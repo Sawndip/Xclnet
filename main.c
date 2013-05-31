@@ -398,15 +398,15 @@ int main (int argc, const char * argv[]) {
 	for( i = 0; i < (*syn_const_p).no_syns; i++){
 		//(*syn_p).rho[i] = SYN_RHO_INITIAL;
 		//TODO: set rho_initial here
-		if((i % RECORDER_MULTI_SYNAPSE_SKIP) == RECORDER_SYNAPSE_ID){
+		/*if((i % RECORDER_MULTI_SYNAPSE_SKIP) == RECORDER_SYNAPSE_ID){
 			(*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1;
-		}
+		}*/
 		/*if(i == RECORDER_SYNAPSE_ID){
 			(*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1;
 		}*/
-		else{
+		//else{
 			(*syn_p).rho[i] = (*syn_p).rho_initial[i] = SYN_RHO_INITIAL;//ran2(&uniform_synaptic_seed);//0.377491; //
-		}
+		//}
 		
 		(*syn_p).ca[i] = SYN_CA_INITIAL;
 		(*rnd_syn_p).d_z[i] = 362436069 - i + PARALLEL_SEED;
@@ -724,7 +724,9 @@ int main (int argc, const char * argv[]) {
 		updateEventBasedSynapse(syn_p, syn_const_p, i, j);
 	}
 	//TODO: reenable final update of single recorder synapse here
-	updateEventBasedSynapse(syn_p, syn_const_p, RECORDER_SYNAPSE_ID, j);
+	if(RECORDER_SYNAPSE_ID < (*syn_const_p).no_syns){
+		updateEventBasedSynapse(syn_p, syn_const_p, RECORDER_SYNAPSE_ID, j);
+	}
 	print_network_summary_activity();
 	printf("done.\nAnd final state of synapses...");
 	// Print final state of synapse strengths
@@ -751,6 +753,8 @@ int main (int argc, const char * argv[]) {
 }
 
 
+// There is a cute risk of buffer overflow here: I do not check syn_id to see if it is smaller than (*syn_const).no_syns
+// this can corrupt the summary variables
 void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_id, int current_time){
 	static long gaussian_synaptic_seed = GAUSSIAN_SYNAPTIC_SEED;
 	float theta_upper = fmax((*syn_const).theta_d, (*syn_const).theta_p);
@@ -874,7 +878,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 	}
 	
 	//TODO: flat-well potential hack here
-	t_deter = 0;
+	//t_deter = 0;
 	//TODO: comment out following section if double-well desired
 	// Deterministic update for piecewise-quadratic potential well
 	/*if (t_deter > 0){
