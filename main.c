@@ -724,9 +724,9 @@ int main (int argc, const char * argv[]) {
 		updateEventBasedSynapse(syn_p, syn_const_p, i, j);
 	}
 	//TODO: reenable final update of single recorder synapse here
-	if(RECORDER_SYNAPSE_ID < (*syn_const_p).no_syns){
+	/*if(RECORDER_SYNAPSE_ID < (*syn_const_p).no_syns){
 		updateEventBasedSynapse(syn_p, syn_const_p, RECORDER_SYNAPSE_ID, j);
-	}
+	}*/
 	print_network_summary_activity();
 	printf("done.\nAnd final state of synapses...");
 	// Print final state of synapse strengths
@@ -877,7 +877,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 		w = w_stoch;
 	}
 	
-	//TODO: flat-well potential hack here
+	//TODO: flat potential hack here
 	//t_deter = 0;
 	//TODO: comment out following section if double-well desired
 	// Deterministic update for piecewise-quadratic potential well
@@ -890,7 +890,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 	 }
 	 w = w_deter;
 	 }*/
-	//TODO: reenable double-well by commenting out following line
+	//TODO: reenable double-well potential by commenting out following line
 	//t_deter = 0;
 	// Deterministic update for double-well potential
 	if (t_deter > 0){
