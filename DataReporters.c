@@ -59,23 +59,37 @@ void reporters_setup(){
 	if(average_activity_ouput == NULL){
 		perror("Error: failed to open average activity output file\n");
 	}
-	// Setup the bins for recording average population spiking behaviour
 	no_spiking_bins = (LIF_DT / BIN_SIZE) * MAX_TIME_STEPS;
+	// Setup the bins for recording average population spiking behaviour
 	summary_exc_spikes = calloc(no_spiking_bins, sizeof(float));
 	summary_inh_spikes = calloc(no_spiking_bins, sizeof(float));
-	//TODO: new code for monitoring multiple synapses here
-	summary_rho = calloc(no_spiking_bins, sizeof(float));
-	summary_M = calloc(no_spiking_bins, sizeof(float));
-	summary_S = calloc(no_spiking_bins, sizeof(float));
-	summary_n = calloc(no_spiking_bins, sizeof(unsigned int));
-	//TODO: new code for monitoring main population synapses here
-	pop_summary_rho = calloc(no_spiking_bins, sizeof(float));
-	pop_summary_M = calloc(no_spiking_bins, sizeof(float));
-	pop_summary_S = calloc(no_spiking_bins, sizeof(float));
-	pop_summary_n = calloc(no_spiking_bins, sizeof(unsigned int));
 	// Code for monitoring selectively manipulated neurons
 	lif_injection_spikes = calloc(no_spiking_bins, sizeof(float));
-	fprintf(average_activity_ouput, "\n\n\n\n\n# Summary network activity (time bin, TotSpikes/N, ExcSpikes/NE, InhSpikes/NI, InstantaneousExcRate, InstantaneousInhRate, RhoAvSubPop, RhoStdevSubPop, RhoAv, RhoStdev, SupPopSelectiveStimExcRate, NoExcSpikes)\n# all normalised to their respective population sizes\n");
+	//fprintf(average_activity_ouput, "\n\n\n\n\n# Summary network activity (time bin, TotSpikes/N, ExcSpikes/NE, InhSpikes/NI, InstantaneousExcRate, InstantaneousInhRate, RhoAvSubPop, RhoStdevSubPop, RhoAv, RhoStdev, SupPopSelectiveStimExcRate, NoExcSpikes)\n# all normalised to their respective population sizes\n");
+	fprintf(average_activity_ouput, "\n\n\n\n\n# Summary network activity (time bin, InstantaneousExcRate, InstantaneousInhRate, InstantaneousStimRate, RhoAvNonPop, RhoStdevNonPop, RhoAvStimPop, RhoStdevStimPop, RhoAvPrePop, RhoStdevPrePop, , RhoAvPostPop, RhoStdevPostPop )\n# all normalised to their respective population sizes\n");
+	
+	
+	//TODO: new code for monitoring multiple synapses here
+	non_summary_rho = calloc(no_spiking_bins, sizeof(float));
+	non_summary_M = calloc(no_spiking_bins, sizeof(float));
+	non_summary_S = calloc(no_spiking_bins, sizeof(float));
+	non_summary_n = calloc(no_spiking_bins, sizeof(unsigned int));
+	//TODO: new code for monitoring main population synapses here
+	stim_summary_rho = calloc(no_spiking_bins, sizeof(float));
+	stim_summary_M = calloc(no_spiking_bins, sizeof(float));
+	stim_summary_S = calloc(no_spiking_bins, sizeof(float));
+	stim_summary_n = calloc(no_spiking_bins, sizeof(unsigned int));
+	//TODO: new code for monitoring multiple synapses here
+	pre_summary_rho = calloc(no_spiking_bins, sizeof(float));
+	pre_summary_M = calloc(no_spiking_bins, sizeof(float));
+	pre_summary_S = calloc(no_spiking_bins, sizeof(float));
+	pre_summary_n = calloc(no_spiking_bins, sizeof(unsigned int));
+	//TODO: new code for monitoring main population synapses here
+	post_summary_rho = calloc(no_spiking_bins, sizeof(float));
+	post_summary_M = calloc(no_spiking_bins, sizeof(float));
+	post_summary_S = calloc(no_spiking_bins, sizeof(float));
+	post_summary_n = calloc(no_spiking_bins, sizeof(unsigned int));
+	
 	// Detailed recording from single synapse
 	strcpy(outfile, "output/");
 	strcat(outfile, synaptic_activity_name);
@@ -137,7 +151,8 @@ void print_network_summary_activity(){
 	// bin_id_ms, no_spikes, no_exc_spikes, no_inh_spikes, exc_freq, inh_freq
 	printf("Outputting network summary activity\n");
 	for(int i = 0; i < no_spiking_bins; i++){
-		fprintf(average_activity_ouput, "%d %f %f %f %f %f %f %f %f %f %f %d\n", i, ((summary_inh_spikes[i] + summary_exc_spikes[i] + lif_injection_spikes[i]) / NO_LIFS), (summary_exc_spikes[i] / (NO_EXC - no_injection_lifs)), (summary_inh_spikes[i] / NO_INH), ((summary_exc_spikes[i] / (NO_EXC - no_injection_lifs)) * (1.0 / BIN_SIZE)), ((summary_inh_spikes[i] / NO_INH) * (1.0 / BIN_SIZE)), summary_rho[i]/summary_n[i], sqrt(summary_S[i]/(summary_n[i]-1)),  pop_summary_rho[i]/pop_summary_n[i], sqrt(pop_summary_S[i]/(pop_summary_n[i]-1)), ((lif_injection_spikes[i] / no_injection_lifs) * (1.0 / BIN_SIZE)), (int) summary_exc_spikes[i] );
+		//fprintf(average_activity_ouput, "%d %f %f %f %f %f %f %f %f %f %f %d\n", i, ((summary_inh_spikes[i] + summary_exc_spikes[i] + lif_injection_spikes[i]) / NO_LIFS), (summary_exc_spikes[i] / (NO_EXC - no_injection_lifs)), (summary_inh_spikes[i] / NO_INH), ((summary_exc_spikes[i] / (NO_EXC - no_injection_lifs)) * (1.0 / BIN_SIZE)), ((summary_inh_spikes[i] / NO_INH) * (1.0 / BIN_SIZE)), summary_rho[i]/summary_n[i], sqrt(summary_S[i]/(summary_n[i]-1)),  pop_summary_rho[i]/pop_summary_n[i], sqrt(pop_summary_S[i]/(pop_summary_n[i]-1)), ((lif_injection_spikes[i] / no_injection_lifs) * (1.0 / BIN_SIZE)), (int) summary_exc_spikes[i] );
+		fprintf(average_activity_ouput, "%d %f %f %f %f %f %f %f %f %f %f %f\n", i, ((summary_exc_spikes[i] / (NO_EXC - no_injection_lifs)) * (1.0 / BIN_SIZE)), ((summary_inh_spikes[i] / NO_INH) * (1.0 / BIN_SIZE)), ((lif_injection_spikes[i] / no_injection_lifs) * (1.0 / BIN_SIZE)), non_summary_rho[i]/non_summary_n[i], sqrt(non_summary_S[i]/(non_summary_n[i]-1)),  stim_summary_rho[i]/stim_summary_n[i], sqrt(stim_summary_S[i]/(stim_summary_n[i]-1)),  pre_summary_rho[i]/pre_summary_n[i], sqrt(pre_summary_S[i]/(pre_summary_n[i]-1)),  post_summary_rho[i]/post_summary_n[i], sqrt(post_summary_S[i]/(post_summary_n[i]-1))  );
 	}
 }
 

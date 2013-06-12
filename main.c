@@ -954,45 +954,89 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 	else{
 		(*syn).rho[syn_id] = 0;
 	}
+	
 	if(syn_id == RECORDER_SYNAPSE_ID){
 		// Print state of a single synapse
 		print_synapse_activity(current_time, syn);
 	}
+	
 	//Update multisynapse summary variables
-	if((syn_id % RECORDER_MULTI_SYNAPSE_SKIP) == RECORDER_SYNAPSE_ID){
+	if((*syn).pre_lif[syn_id] < NO_STIM_LIFS){
+		if((*syn).post_lif[syn_id] < NO_STIM_LIFS){ 
+			// Synapse receives high stim on both sides
+			int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
+			stim_summary_rho[time_bin_index] += (*syn).rho[syn_id];
+			stim_summary_n[time_bin_index]++;
+			
+			if(stim_summary_M[time_bin_index] == 0){ // initialise on first entry to time bin
+				stim_summary_M[time_bin_index] = (*syn).rho[syn_id];
+				stim_summary_S[time_bin_index] = 0;
+			}
+			else{
+				//Mk = Mk-1+ (xk - Mk-1)/k
+				//Sk = Sk-1 + (xk - Mk-1)*(xk - Mk).
+				float Mk;
+				Mk = stim_summary_M[time_bin_index] + ((*syn).rho[syn_id] - stim_summary_M[time_bin_index])/stim_summary_n[time_bin_index];
+				stim_summary_S[time_bin_index] = stim_summary_S[time_bin_index] + ((*syn).rho[syn_id] - stim_summary_M[time_bin_index]) * ((*syn).rho[syn_id] - Mk);
+				stim_summary_M[time_bin_index] = Mk;
+			}
+		}
+		else{
+			// Synapse receives high stim only on pre side
+			int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
+			pre_summary_rho[time_bin_index] += (*syn).rho[syn_id];
+			pre_summary_n[time_bin_index]++;
+			
+			if(pre_summary_M[time_bin_index] == 0){ // initialise on first entry to time bin
+				pre_summary_M[time_bin_index] = (*syn).rho[syn_id];
+				pre_summary_S[time_bin_index] = 0;
+			}
+			else{
+				//Mk = Mk-1+ (xk - Mk-1)/k
+				//Sk = Sk-1 + (xk - Mk-1)*(xk - Mk).
+				float Mk;
+				Mk = pre_summary_M[time_bin_index] + ((*syn).rho[syn_id] - pre_summary_M[time_bin_index])/pre_summary_n[time_bin_index];
+				pre_summary_S[time_bin_index] = pre_summary_S[time_bin_index] + ((*syn).rho[syn_id] - pre_summary_M[time_bin_index]) * ((*syn).rho[syn_id] - Mk);
+				pre_summary_M[time_bin_index] = Mk;
+			}
+		}
+	}
+	else if((*syn).post_lif[syn_id] < NO_STIM_LIFS){
+		// Synapse receives high stim only on post side
 		int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
-		summary_rho[time_bin_index] += (*syn).rho[syn_id];
-		summary_n[time_bin_index]++;
+		post_summary_rho[time_bin_index] += (*syn).rho[syn_id];
+		post_summary_n[time_bin_index]++;
 		
-		if(summary_M[time_bin_index] == 0){ // initialise on first entry to time bin
-			summary_M[time_bin_index] = (*syn).rho[syn_id];
-			summary_S[time_bin_index] = 0;
+		if(post_summary_M[time_bin_index] == 0){ // initialise on first entry to time bin
+			post_summary_M[time_bin_index] = (*syn).rho[syn_id];
+			post_summary_S[time_bin_index] = 0;
 		}
 		else{
 			//Mk = Mk-1+ (xk - Mk-1)/k
 			//Sk = Sk-1 + (xk - Mk-1)*(xk - Mk).
 			float Mk;
-			Mk = summary_M[time_bin_index] + ((*syn).rho[syn_id] - summary_M[time_bin_index])/summary_n[time_bin_index];
-			summary_S[time_bin_index] = summary_S[time_bin_index] + ((*syn).rho[syn_id] - summary_M[time_bin_index]) * ((*syn).rho[syn_id] - Mk);
-			summary_M[time_bin_index] = Mk;
+			Mk = post_summary_M[time_bin_index] + ((*syn).rho[syn_id] - post_summary_M[time_bin_index])/post_summary_n[time_bin_index];
+			post_summary_S[time_bin_index] = post_summary_S[time_bin_index] + ((*syn).rho[syn_id] - post_summary_M[time_bin_index]) * ((*syn).rho[syn_id] - Mk);
+			post_summary_M[time_bin_index] = Mk;
 		}
 	}
 	else{
+		// Synapse receives only background stim levels
 		int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
-		pop_summary_rho[time_bin_index] += (*syn).rho[syn_id];
-		pop_summary_n[time_bin_index]++;
+		non_summary_rho[time_bin_index] += (*syn).rho[syn_id];
+		non_summary_n[time_bin_index]++;
 		
-		if(pop_summary_M[time_bin_index] == 0){ // initialise on first entry to time bin
-			pop_summary_M[time_bin_index] = (*syn).rho[syn_id];
-			pop_summary_S[time_bin_index] = 0;
+		if(non_summary_M[time_bin_index] == 0){ // initialise on first entry to time bin
+			non_summary_M[time_bin_index] = (*syn).rho[syn_id];
+			non_summary_S[time_bin_index] = 0;
 		}
 		else{
 			//Mk = Mk-1+ (xk - Mk-1)/k
 			//Sk = Sk-1 + (xk - Mk-1)*(xk - Mk).
 			float Mk;
-			Mk = pop_summary_M[time_bin_index] + ((*syn).rho[syn_id] - pop_summary_M[time_bin_index])/pop_summary_n[time_bin_index];
-			pop_summary_S[time_bin_index] = pop_summary_S[time_bin_index] + ((*syn).rho[syn_id] - pop_summary_M[time_bin_index]) * ((*syn).rho[syn_id] - Mk);
-			pop_summary_M[time_bin_index] = Mk;
+			Mk = non_summary_M[time_bin_index] + ((*syn).rho[syn_id] - non_summary_M[time_bin_index])/non_summary_n[time_bin_index];
+			non_summary_S[time_bin_index] = non_summary_S[time_bin_index] + ((*syn).rho[syn_id] - non_summary_M[time_bin_index]) * ((*syn).rho[syn_id] - Mk);
+			non_summary_M[time_bin_index] = Mk;
 		}
 	}
 }

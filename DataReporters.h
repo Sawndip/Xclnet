@@ -40,20 +40,32 @@ float *summary_exc_spikes;
 float *summary_inh_spikes;
 unsigned int no_spiking_bins;
 
-// Summary variables for monitoring multiple recorder synapses
-float *summary_rho;
-float *summary_M;
-float *summary_S;
-unsigned int *summary_n;
-// Summary variables for main population synapse recorders
-float *pop_summary_rho;
-float *pop_summary_M;
-float *pop_summary_S;
-unsigned int *pop_summary_n;
-
 // Variables for manipulating subset of neurons
 float *lif_injection_spikes;
 int no_injection_lifs;
+
+
+// Summary variables for monitoring synapses which receive only background activity
+float *non_summary_rho;
+float *non_summary_M;
+float *non_summary_S;
+unsigned int *non_summary_n;
+// Summary variables for synapses which receive high stim pre and post activity
+float *stim_summary_rho;
+float *stim_summary_M;
+float *stim_summary_S;
+unsigned int *stim_summary_n;
+// Summary variables for synapses which receive high stim pre activity
+float *pre_summary_rho;
+float *pre_summary_M;
+float *pre_summary_S;
+unsigned int *pre_summary_n;
+// Summary variables for synapses which receive high stim post activity
+float *post_summary_rho;
+float *post_summary_M;
+float *post_summary_S;
+unsigned int *post_summary_n;
+
 
 //Debugging variables
 float *lif_gauss_totals;
