@@ -12,6 +12,9 @@ CDEBUG =
 LIBOCL = -L/Developer/SDKs/MacOSX10.6.sdk/System/Library/Frameworks/OpenCL.framework/Versions/A/Libraries
 INCOCL = -I/System/Library/Frameworks/OpenCL.framework/Versions/A/Headers
 
+AIRLIBOCL = -L/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/System/Library/Frameworks/OpenCL.framework/Versions/A/Libraries
+AIRINCOCL = $(INCOCL)
+
 INCCUDA = -I/usr/local/cuda/include/
 LIBCUDA = -L/usr/local/cuda/ -L/usr/local/cuda/lib/ -l OpenCL
 
@@ -33,7 +36,13 @@ lynch:
 bsd:
 				$(LD) $(CFLAGS) $(INCAMD) $(LIBAMD) $(SRCS) -o $(EXE)
 
-all: $(EXE)
+macair: AIROBJS
+				$(LD) $(OBJS) $(AIRLIBOCL) -o $(EXE) -framework OpenCL
+
+AIROBJS: $(SRCS)
+				$(CC) $(CFLAGS) $(AIRINCOCL) -I/usr/include -c $(SRCS)
+
+macpro: $(EXE)
 
 $(OBJS): $(SRCS)
 				$(CC) $(CFLAGS) $(INCOCL) -I/usr/include -c $(SRCS)
