@@ -33,16 +33,16 @@ FILE *average_activity_ouput; //network_activity_output
 FILE *synaptic_activity_output; //single_synapse_output
 FILE *synaptic_strength_output; //final_synaptic_strength_output
 
+
 // Summary variables for monitoring network firing rate
+unsigned int no_spiking_bins;
 //CONSIDER: since we use a timestepping approach these variables could be condensed
 // to single value variables and printed out during the simulation
 float *summary_exc_spikes;
 float *summary_inh_spikes;
-unsigned int no_spiking_bins;
-
 // Variables for manipulating subset of neurons
 float *lif_injection_spikes;
-int no_injection_lifs;
+//int no_injection_lifs;
 
 
 // Summary variables for monitoring synapses which receive only background activity
