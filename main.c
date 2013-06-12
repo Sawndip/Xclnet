@@ -713,11 +713,17 @@ int main (int argc, const char * argv[]) {
 	
 	printf("Simulation finished, printing summary of network activity...\n");
 	// Print summary of excitatory and inhibitory activity
-	//TODO: consider cycling through all synapses (not just recorder synapses) to do a final update of their states
-	//TODO: disable updating of multi-recorder synapses here
-	for (i = RECORDER_SYNAPSE_ID; i < (*syn_const_p).no_syns; i+= RECORDER_MULTI_SYNAPSE_SKIP){
-		//TODO: reenable updateEventBasedSynapse here
-		updateEventBasedSynapse(syn_p, syn_const_p, i, j);
+	//CONSIDER: cycling through all synapses (not just recorder synapses) to do a final update of their states
+	//TODO: disable updating of stimulated synapses here
+	for (i = 0; i < NO_STIM_LIFS; i++){
+		for(k = 0; k < (*lif_p).no_outgoing_ee_synapses[i]; k++){ // Update stim synapses originating in stim pop
+			updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).outgoing_synapse_index[i][k], j);
+		}
+		for(k = 0; k < (*lif_p).no_incoming_synapses[i]; k++){
+			if((*lif_p).incoming_synapse_index[i][k] < (*syn_const_p).no_syns){ // Updated stim synapses ending in stim pop
+				updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).incoming_synapse_index[i][k], j);
+			}
+		}
 	}
 	//TODO: reenable final update of single recorder synapse here
 	/*if(RECORDER_SYNAPSE_ID < (*syn_const_p).no_syns){
@@ -874,7 +880,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 	}
 	
 	//TODO: flat potential hack here
-	//t_deter = 0;
+	t_deter = 0;
 	//TODO: comment out following section if double-well desired
 	// Deterministic update for piecewise-quadratic potential well
 	/*if (t_deter > 0){

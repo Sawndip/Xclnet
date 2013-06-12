@@ -108,7 +108,8 @@ void reporters_setup(){
 	if(synaptic_strength_output == NULL){
 		perror("Error: failed to open synaptic strength output file\n");
 	}
-	fprintf(synaptic_strength_output, "\n\n\n\n\n# Final synaptic strengths (syn_id, pre_syn_lif_id, post_syn_lif_id, rho_initial, rho_final, in_sub_pop)\n");
+	fprintf(synaptic_strength_output, "\n\n\n\n\n# Final synaptic strengths (syn_id, pre_syn_lif_id, post_syn_lif_id, rho_initial, rho_final)\n");
+	//fprintf(synaptic_strength_output, "# Receives high rate stim, Pre: %d and Post: %d\n", ((*syn).pre_lif[RECORDER_SYNAPSE_ID]<100?1,0), ((*syn).post_lif[RECORDER_SYNAPSE_ID]<100?1,0));
 	
 	#ifdef DEBUG_MODE_NETWORK
 		//Debugging stuff
