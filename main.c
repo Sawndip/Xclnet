@@ -970,9 +970,11 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 			stim_summary_rho[time_bin_index] += (*syn).rho[syn_id];
 			stim_summary_n[time_bin_index]++;
 			
-			if(stim_summary_M[time_bin_index] == 0){ // initialise on first entry to time bin
+			if(stim_summary_n[time_bin_index] == 1){ // initialise on first entry to time bin
 				stim_summary_M[time_bin_index] = (*syn).rho[syn_id];
-				stim_summary_S[time_bin_index] = 0;
+				//stim_summary_S[time_bin_index] = 0; //done via calloc()
+                stim_summary_min[time_bin_index] = (*syn).rho[syn_id];
+                stim_summary_max[time_bin_index] = (*syn).rho[syn_id];
 			}
 			else{
 				//Mk = Mk-1+ (xk - Mk-1)/k
@@ -981,6 +983,12 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 				Mk = stim_summary_M[time_bin_index] + ((*syn).rho[syn_id] - stim_summary_M[time_bin_index])/stim_summary_n[time_bin_index];
 				stim_summary_S[time_bin_index] = stim_summary_S[time_bin_index] + ((*syn).rho[syn_id] - stim_summary_M[time_bin_index]) * ((*syn).rho[syn_id] - Mk);
 				stim_summary_M[time_bin_index] = Mk;
+                if ((*syn).rho[syn_id] > stim_summary_max[time_bin_index]){
+                    stim_summary_max[time_bin_index] = (*syn).rho[syn_id];
+                } // these are mutually exclusive events, so using elseif to cut number of computations
+                else if ((*syn).rho[syn_id] < stim_summary_min[time_bin_index]){
+                    stim_summary_min[time_bin_index] = (*syn).rho[syn_id];
+                }
 			}
 		}
 		else{
@@ -989,9 +997,11 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 			pre_summary_rho[time_bin_index] += (*syn).rho[syn_id];
 			pre_summary_n[time_bin_index]++;
 			
-			if(pre_summary_M[time_bin_index] == 0){ // initialise on first entry to time bin
+			if(pre_summary_n[time_bin_index] == 1){ // initialise on first entry to time bin
 				pre_summary_M[time_bin_index] = (*syn).rho[syn_id];
-				pre_summary_S[time_bin_index] = 0;
+				//pre_summary_S[time_bin_index] = 0;
+                pre_summary_min[time_bin_index] = (*syn).rho[syn_id];
+                pre_summary_max[time_bin_index] = (*syn).rho[syn_id];
 			}
 			else{
 				//Mk = Mk-1+ (xk - Mk-1)/k
@@ -1000,6 +1010,12 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 				Mk = pre_summary_M[time_bin_index] + ((*syn).rho[syn_id] - pre_summary_M[time_bin_index])/pre_summary_n[time_bin_index];
 				pre_summary_S[time_bin_index] = pre_summary_S[time_bin_index] + ((*syn).rho[syn_id] - pre_summary_M[time_bin_index]) * ((*syn).rho[syn_id] - Mk);
 				pre_summary_M[time_bin_index] = Mk;
+                if ((*syn).rho[syn_id] > pre_summary_max[time_bin_index]){
+                    pre_summary_max[time_bin_index] = (*syn).rho[syn_id];
+                } // these are mutually exclusive events, so using elseif to cut number of computations
+                else if ((*syn).rho[syn_id] < pre_summary_min[time_bin_index]){
+                    pre_summary_min[time_bin_index] = (*syn).rho[syn_id];
+                }
 			}
 		}
 	}
@@ -1009,9 +1025,11 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 		post_summary_rho[time_bin_index] += (*syn).rho[syn_id];
 		post_summary_n[time_bin_index]++;
 		
-		if(post_summary_M[time_bin_index] == 0){ // initialise on first entry to time bin
+		if(post_summary_n[time_bin_index] == 1){ // initialise on first entry to time bin
 			post_summary_M[time_bin_index] = (*syn).rho[syn_id];
-			post_summary_S[time_bin_index] = 0;
+			//post_summary_S[time_bin_index] = 0;
+            post_summary_min[time_bin_index] = (*syn).rho[syn_id];
+            post_summary_max[time_bin_index] = (*syn).rho[syn_id];
 		}
 		else{
 			//Mk = Mk-1+ (xk - Mk-1)/k
@@ -1020,6 +1038,12 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 			Mk = post_summary_M[time_bin_index] + ((*syn).rho[syn_id] - post_summary_M[time_bin_index])/post_summary_n[time_bin_index];
 			post_summary_S[time_bin_index] = post_summary_S[time_bin_index] + ((*syn).rho[syn_id] - post_summary_M[time_bin_index]) * ((*syn).rho[syn_id] - Mk);
 			post_summary_M[time_bin_index] = Mk;
+            if ((*syn).rho[syn_id] > post_summary_max[time_bin_index]){
+                post_summary_max[time_bin_index] = (*syn).rho[syn_id];
+            } // these are mutually exclusive events, so using elseif to cut number of computations
+            else if ((*syn).rho[syn_id] < post_summary_min[time_bin_index]){
+                post_summary_min[time_bin_index] = (*syn).rho[syn_id];
+            }
 		}
 	}
 	else{
@@ -1028,9 +1052,11 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 		non_summary_rho[time_bin_index] += (*syn).rho[syn_id];
 		non_summary_n[time_bin_index]++;
 		
-		if(non_summary_M[time_bin_index] == 0){ // initialise on first entry to time bin
+		if(non_summary_n[time_bin_index] == 1){ // initialise on first entry to time bin
 			non_summary_M[time_bin_index] = (*syn).rho[syn_id];
-			non_summary_S[time_bin_index] = 0;
+			//non_summary_S[time_bin_index] = 0;
+            non_summary_min[time_bin_index] = (*syn).rho[syn_id];
+            non_summary_max[time_bin_index] = (*syn).rho[syn_id];
 		}
 		else{
 			//Mk = Mk-1+ (xk - Mk-1)/k
@@ -1039,6 +1065,12 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 			Mk = non_summary_M[time_bin_index] + ((*syn).rho[syn_id] - non_summary_M[time_bin_index])/non_summary_n[time_bin_index];
 			non_summary_S[time_bin_index] = non_summary_S[time_bin_index] + ((*syn).rho[syn_id] - non_summary_M[time_bin_index]) * ((*syn).rho[syn_id] - Mk);
 			non_summary_M[time_bin_index] = Mk;
+            if ((*syn).rho[syn_id] > non_summary_max[time_bin_index]){
+                non_summary_max[time_bin_index] = (*syn).rho[syn_id];
+            } // these are mutually exclusive events, so using elseif to cut number of computations
+            else if ((*syn).rho[syn_id] < non_summary_min[time_bin_index]){
+                non_summary_min[time_bin_index] = (*syn).rho[syn_id];
+            }
 		}
 	}
 }

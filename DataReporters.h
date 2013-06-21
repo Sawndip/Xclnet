@@ -50,21 +50,29 @@ float *non_summary_rho;
 float *non_summary_M;
 float *non_summary_S;
 unsigned int *non_summary_n;
+float *non_summary_max;
+float *non_summary_min;
 // Summary variables for synapses which receive high stim pre and post activity
 float *stim_summary_rho;
 float *stim_summary_M;
 float *stim_summary_S;
 unsigned int *stim_summary_n;
+float *stim_summary_max;
+float *stim_summary_min;
 // Summary variables for synapses which receive high stim pre activity
 float *pre_summary_rho;
 float *pre_summary_M;
 float *pre_summary_S;
 unsigned int *pre_summary_n;
+float *pre_summary_max;
+float *pre_summary_min;
 // Summary variables for synapses which receive high stim post activity
 float *post_summary_rho;
 float *post_summary_M;
 float *post_summary_S;
 unsigned int *post_summary_n;
+float *post_summary_max;
+float *post_summary_min;
 
 
 //Debugging variables

@@ -74,22 +74,37 @@ void reporters_setup(){
 	non_summary_M = calloc(no_spiking_bins, sizeof(float));
 	non_summary_S = calloc(no_spiking_bins, sizeof(float));
 	non_summary_n = calloc(no_spiking_bins, sizeof(unsigned int));
+    non_summary_max = calloc(no_spiking_bins, sizeof(float));
+    non_summary_min = calloc(no_spiking_bins, sizeof(float));
 	//TODO: new code for monitoring main population synapses here
 	stim_summary_rho = calloc(no_spiking_bins, sizeof(float));
 	stim_summary_M = calloc(no_spiking_bins, sizeof(float));
 	stim_summary_S = calloc(no_spiking_bins, sizeof(float));
 	stim_summary_n = calloc(no_spiking_bins, sizeof(unsigned int));
+    stim_summary_max = calloc(no_spiking_bins, sizeof(float));
+    stim_summary_min = calloc(no_spiking_bins, sizeof(float));
 	//TODO: new code for monitoring multiple synapses here
 	pre_summary_rho = calloc(no_spiking_bins, sizeof(float));
 	pre_summary_M = calloc(no_spiking_bins, sizeof(float));
 	pre_summary_S = calloc(no_spiking_bins, sizeof(float));
 	pre_summary_n = calloc(no_spiking_bins, sizeof(unsigned int));
+    pre_summary_max = calloc(no_spiking_bins, sizeof(float));
+    pre_summary_min = calloc(no_spiking_bins, sizeof(float));
 	//TODO: new code for monitoring main population synapses here
 	post_summary_rho = calloc(no_spiking_bins, sizeof(float));
 	post_summary_M = calloc(no_spiking_bins, sizeof(float));
 	post_summary_S = calloc(no_spiking_bins, sizeof(float));
 	post_summary_n = calloc(no_spiking_bins, sizeof(unsigned int));
-	
+    post_summary_max = calloc(no_spiking_bins, sizeof(float));
+    post_summary_min = calloc(no_spiking_bins, sizeof(float));
+	// Set min values to theoretical max, moved to updateSynapse()
+    /*for( int i = 0; i < no_spiking_bins; i++){
+        non_summary_min[i] = 1;
+        stim_summary_min[i] = 1;
+        pre_summary_min[i] = 1;
+        post_summary_min[i] = 1;
+    }*/
+    
 	// Detailed recording from single synapse
 	strcpy(outfile, "output/");
 	strcat(outfile, synaptic_activity_name);
