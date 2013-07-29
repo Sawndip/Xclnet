@@ -566,7 +566,7 @@ int main (int argc, const char * argv[]) {
 		for ( i = 0; i < (*lif_p).no_lifs; i++){
 			if((*lif_p).time_since_spike[i] == 0){				
 				// New, ISI calculation code
-				isi = j - (*lif_p).time_of_last_spike[i];
+				isi = ( j - (*lif_p).time_of_last_spike[i] ) * (*lif_p).dt;
 				(*lif_p).time_of_last_spike[i] = j;
 				
 				//CONSIDER: using local variables to point to I[], post_lif[], Jx[], etc. it cuts down on dereferencing!
