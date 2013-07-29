@@ -564,7 +564,7 @@ int main (int argc, const char * argv[]) {
 		int local_count = 0;
 		// Update LIFs: spike detection/propagation to post-synaptic lifs as well as pre- and post-lif neurons
 		for ( i = 0; i < (*lif_p).no_lifs; i++){
-			if((*lif_p).time_since_spike[i] == 0){
+			if((*lif_p).time_since_spike[i] == 0){				
 				// New, ISI calculation code
 				isi = j - (*lif_p).time_of_last_spike[i];
 				(*lif_p).time_of_last_spike[i] = j;
