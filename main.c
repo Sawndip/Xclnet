@@ -234,6 +234,7 @@ unsigned int generateNetwork(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynaps
 int main (int argc, const char * argv[]) {
 	int i, j, k;
 	int offset;
+	float isi; // new ISI variable (local to main sim loop)
 	//long uniform_synaptic_seed = UNIFORM_SYNAPTIC_SEED;
 	//long gaussian_lif_seed = (GAUSSIAN_SYNAPTIC_SEED - 1);
 	
@@ -255,6 +256,7 @@ int main (int argc, const char * argv[]) {
 	(*lif_p).I = malloc(sizeof(float) * NO_LIFS);
 	(*lif_p).gauss = calloc(NO_LIFS, sizeof(float));
 	(*lif_p).time_since_spike = calloc(NO_LIFS, sizeof(unsigned int));
+	(*lif_p).time_of_last_spike = calloc(NO_LIFS, sizeof(unsigned int));
 	
 	(*lif_p).v_rest = LIF_V_REST;
 	(*lif_p).v_reset = LIF_V_RESET;
@@ -537,7 +539,7 @@ int main (int argc, const char * argv[]) {
 		(*spike_queue_p).no_events[offset] = 0;
 		
 
-		// Apply external voltage (this cannot be done in same loop as spike detection/propagation
+		// Apply external voltage (this cannot be done in same loop as spike detection/propagation)
 		for( i = 0; i < (*lif_p).no_lifs; i++){
 			// Fixed external current
 			(*lif_p).I[i] = external_voltage;
@@ -563,6 +565,10 @@ int main (int argc, const char * argv[]) {
 		// Update LIFs: spike detection/propagation to post-synaptic lifs as well as pre- and post-lif neurons
 		for ( i = 0; i < (*lif_p).no_lifs; i++){
 			if((*lif_p).time_since_spike[i] == 0){
+				// New, ISI calculation code
+				isi = j - (*lif_p).time_of_last_spike[i];
+				(*lif_p).time_of_last_spike[i] = j;
+				
 				//CONSIDER: using local variables to point to I[], post_lif[], Jx[], etc. it cuts down on dereferencing!
 				//TODO: strongly consider implementing parallel spike transfer system
 				/*if(i==0){
@@ -644,7 +650,7 @@ int main (int argc, const char * argv[]) {
 				
 				
 				//Print to raster file
-				print_raster_spike(j, i);
+				print_raster_spike(j, i, isi);
 				
 				// Add to average spiking activity bins
 				if(i < NO_STIM_LIFS){ //Stim pop
@@ -1082,6 +1088,7 @@ void freeMemory(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynapse *fixed_syn_
 	free((*lif_p).I);
 	free((*lif_p).gauss);
 	free((*lif_p).time_since_spike);
+	free((*lif_p).time_of_last_spike);
 	free((*lif_p).no_outgoing_synapses);
 	free((*lif_p).no_outgoing_ee_synapses);
 	free((*lif_p).no_incoming_synapses);

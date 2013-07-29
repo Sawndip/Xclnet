@@ -156,11 +156,18 @@ void reporters_setup(){
 }
 
 
-void print_raster_spike(int t, int lif_no){
+// New version of print_raster_spike to include ISI in output
+void print_raster_spike(int t, int lif_no, float isi){
+	// A spike has occurred, add its occurrence to raster file
+	// print inter-spike-interval too
+	// t, lif_id, isi
+	fprintf(raster_output, "%d %d %f\n", t, lif_no, isi);
+}
+/*void print_raster_spike(int t, int lif_no){
 	// A spike has occurred, add its occurrence to raster file
 	// t, lif_id
 	fprintf(raster_output, "%d %d\n", t, lif_no);
-}
+}*/
 
 
 void print_network_summary_activity(){

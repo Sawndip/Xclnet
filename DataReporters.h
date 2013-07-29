@@ -100,7 +100,7 @@ float *lif_currents_II;
 void reporters_setup();
 void reporters_close();
 
-void print_raster_spike(int t, int lif_no);
+void print_raster_spike(int t, int lif_no, float isi);
 void print_network_summary_activity();
 void print_synapse_activity(int t, cl_Synapse *syn);
 void print_synapses_final_state(cl_Synapse *syn, SynapseConsts *syn_const);
