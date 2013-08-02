@@ -552,7 +552,7 @@ int main (int argc, const char * argv[]) {
 		// For a brief period apply stimulation to a subset of neurons
 		if((STIM_ON < (j * LIF_DT)) && ((j * LIF_DT) < STIM_OFF)){
 			for( i = 0; i < NO_STIM_LIFS; i++){
-				(*lif_p).I[i] = J_STIM;
+				(*lif_p).I[i + STIM_OFFSET] = J_STIM;
 				//printf("DEBUG: (j*LIF_DT) %f, i %d\n", (j*LIF_DT), i);
 			}
 		}
@@ -653,7 +653,7 @@ int main (int argc, const char * argv[]) {
 				print_raster_spike(j, i, isi);
 				
 				// Add to average spiking activity bins
-				if(i < NO_STIM_LIFS){ //Stim pop
+				if( (i < (NO_STIM_LIFS + STIM_OFFSET)) && (i > (STIM_OFFSET-1) ) ){ //Stim pop
 					lif_injection_spikes[(int) ( ( (*lif_p).dt / BIN_SIZE) * j + EPSILLON)]++;
 				}
 				else if(i < NO_EXC){ //Non-stim pop
@@ -722,12 +722,12 @@ int main (int argc, const char * argv[]) {
 	//CONSIDER: cycling through all synapses (not just recorder synapses) to do a final update of their states
 	//TODO: disable updating of stimulated synapses here
 	for (i = 0; i < NO_STIM_LIFS; i++){
-		for(k = 0; k < (*lif_p).no_outgoing_ee_synapses[i]; k++){ // Update stim synapses originating in stim pop
-			updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).outgoing_synapse_index[i][k], j);
+		for(k = 0; k < (*lif_p).no_outgoing_ee_synapses[i + STIM_OFFSET]; k++){ // Update stim synapses originating in stim pop
+			updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).outgoing_synapse_index[i + STIM_OFFSET][k], j);
 		}
-		for(k = 0; k < (*lif_p).no_incoming_synapses[i]; k++){
-			if((*lif_p).incoming_synapse_index[i][k] < (*syn_const_p).no_syns){ // Updated stim synapses ending in stim pop
-				updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).incoming_synapse_index[i][k], j);
+		for(k = 0; k < (*lif_p).no_incoming_synapses[i + STIM_OFFSET]; k++){
+			if((*lif_p).incoming_synapse_index[i + STIM_OFFSET][k] < (*syn_const_p).no_syns){ // Updated stim synapses ending in stim pop
+				updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).incoming_synapse_index[i + STIM_OFFSET][k], j);
 			}
 		}
 	}
@@ -969,8 +969,8 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 	}
 	
 	//Update multisynapse summary variables
-	if((*syn).pre_lif[syn_id] < NO_STIM_LIFS){
-		if((*syn).post_lif[syn_id] < NO_STIM_LIFS){ 
+	if( ( (*syn).pre_lif[syn_id] < (NO_STIM_LIFS + STIM_OFFSET) ) && ( (*syn).pre_lif[syn_id] > (STIM_OFFSET-1) ) ){
+		if( ( (*syn).post_lif[syn_id] < (NO_STIM_LIFS + STIM_OFFSET) ) && ( (*syn).post_lif[syn_id] > (STIM_OFFSET-1) ) ){
 			// Synapse receives high stim on both sides
 			int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
 			stim_summary_rho[time_bin_index] += (*syn).rho[syn_id];
@@ -1025,7 +1025,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 			}
 		}
 	}
-	else if((*syn).post_lif[syn_id] < NO_STIM_LIFS){
+	else if( ( (*syn).post_lif[syn_id] < (NO_STIM_LIFS + STIM_OFFSET) ) && ( (*syn).post_lif[syn_id] > (STIM_OFFSET-1) ) ){
 		// Synapse receives high stim only on post side
 		int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
 		post_summary_rho[time_bin_index] += (*syn).rho[syn_id];
