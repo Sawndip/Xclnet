@@ -653,7 +653,7 @@ int main (int argc, const char * argv[]) {
 				print_raster_spike(j, i, isi);
 				
 				// Add to average spiking activity bins
-				if( (i < (NO_STIM_LIFS + STIM_OFFSET)) && (i > (STIM_OFFSET-1) ) ){ //Stim pop
+				/*if( (i < (NO_STIM_LIFS + STIM_OFFSET)) && (i > (STIM_OFFSET-1) ) ){ //Stim pop
 					lif_injection_spikes[(int) ( ( (*lif_p).dt / BIN_SIZE) * j + EPSILLON)]++;
 				}
 				else if(i < NO_EXC){ //Non-stim pop
@@ -661,6 +661,15 @@ int main (int argc, const char * argv[]) {
 				}
 				else{ //INH pop
 					summary_inh_spikes[(int)( ( (*lif_p).dt / BIN_SIZE ) * j + EPSILLON)]++;
+				}*/
+                if( i > (NO_EXC - 1)){ //INH pop
+					summary_inh_spikes[(int)( ( (*lif_p).dt / BIN_SIZE ) * j + EPSILLON)]++;
+                }
+                else if( (i > (NO_STIM_LIFS + STIM_OFFSET - 1)) || (i < (STIM_OFFSET) ) ){ //EXC pop
+                    summary_exc_spikes[(int)( ( (*lif_p).dt / BIN_SIZE ) * j + EPSILLON)]++;
+				}
+				else { //Non-stim pop
+					lif_injection_spikes[(int) ( ( (*lif_p).dt / BIN_SIZE) * j + EPSILLON)]++;
 				}
 			} // end of handling spike
 			// Pre-synaptic spike propagates across synapse after delay
@@ -969,8 +978,8 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 	}
 	
 	//Update multisynapse summary variables
-	if( ( (*syn).pre_lif[syn_id] < (NO_STIM_LIFS + STIM_OFFSET) ) && ( (*syn).pre_lif[syn_id] > (STIM_OFFSET-1) ) ){
-		if( ( (*syn).post_lif[syn_id] < (NO_STIM_LIFS + STIM_OFFSET) ) && ( (*syn).post_lif[syn_id] > (STIM_OFFSET-1) ) ){
+	if( ( (*syn).pre_lif[syn_id] < (NO_STIM_LIFS + STIM_OFFSET) ) && ( (*syn).pre_lif[syn_id] > (STIM_OFFSET-1) ) ){ // Pre- stim
+		if( ( (*syn).post_lif[syn_id] < (NO_STIM_LIFS + STIM_OFFSET) ) && ( (*syn).post_lif[syn_id] > (STIM_OFFSET-1) ) ){ // Post- stim
 			// Synapse receives high stim on both sides
 			int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
 			stim_summary_rho[time_bin_index] += (*syn).rho[syn_id];
@@ -998,7 +1007,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 			}
 		}
 		else{
-			// Synapse receives high stim only on pre side
+			// Synapse receives high stim only on Pre- side
 			int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
 			pre_summary_rho[time_bin_index] += (*syn).rho[syn_id];
 			pre_summary_n[time_bin_index]++;
@@ -1025,7 +1034,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 			}
 		}
 	}
-	else if( ( (*syn).post_lif[syn_id] < (NO_STIM_LIFS + STIM_OFFSET) ) && ( (*syn).post_lif[syn_id] > (STIM_OFFSET-1) ) ){
+	else if( ( (*syn).post_lif[syn_id] < (NO_STIM_LIFS + STIM_OFFSET) ) && ( (*syn).post_lif[syn_id] > (STIM_OFFSET-1) ) ){ // Post- stim
 		// Synapse receives high stim only on post side
 		int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
 		post_summary_rho[time_bin_index] += (*syn).rho[syn_id];
