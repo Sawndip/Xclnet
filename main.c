@@ -252,10 +252,10 @@ int main (int argc, const char * argv[]) {
 	cl_LIFNeuron lif;
 	cl_LIFNeuron *lif_p = &lif;
 	
-	(*lif_p).V = malloc(sizeof(float) * NO_LIFS);
-	(*lif_p).I = malloc(sizeof(float) * NO_LIFS);
+	//(*lif_p).V = malloc(sizeof(float) * NO_LIFS);
+	//(*lif_p).I = malloc(sizeof(float) * NO_LIFS);
 	(*lif_p).gauss = calloc(NO_LIFS, sizeof(float));
-	(*lif_p).time_since_spike = calloc(NO_LIFS, sizeof(unsigned int));
+	//(*lif_p).time_since_spike = calloc(NO_LIFS, sizeof(unsigned int));
 	(*lif_p).time_of_last_spike = calloc(NO_LIFS, sizeof(unsigned int));
 	
 	(*lif_p).v_rest = LIF_V_REST;
@@ -454,7 +454,11 @@ int main (int argc, const char * argv[]) {
     //----------
     printf("DEBUG: beginning map operation\n");
     //TODO: new mapped memory here
+    /*free((*lif_p).V);
+    free((*lif_p).I);
+    free((*lif_p).time_since_spike);*/
     (*lif_p).V = clEnqueueMapBuffer( (*cl_lif_p).commands, (*cl_lif_p).input_v , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif_p).no_lifs, 0, NULL, NULL, NULL );
+    printf("%ld\n", sizeof(cl_float) * (*lif_p).no_lifs);
     (*lif_p).I = clEnqueueMapBuffer( (*cl_lif_p).commands, (*cl_lif_p).input_current , CL_TRUE,  (CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif_p).no_lifs, 0, NULL, NULL, NULL );
     (*lif_p).time_since_spike = clEnqueueMapBuffer( (*cl_lif_p).commands, (*cl_lif_p).input_spike , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif_p).no_lifs, 0, NULL, NULL, NULL );
     printf("DEBUG: maps created\n");
