@@ -438,15 +438,7 @@ int main (int argc, const char * argv[]) {
 	if( createLifIObufs(cl_lif_p) == EXIT_FAILURE){
 		return EXIT_FAILURE;
 	}
-	/*if( createSynIObufs(cl_syn_p) == EXIT_FAILURE){
-		return EXIT_FAILURE;
-	}*/
-    
-    
-	if( enqueueLifInputBuf(cl_lif_p, lif_p, rnd_lif_p) == EXIT_FAILURE){
-		return EXIT_FAILURE;
-	}
-	/*if( enqueueSynInputBuf(cl_syn_p, syn_p, syn_const_p, rnd_syn_p) == EXIT_FAILURE){
+    /*if( createSynIObufs(cl_syn_p) == EXIT_FAILURE){
 		return EXIT_FAILURE;
 	}*/
     
@@ -454,15 +446,11 @@ int main (int argc, const char * argv[]) {
     //----------
     printf("DEBUG: beginning map operation\n");
     //TODO: new mapped memory here
-    /*free((*lif_p).V);
-    free((*lif_p).I);
-    free((*lif_p).time_since_spike);*/
+    //TODO: create function containing following
     (*lif_p).V = clEnqueueMapBuffer( (*cl_lif_p).commands, (*cl_lif_p).input_v , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif_p).no_lifs, 0, NULL, NULL, NULL );
-    printf("%ld\n", sizeof(cl_float) * (*lif_p).no_lifs);
     (*lif_p).I = clEnqueueMapBuffer( (*cl_lif_p).commands, (*cl_lif_p).input_current , CL_TRUE,  (CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif_p).no_lifs, 0, NULL, NULL, NULL );
     (*lif_p).time_since_spike = clEnqueueMapBuffer( (*cl_lif_p).commands, (*cl_lif_p).input_spike , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif_p).no_lifs, 0, NULL, NULL, NULL );
     printf("DEBUG: maps created\n");
-    //printf("DEBUG: %f %f\n", (*cl_lif_p).input_v, (*lif_p).V[0]);
     
     printf("DEBUG: new contents of V[0]: %f\n", (*lif_p).V[0]);
     printf("DEBUG: initialising V, I, time_since_spike\n");
@@ -474,6 +462,16 @@ int main (int argc, const char * argv[]) {
 	}
     printf("DEBUG: final contents of V[0]: %f\n", (*lif_p).V[0]);
     //----------
+    
+    
+	if( enqueueLifInputBuf(cl_lif_p, lif_p, rnd_lif_p) == EXIT_FAILURE){
+		return EXIT_FAILURE;
+	}
+	/*if( enqueueSynInputBuf(cl_syn_p, syn_p, syn_const_p, rnd_syn_p) == EXIT_FAILURE){
+		return EXIT_FAILURE;
+	}*/
+    
+    
 	
 	if( setLifKernelArgs(cl_lif_p, lif_p) == EXIT_FAILURE){
 		return EXIT_FAILURE;
