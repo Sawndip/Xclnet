@@ -42,7 +42,7 @@
 #define STIM_OFF (0.)
 #define J_STIM (24.55) /*24.55mV approx 50Hz, 34.8mV approx 100Hz*/
 #define NO_STIM_LIFS (100)
-#define STIM_OFFSET (500)
+#define STIM_OFFSET (0)
 
 // Transfer voltages
 #define J_EE (0.2) /*(0.1)*/
