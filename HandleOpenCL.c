@@ -326,6 +326,10 @@ int createLifIObufs(CL *cl){
 	
     // Create the input and output arrays in device memory for our calculation
     //
+    cl_int err1 = 0;
+    cl_int err2 = 0;
+    cl_int err3 = 0;
+    cl_int err4 = 0;
     
     //TODO: modified here for Mapped memory (pinned memory is faster)
     //(*cl).input_v = clCreateBuffer((*cl).context,  CL_MEM_READ_WRITE,  sizeof(float) * (*cl).job_size, NULL, NULL);
@@ -334,11 +338,12 @@ int createLifIObufs(CL *cl){
     
     //(*cl).gauss = clCreateBuffer((*cl).context,  CL_MEM_READ_ONLY,  sizeof(float) * (*cl).job_size, NULL, NULL);
     
-    (*cl).input_v = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, NULL); // read-write
-    (*cl).input_current = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, NULL); // write only
-	(*cl).input_spike = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(unsigned int) * (*cl).job_size, NULL, NULL); // read-write
+    (*cl).input_v = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err1); // read-write
+	(*cl).input_spike = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(unsigned int) * (*cl).job_size, NULL, &err2); // read-write
+    
+    (*cl).input_current = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err3); // write only
 	
-	(*cl).gauss = clCreateBuffer((*cl).context,  CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, NULL); // read only
+	(*cl).gauss = clCreateBuffer((*cl).context,  CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err4); // read only
 	
 	/*(*cl).d_z = clCreateBuffer((*cl).context,  CL_MEM_READ_WRITE,  sizeof(unsigned int) * (*cl).job_size, NULL, NULL);
 	(*cl).d_w = clCreateBuffer((*cl).context,  CL_MEM_READ_WRITE,  sizeof(unsigned int) * (*cl).job_size, NULL, NULL);
@@ -348,9 +353,9 @@ int createLifIObufs(CL *cl){
 	
 	//(*cl).output_v = clCreateBuffer((*cl).context, CL_MEM_WRITE_ONLY, sizeof(float) * NO_LIFS, NULL, NULL);
 	//(*cl).output_spike = clCreateBuffer((*cl).context, CL_MEM_WRITE_ONLY, sizeof(unsigned int) * NO_LIFS, NULL, NULL);
-    if (!(*cl).input_v || !(*cl).input_current || !(*cl).gauss || !(*cl).input_spike)// || !(*cl).d_z || !(*cl).d_w || !(*cl).d_jsr || !(*cl).d_jcong)
+    if (!(*cl).input_v || !(*cl).input_current || !(*cl).gauss || !(*cl).input_spike) // || !(*cl).d_z || !(*cl).d_w || !(*cl).d_jsr || !(*cl).d_jcong)
     {
-        printf("Error: Failed to allocate device memory!\n");
+        printf("Error: Failed to allocate device memory!\n%s\n%s\n%s\n%s\n", print_cl_errstring(err1), print_cl_errstring(err2), print_cl_errstring(err3), print_cl_errstring(err4));
 	    exit(1);
 	}
 	return !(EXIT_FAILURE);
@@ -385,6 +390,36 @@ int createSynIObufs(CL *cl){
 	return !(EXIT_FAILURE);
 }
 
+int mapLifIObufs(CL *cl, cl_LIFNeuron *lif){
+	// Create memory maps to IO buffers
+	//
+	
+	printf("creating maps to LIF io buffers...\n");
+    
+    // I'm not sure that reusing err in the following commands is safe, do they reset it on each call? So I use separate variables instead.
+    cl_int err1 = 0;
+    cl_int err2 = 0;
+    cl_int err3 = 0;
+    cl_int err4 = 0;
+	
+    // Mapped memory is pinned (prevented from being swapped) hence faster (on occasion)
+    printf("DEBUG: beginning map operation\n");
+
+    (*lif).V = clEnqueueMapBuffer( (*cl).commands, (*cl).input_v , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err1 );
+    (*lif).I = clEnqueueMapBuffer( (*cl).commands, (*cl).input_current , CL_TRUE,  (CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err2);
+    (*lif).time_since_spike = clEnqueueMapBuffer( (*cl).commands, (*cl).input_spike , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err3);
+    (*lif).gauss = clEnqueueMapBuffer( (*cl).commands, (*cl).gauss , CL_TRUE,  (CL_MAP_READ), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err4 );
+    printf("DEBUG: maps created\n");
+    
+
+    if (!(*lif).V || !(*lif).I|| !(*lif).time_since_spike || !(*lif).gauss)
+    {
+        printf("Error: Failed to create maps to device memory!\n%s\n%s\n%s\n%s\n", print_cl_errstring(err1), print_cl_errstring(err2), print_cl_errstring(err3), print_cl_errstring(err4));
+	    exit(1);
+	}
+	return !(EXIT_FAILURE);
+}
+
 //int enqueueInputBuf(CL *cl, unsigned int count){
 //	// Create the compute kernel in the program we wish to run
 //	//
@@ -412,6 +447,7 @@ int enqueueLifInputBuf(CL *cl, cl_LIFNeuron *lif, cl_MarsagliaStruct *rnd){
     //
 
     //TODO: modified here, to not write to so many buffers
+    //TODO: check that the Macbook Pro doesn't choke on this lack of updates
     (*cl).err = clEnqueueWriteBuffer((*cl).commands, (*cl).input_current, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).I, 0, NULL, NULL);
     //(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).input_v, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).V, 0, NULL, NULL);
 	//(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).input_spike, CL_TRUE, 0, sizeof(unsigned int) * (*lif).no_lifs, (*lif).time_since_spike, 0, NULL, NULL);

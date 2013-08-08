@@ -5,7 +5,6 @@
 
 typedef struct LIFNeuron{
     float * V;
-	//cl_float * V2;
     float * I;
 	float * gauss;
     unsigned int * time_since_spike;

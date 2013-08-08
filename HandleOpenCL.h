@@ -43,7 +43,7 @@ typedef struct cl_struct{
 	cl_mem input_current;
 	cl_mem input_spike;
     
-    cl_mem blah;
+    //cl_mem blah;
 	
 	// Synapse specific memory streams
 	cl_mem rho;
@@ -76,6 +76,7 @@ int createKernel(CL *cl, char * k_name);
 //int createIObufs(CL *cl, unsigned int count);
 int createLifIObufs(CL *cl);
 int createSynIObufs(CL *cl);
+int mapLifIObufs(CL *cl, cl_LIFNeuron *lif);
 //int enqueueInputBuf(CL *cl, unsigned int count);
 int enqueueLifInputBuf(CL *cl, cl_LIFNeuron *lif, cl_MarsagliaStruct *rnd);
 int enqueueSynInputBuf(CL *cl, cl_Synapse *syn, SynapseConsts *syn_const, cl_MarsagliaStruct *rnd);

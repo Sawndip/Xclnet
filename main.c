@@ -252,10 +252,12 @@ int main (int argc, const char * argv[]) {
 	cl_LIFNeuron lif;
 	cl_LIFNeuron *lif_p = &lif;
 	
+    //These guys get initialise as maps to device memory now (below)
 	//(*lif_p).V = malloc(sizeof(float) * NO_LIFS);
 	//(*lif_p).I = malloc(sizeof(float) * NO_LIFS);
-	(*lif_p).gauss = calloc(NO_LIFS, sizeof(float));
+	//(*lif_p).gauss = calloc(NO_LIFS, sizeof(float));
 	//(*lif_p).time_since_spike = calloc(NO_LIFS, sizeof(unsigned int));
+    
 	(*lif_p).time_of_last_spike = calloc(NO_LIFS, sizeof(unsigned int));
 	
 	(*lif_p).v_rest = LIF_V_REST;
@@ -383,43 +385,7 @@ int main (int argc, const char * argv[]) {
 	(*rnd_syn_p).d_jcong = malloc((*syn_const_p).no_syns * sizeof(unsigned int));
 	
 	
-	printf("initialising data...\n");
-    // Prepopulate data set, including with random values
-    //
-	/*for ( i = 0; i < (*lif_p).no_lifs; i++){
-		//CONSIDER: initialising V and time_since_spike to random values (within reasonable ranges)
-		(*lif_p).V[i] = (float)LIF_V_INITIAL;
-		(*lif_p).I[i] = external_voltage;
-		(*lif_p).time_since_spike[i] = (*lif_p).refrac_time;
-		*/ /*(*rnd_lif_p).d_z[i] = 362436069 + i + 1 + PARALLEL_SEED;
-		(*rnd_lif_p).d_w[i] = 521288629 + i + 1 + PARALLEL_SEED;
-		(*rnd_lif_p).d_jsr[i] = 123456789 + i + 1 + PARALLEL_SEED;
-		(*rnd_lif_p).d_jcong[i] = 380116160 + i + 1 + PARALLEL_SEED;*/
-	/*
-		//(*lif_p).gauss[i] = gasdev(&gaussian_lif_seed);
-	}*/
-	for( i = 0; i < (*syn_const_p).no_syns; i++){
-		//(*syn_p).rho[i] = SYN_RHO_INITIAL;
-		//TODO: set rho_initial here
-		/*if((i % RECORDER_MULTI_SYNAPSE_SKIP) == RECORDER_SYNAPSE_ID){
-			(*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1;
-		}*/
-		/*if(i == RECORDER_SYNAPSE_ID){
-			(*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1;
-		}*/
-		//else{
-			(*syn_p).rho[i] = (*syn_p).rho_initial[i] = SYN_RHO_INITIAL;//ran2(&uniform_synaptic_seed);//0.377491; //
-		//}
-		
-		(*syn_p).ca[i] = SYN_CA_INITIAL;
-		(*rnd_syn_p).d_z[i] = 362436069 - i + PARALLEL_SEED;
-		(*rnd_syn_p).d_w[i] = 521288629 - i + PARALLEL_SEED;
-		(*rnd_syn_p).d_jsr[i] = 123456789 - i + PARALLEL_SEED;
-		(*rnd_syn_p).d_jcong[i] = 380116160 - i + PARALLEL_SEED;
-	}
-	
-	
-	// OpenCL functions
+    // OpenCL functions
 	if( setupCL(cl_lif_p) == EXIT_FAILURE){
 		return EXIT_FAILURE;
 	}
@@ -442,26 +408,48 @@ int main (int argc, const char * argv[]) {
 		return EXIT_FAILURE;
 	}*/
     
-    //TODO: new mapped memory code here
-    //----------
-    printf("DEBUG: beginning map operation\n");
-    //TODO: new mapped memory here
-    //TODO: create function containing following
-    (*lif_p).V = clEnqueueMapBuffer( (*cl_lif_p).commands, (*cl_lif_p).input_v , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif_p).no_lifs, 0, NULL, NULL, NULL );
-    (*lif_p).I = clEnqueueMapBuffer( (*cl_lif_p).commands, (*cl_lif_p).input_current , CL_TRUE,  (CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif_p).no_lifs, 0, NULL, NULL, NULL );
-    (*lif_p).time_since_spike = clEnqueueMapBuffer( (*cl_lif_p).commands, (*cl_lif_p).input_spike , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif_p).no_lifs, 0, NULL, NULL, NULL );
-    printf("DEBUG: maps created\n");
+    // Mapped memory is pinned (prevented from being swapped) hence faster (on occasion)
+    // so our buffers are now in mapped memory
+    if( mapLifIObufs(cl_lif_p, lif_p) == EXIT_FAILURE){
+		return EXIT_FAILURE;
+	}
+
     
-    printf("DEBUG: new contents of V[0]: %f\n", (*lif_p).V[0]);
-    printf("DEBUG: initialising V, I, time_since_spike\n");
-    for ( i = 0; i < (*lif_p).no_lifs; i++){
-		//CONSIDER: initialising V and time_since_spike to random values (within reasonable ranges)
-		(*lif_p).V[i] = (float)LIF_V_INITIAL;
+    // Prepopulate data set, including with random values
+    //
+    printf("initialising data...\n");
+	for ( i = 0; i < (*lif_p).no_lifs; i++){
+        //CONSIDER: initialising V and time_since_spike to random values (within reasonable ranges)
+        (*lif_p).V[i] = (float)LIF_V_INITIAL;
         (*lif_p).I[i] = external_voltage;
-		(*lif_p).time_since_spike[i] = (*lif_p).refrac_time;
+        (*lif_p).time_since_spike[i] = (*lif_p).refrac_time;
+        /*(*rnd_lif_p).d_z[i] = 362436069 + i + 1 + PARALLEL_SEED;
+         (*rnd_lif_p).d_w[i] = 521288629 + i + 1 + PARALLEL_SEED;
+         (*rnd_lif_p).d_jsr[i] = 123456789 + i + 1 + PARALLEL_SEED;
+         (*rnd_lif_p).d_jcong[i] = 380116160 + i + 1 + PARALLEL_SEED;*/
+	
+        //(*lif_p).gauss[i] = gasdev(&gaussian_lif_seed);
+    }
+	for( i = 0; i < (*syn_const_p).no_syns; i++){
+		//(*syn_p).rho[i] = SYN_RHO_INITIAL;
+		//TODO: set rho_initial here
+		/*if((i % RECORDER_MULTI_SYNAPSE_SKIP) == RECORDER_SYNAPSE_ID){
+         (*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1;
+         }*/
+		/*if(i == RECORDER_SYNAPSE_ID){
+         (*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1;
+         }*/
+		//else{
+        (*syn_p).rho[i] = (*syn_p).rho_initial[i] = SYN_RHO_INITIAL;//ran2(&uniform_synaptic_seed);//0.377491; //
+		//}
+		
+		(*syn_p).ca[i] = SYN_CA_INITIAL;
+		(*rnd_syn_p).d_z[i] = 362436069 - i + PARALLEL_SEED;
+		(*rnd_syn_p).d_w[i] = 521288629 - i + PARALLEL_SEED;
+		(*rnd_syn_p).d_jsr[i] = 123456789 - i + PARALLEL_SEED;
+		(*rnd_syn_p).d_jcong[i] = 380116160 - i + PARALLEL_SEED;
 	}
     printf("DEBUG: final contents of V[0]: %f\n", (*lif_p).V[0]);
-    //----------
     
     
 	if( enqueueLifInputBuf(cl_lif_p, lif_p, rnd_lif_p) == EXIT_FAILURE){
@@ -727,6 +715,7 @@ int main (int argc, const char * argv[]) {
 		
 		// Setup next LIF Kernel
 		// this is the part I was able to comment out and sim still worked! (most of the time!)
+        // TODO: test which systems I can comment out the following and still have a working simulator
 		if( enqueueLifInputBuf(cl_lif_p, lif_p, rnd_lif_p) == EXIT_FAILURE){
 			return EXIT_FAILURE;
 		}
