@@ -610,8 +610,8 @@ int main (int argc, const char * argv[]) {
 						if ((*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]] == RECORDER_NEURON_ID){
 							//local_count++;
 							//TODO: change plastic versus fixed transfer voltage here
-							lif_currents_EE[j] += transfer_voltage * (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
-							//lif_currents_EE[j] += transfer_voltage * SYN_RHO_FIXED; //(*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
+							//lif_currents_EE[j] += transfer_voltage * (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
+							lif_currents_EE[j] += transfer_voltage * SYN_RHO_FIXED; //(*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
 							
 							//printf("DEBUG: synaptic transfer voltage: %f, rho: %f, transfer voltage: %fc\n", (transfer_voltage * (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]]), (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]], transfer_voltage);
 							//printf("DEBUG: total transfer voltage: %f, time: %f\n", lif_currents_EE[j], (j * LIF_DT));
@@ -622,8 +622,8 @@ int main (int argc, const char * argv[]) {
 						printf("Spike transfer (LIF %d) \n", i);
 					#endif /* DEBUG_MODE_SPIKES */
 					//TODO: change plastic versus fixed transfer voltage here
-					(*lif_p).I[(*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]]] += transfer_voltage * (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
-					//(*lif_p).I[(*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]]] += transfer_voltage * SYN_RHO_FIXED; //(*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
+					//(*lif_p).I[(*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]]] += transfer_voltage * (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
+					(*lif_p).I[(*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]]] += transfer_voltage * SYN_RHO_FIXED; //(*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
 					/*if(i==0){
 						printf("current transfer, I: %f, to post-synaptic neuron(%d)\n", (transfer_voltage * (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]]), (*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]]);
 					}*/				
@@ -715,7 +715,7 @@ int main (int argc, const char * argv[]) {
 		
 		// Setup next LIF Kernel
 		// this is the part I was able to comment out and sim still worked! (most of the time!)
-        // TODO: test which systems I can comment out the following and still have a working simulator
+        // TODO: test which systems I can comment out the following on and still have a working simulator
 		if( enqueueLifInputBuf(cl_lif_p, lif_p, rnd_lif_p) == EXIT_FAILURE){
 			return EXIT_FAILURE;
 		}
@@ -744,11 +744,11 @@ int main (int argc, const char * argv[]) {
 	//TODO: disable updating of stimulated synapses here
 	for (i = 0; i < NO_STIM_LIFS; i++){
 		for(k = 0; k < (*lif_p).no_outgoing_ee_synapses[i + STIM_OFFSET]; k++){ // Update stim synapses originating in stim pop
-			updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).outgoing_synapse_index[i + STIM_OFFSET][k], j);
+			//updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).outgoing_synapse_index[i + STIM_OFFSET][k], j);
 		}
 		for(k = 0; k < (*lif_p).no_incoming_synapses[i + STIM_OFFSET]; k++){
 			if((*lif_p).incoming_synapse_index[i + STIM_OFFSET][k] < (*syn_const_p).no_syns){ // Updated stim synapses ending in stim pop
-				updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).incoming_synapse_index[i + STIM_OFFSET][k], j);
+				//updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).incoming_synapse_index[i + STIM_OFFSET][k], j);
 			}
 		}
 	}
@@ -989,6 +989,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 		print_synapse_activity(current_time, syn);
 	}
 	
+	//TODO: stdev is probably incorrect as each value is actually getting counted one-two times (on spike transfer and after delay)
 	//Update multisynapse summary variables
 	if( ( (*syn).pre_lif[syn_id] < (NO_STIM_LIFS + STIM_OFFSET) ) && ( (*syn).pre_lif[syn_id] > (STIM_OFFSET-1) ) ){ // Pre- stim
 		if( ( (*syn).post_lif[syn_id] < (NO_STIM_LIFS + STIM_OFFSET) ) && ( (*syn).post_lif[syn_id] > (STIM_OFFSET-1) ) ){ // Post- stim
@@ -1007,8 +1008,8 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 				//Mk = Mk-1+ (xk - Mk-1)/k
 				//Sk = Sk-1 + (xk - Mk-1)*(xk - Mk).
 				float Mk;
-				Mk = stim_summary_M[time_bin_index] + ((*syn).rho[syn_id] - stim_summary_M[time_bin_index])/stim_summary_n[time_bin_index];
-				stim_summary_S[time_bin_index] = stim_summary_S[time_bin_index] + ((*syn).rho[syn_id] - stim_summary_M[time_bin_index]) * ((*syn).rho[syn_id] - Mk);
+				Mk = stim_summary_M[time_bin_index] + ( ( (*syn).rho[syn_id] - stim_summary_M[time_bin_index] ) / stim_summary_n[time_bin_index] );
+				stim_summary_S[time_bin_index] = stim_summary_S[time_bin_index] + ( ( (*syn).rho[syn_id] - stim_summary_M[time_bin_index] ) * ( (*syn).rho[syn_id] - Mk ) );
 				stim_summary_M[time_bin_index] = Mk;
                 if ((*syn).rho[syn_id] > stim_summary_max[time_bin_index]){
                     stim_summary_max[time_bin_index] = (*syn).rho[syn_id];
