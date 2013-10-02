@@ -38,46 +38,54 @@ FILE *synaptic_strength_output; //final_synaptic_strength_output
 unsigned int no_spiking_bins;
 //CONSIDER: since we use a timestepping approach these variables could be condensed
 // to single value variables and printed out during the simulation
-float *summary_exc_spikes;
-float *summary_inh_spikes;
+double *summary_exc_spikes;
+double *summary_inh_spikes;
 // Variables for manipulating subset of neurons
-float *lif_injection_spikes;
+double *lif_injection_spikes;
 //int no_injection_lifs;
 
 //Summary variablse for initially_UP pop
-float *UP_pop_rho;
-float *UP_pop_M;
-float *UP_pop_S;
+double *UP_pop_rho;
+double *UP_pop_M;
+double *UP_pop_S;
 unsigned int *UP_pop_n;
 float *UP_pop_max;
 float *UP_pop_min;
 
+//Summary variablse for initially_UP pop
+double *DOWN_pop_rho;
+double *DOWN_pop_M;
+double *DOWN_pop_S;
+unsigned int *DOWN_pop_n;
+float *DOWN_pop_max;
+float *DOWN_pop_min;
+
 
 // Summary variables for monitoring synapses which receive only background activity
-float *non_summary_rho;
-float *non_summary_M;
-float *non_summary_S;
+double *non_summary_rho;
+double *non_summary_M;
+double *non_summary_S;
 unsigned int *non_summary_n;
 float *non_summary_max;
 float *non_summary_min;
 // Summary variables for synapses which receive high stim pre and post activity
-float *stim_summary_rho;
-float *stim_summary_M;
-float *stim_summary_S;
+double *stim_summary_rho;
+double *stim_summary_M;
+double *stim_summary_S;
 unsigned int *stim_summary_n;
 float *stim_summary_max;
 float *stim_summary_min;
 // Summary variables for synapses which receive high stim pre activity
-float *pre_summary_rho;
-float *pre_summary_M;
-float *pre_summary_S;
+double *pre_summary_rho;
+double *pre_summary_M;
+double *pre_summary_S;
 unsigned int *pre_summary_n;
 float *pre_summary_max;
 float *pre_summary_min;
 // Summary variables for synapses which receive high stim post activity
-float *post_summary_rho;
-float *post_summary_M;
-float *post_summary_S;
+double *post_summary_rho;
+double *post_summary_M;
+double *post_summary_S;
 unsigned int *post_summary_n;
 float *post_summary_max;
 float *post_summary_min;

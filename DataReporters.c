@@ -61,48 +61,56 @@ void reporters_setup(){
 	}
 	no_spiking_bins = (LIF_DT / BIN_SIZE) * MAX_TIME_STEPS;
 	// Setup the bins for recording average population spiking behaviour
-	summary_exc_spikes = calloc(no_spiking_bins, sizeof(float));
-	summary_inh_spikes = calloc(no_spiking_bins, sizeof(float));
+	summary_exc_spikes = calloc(no_spiking_bins, sizeof(double));
+	summary_inh_spikes = calloc(no_spiking_bins, sizeof(double));
 	// Code for monitoring selectively manipulated neurons
-	lif_injection_spikes = calloc(no_spiking_bins, sizeof(float));
+	lif_injection_spikes = calloc(no_spiking_bins, sizeof(double));
 	//fprintf(average_activity_ouput, "\n\n\n\n\n# Summary network activity (time bin, TotSpikes/N, ExcSpikes/NE, InhSpikes/NI, InstantaneousExcRate, InstantaneousInhRate, RhoAvSubPop, RhoStdevSubPop, RhoAv, RhoStdev, SupPopSelectiveStimExcRate, NoExcSpikes)\n# all normalised to their respective population sizes\n");
 	fprintf(average_activity_ouput, "\n\n\n\n\n# Summary network activity (time bin, InstantaneousExcRate, InstantaneousInhRate, InstantaneousStimRate, RhoAvNonPop, RhoStdevNonPop, RhoAvStimPop, RhoStdevStimPop, RhoAvPrePop, RhoStdevPrePop, RhoAvPostPop, RhoStdevPostPop, NupdatesNonPop, NupdatesStimPop, NupdatesPrePop, NupdatesPostPop, RhoMaxNonPop, RhoMinNonPop, RhoMaxStimPop, RhoMinStimPop, RhoMaxPrePop, RhoMinPrePop, RhoMaxPostPop, RhoMinPostPop )\n# all normalised to their respective population sizes\n");
 	
 	
 	//New code for monitoring initially_UP population
-	UP_pop_rho = calloc(no_spiking_bins, sizeof(float));
-	UP_pop_M = calloc(no_spiking_bins, sizeof(float));
-	UP_pop_S = calloc(no_spiking_bins, sizeof(float));
+	UP_pop_rho = calloc(no_spiking_bins, sizeof(double));
+	UP_pop_M = calloc(no_spiking_bins, sizeof(double));
+	UP_pop_S = calloc(no_spiking_bins, sizeof(double));
 	UP_pop_n = calloc(no_spiking_bins, sizeof(unsigned int));
     UP_pop_max = calloc(no_spiking_bins, sizeof(float));
     UP_pop_min = calloc(no_spiking_bins, sizeof(float));
 	
+	//New code for monitoring initially_DOWN population
+	DOWN_pop_rho = calloc(no_spiking_bins, sizeof(double));
+	DOWN_pop_M = calloc(no_spiking_bins, sizeof(double));
+	DOWN_pop_S = calloc(no_spiking_bins, sizeof(double));
+	DOWN_pop_n = calloc(no_spiking_bins, sizeof(unsigned int));
+    DOWN_pop_max = calloc(no_spiking_bins, sizeof(float));
+    DOWN_pop_min = calloc(no_spiking_bins, sizeof(float));
+	
 	
 	//TODO: new code for monitoring multiple synapses here
-	non_summary_rho = calloc(no_spiking_bins, sizeof(float));
-	non_summary_M = calloc(no_spiking_bins, sizeof(float));
-	non_summary_S = calloc(no_spiking_bins, sizeof(float));
+	non_summary_rho = calloc(no_spiking_bins, sizeof(double));
+	non_summary_M = calloc(no_spiking_bins, sizeof(double));
+	non_summary_S = calloc(no_spiking_bins, sizeof(double));
 	non_summary_n = calloc(no_spiking_bins, sizeof(unsigned int));
     non_summary_max = calloc(no_spiking_bins, sizeof(float));
     non_summary_min = calloc(no_spiking_bins, sizeof(float));
 	//TODO: new code for monitoring main population synapses here
-	stim_summary_rho = calloc(no_spiking_bins, sizeof(float));
-	stim_summary_M = calloc(no_spiking_bins, sizeof(float));
-	stim_summary_S = calloc(no_spiking_bins, sizeof(float));
+	stim_summary_rho = calloc(no_spiking_bins, sizeof(double));
+	stim_summary_M = calloc(no_spiking_bins, sizeof(double));
+	stim_summary_S = calloc(no_spiking_bins, sizeof(double));
 	stim_summary_n = calloc(no_spiking_bins, sizeof(unsigned int));
     stim_summary_max = calloc(no_spiking_bins, sizeof(float));
     stim_summary_min = calloc(no_spiking_bins, sizeof(float));
 	//TODO: new code for monitoring multiple synapses here
-	pre_summary_rho = calloc(no_spiking_bins, sizeof(float));
-	pre_summary_M = calloc(no_spiking_bins, sizeof(float));
-	pre_summary_S = calloc(no_spiking_bins, sizeof(float));
+	pre_summary_rho = calloc(no_spiking_bins, sizeof(double));
+	pre_summary_M = calloc(no_spiking_bins, sizeof(double));
+	pre_summary_S = calloc(no_spiking_bins, sizeof(double));
 	pre_summary_n = calloc(no_spiking_bins, sizeof(unsigned int));
     pre_summary_max = calloc(no_spiking_bins, sizeof(float));
     pre_summary_min = calloc(no_spiking_bins, sizeof(float));
 	//TODO: new code for monitoring main population synapses here
-	post_summary_rho = calloc(no_spiking_bins, sizeof(float));
-	post_summary_M = calloc(no_spiking_bins, sizeof(float));
-	post_summary_S = calloc(no_spiking_bins, sizeof(float));
+	post_summary_rho = calloc(no_spiking_bins, sizeof(double));
+	post_summary_M = calloc(no_spiking_bins, sizeof(double));
+	post_summary_S = calloc(no_spiking_bins, sizeof(double));
 	post_summary_n = calloc(no_spiking_bins, sizeof(unsigned int));
     post_summary_max = calloc(no_spiking_bins, sizeof(float));
     post_summary_min = calloc(no_spiking_bins, sizeof(float));

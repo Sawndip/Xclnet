@@ -442,14 +442,15 @@ int main (int argc, const char * argv[]) {
          (*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1;
          }*/
 		//else{
-        //(*syn_p).rho[i] = (*syn_p).rho_initial[i] = SYN_RHO_INITIAL;//ran2(&uniform_synaptic_seed);//0.377491; //
-		(*syn_p).rho[i] = (*syn_p).rho_initial[i] = invivo_double_well_distribution(&uniform_synaptic_seed);
+        (*syn_p).rho[i] = (*syn_p).rho_initial[i] = SYN_RHO_INITIAL; //ran2(&uniform_synaptic_seed);//0.377491; //
+		//(*syn_p).rho[i] = (*syn_p).rho_initial[i] = invivo_double_well_distribution(&uniform_synaptic_seed);
 		//}
 		
-		if(ran2(&uniform_synaptic_seed) < 0.05){
+		// Set a subset of synapses to UP initially
+		/*if(ran2(&uniform_synaptic_seed) < 0.05){
 			(*syn_p).rho[i] = (*syn_p).rho_initial[i] = 0.9;
 			(*syn_p).initially_UP[i] = 1;
-		}
+		}*/
 		
 		(*syn_p).ca[i] = SYN_CA_INITIAL;
 		(*rnd_syn_p).d_z[i] = 362436069 - i + PARALLEL_SEED;
@@ -684,6 +685,8 @@ int main (int argc, const char * argv[]) {
 				else{ //INH pop
 					summary_inh_spikes[(int)( ( (*lif_p).dt / BIN_SIZE ) * j + EPSILLON)]++;
 				}*/
+				//CONSIDER: using Kahan formula for addition here to improve accuracy
+				// for now double is sufficient, it works to greater than 1 billion spikes per bin
                 if( i > (NO_EXC - 1)){ //INH pop
 					summary_inh_spikes[(int)( ( (*lif_p).dt / BIN_SIZE ) * j + EPSILLON)]++;
                 }
@@ -1027,6 +1030,34 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 			}
 		}	
 	}
+	// Monitor pop which begins life in DOWN state
+	else{
+		int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
+		DOWN_pop_rho[time_bin_index] += (*syn).rho[syn_id];
+		DOWN_pop_n[time_bin_index]++;
+		
+		if(DOWN_pop_n[time_bin_index] == 1){ // initialise on first entry to time bin
+			DOWN_pop_M[time_bin_index] = (*syn).rho[syn_id];
+			//stim_summary_S[time_bin_index] = 0; //done via calloc()
+			DOWN_pop_min[time_bin_index] = (*syn).rho[syn_id];
+			DOWN_pop_max[time_bin_index] = (*syn).rho[syn_id];
+		}
+		else{
+			//Mk = Mk-1+ (xk - Mk-1)/k
+			//Sk = Sk-1 + (xk - Mk-1)*(xk - Mk).
+			float Mk;
+			Mk = DOWN_pop_M[time_bin_index] + ( ( (*syn).rho[syn_id] - DOWN_pop_M[time_bin_index] ) / DOWN_pop_n[time_bin_index] );
+			DOWN_pop_S[time_bin_index] = DOWN_pop_S[time_bin_index] + ( ( (*syn).rho[syn_id] - DOWN_pop_M[time_bin_index] ) * ( (*syn).rho[syn_id] - Mk ) );
+			DOWN_pop_M[time_bin_index] = Mk;
+			if ((*syn).rho[syn_id] > DOWN_pop_max[time_bin_index]){
+				DOWN_pop_max[time_bin_index] = (*syn).rho[syn_id];
+			} // these are mutually exclusive events, so using elseif to cut number of computations
+			else if ((*syn).rho[syn_id] < DOWN_pop_min[time_bin_index]){
+				DOWN_pop_min[time_bin_index] = (*syn).rho[syn_id];
+			}
+		}	
+	}
+	
 	
 	//TODO: stdev is probably incorrect as each value is actually getting counted one-two times (on spike transfer and after delay)
 	//Update multisynapse summary variables
