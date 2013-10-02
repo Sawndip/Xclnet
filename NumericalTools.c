@@ -35,6 +35,101 @@
 #define MZ 0
 #define FAC (1.0/MBIG)
 
+
+#define NUMBER_INTERVALS (1000)
+
+
+// Define shape of potential well for double-well invivo simulations
+double U(double x){
+	double Ux;
+	double alphaD = 0.0001171457;
+	//double alphaP = 0.0000137076;
+	double Gp = 0.00993916;
+	double Gd = 0.03888171;
+	
+	//double Gx = (0.5) + Gp + Gd;
+	
+	Ux = ((1 - alphaD) * ((0.25 * x * x) - (0.5 * pow(x,3)) + (0.25 * pow(x,4))) - Gp * (x - 0.5 * x * x) + Gd * (0.5 * x * x));
+	
+	return Ux;
+}
+
+// Return variable with double-well 1Hz, invivo distribution for synapses
+double invivo_double_well_distribution(long *uni_seed){
+	static int first_run_flag = 0;
+	
+	double interval_width = 1.0/(double)NUMBER_INTERVALS;
+	
+	static double x[NUMBER_INTERVALS+1]; //x-values
+	static double P[NUMBER_INTERVALS+1]; //PDF
+	static double C[NUMBER_INTERVALS+1]; //CDF
+	
+	double uni_rnd = ran2(uni_seed);
+	
+	if(first_run_flag == 0){ // generate pdf and cdf
+		double alphaD = 0.0001171457;
+		double alphaP = 0.0000137076;
+		double sigma = 3.35;
+		
+		double sigma_rho_sq = (sigma*sigma * (alphaD + alphaP));
+		
+		double sum_P = 0; // for normalisation
+		
+		for(int i = 0; i < NUMBER_INTERVALS+1; i++){
+			x[i] = i * interval_width;
+			P[i] = exp( (-2.0 * U(x[i])) / sigma_rho_sq);
+			
+			sum_P += P[i];
+			
+			//printf("%f %f %g %g\n", x[i], U(x[i]), P[i], sum_P);
+		}
+		
+		double normaliser = sum_P * interval_width;
+		for(int i = 0; i < NUMBER_INTERVALS+1; i++){
+			P[i] = P[i]/normaliser;
+			
+			if (i > 0){
+				C[i] = C[i-1] + P[i]*interval_width;
+			}
+			else{
+				C[i] = P[i]*interval_width;
+			}
+			
+			//printf("%f %g %g\n", x[i], P[i], C[i]);
+		}
+		
+		first_run_flag = 1;
+	} //end first run generation of pdf and cdf
+	
+	// now use uni_rnd to lookup x value from C
+	double new_rand;
+	double higher_x;
+	double higher_y;
+	double lower_x;
+	double lower_y;
+	
+	//printf("uni_rnd %f\n", uni_rnd);
+	for (int i = 0; i < NUMBER_INTERVALS+1; i++){
+		//find sign change in difference
+		double diff = (uni_rnd - C[i]);
+		if (diff < 0){
+			higher_x = x[i];
+			lower_x = x[i-1];
+			higher_y = C[i];
+			lower_y = C[i-1];
+			break;
+		}
+	}
+	//printf("%g %g %g %g\n", higher_x, lower_x, higher_y, lower_y);
+	// Don't forget swapping x's and y's here (hence the reversed formulae)
+	double slope = (higher_x - lower_x) / (higher_y - lower_y);
+	new_rand = slope * (uni_rnd - lower_y) + lower_x;
+	
+	return new_rand;
+}
+
+
+
 // ran0 returns a Uniform(0,1) value
 // Minimal Park and Miller method: multiplicative congruential algorithm (I_{j+1} = a I_j \mod m )
 float ran0(long *idum)

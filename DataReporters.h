@@ -44,6 +44,14 @@ float *summary_inh_spikes;
 float *lif_injection_spikes;
 //int no_injection_lifs;
 
+//Summary variablse for initially_UP pop
+float *UP_pop_rho;
+float *UP_pop_M;
+float *UP_pop_S;
+unsigned int *UP_pop_n;
+float *UP_pop_max;
+float *UP_pop_min;
+
 
 // Summary variables for monitoring synapses which receive only background activity
 float *non_summary_rho;

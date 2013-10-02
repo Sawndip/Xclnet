@@ -32,6 +32,8 @@ typedef struct Synapse{
 	signed int * pre_lif;
 	signed int * post_lif;
 	
+	unsigned char * initially_UP;
+	
 	//unsigned char * receives_stimulation_flag;
 } cl_Synapse;
 

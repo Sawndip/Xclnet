@@ -17,3 +17,8 @@ float expdev(long *idum);
 float gamdev(int ia, long *idum);
 float poidev(float xm, long *idum);
 float bnldev(float pp, int n, long *idum);
+
+
+// Added for in-vivo sims
+double U(double x);
+double invivo_double_well_distribution(long *uni_seed);

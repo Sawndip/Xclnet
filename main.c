@@ -41,6 +41,7 @@ unsigned int generateNetwork(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynaps
 	//no_injection_lifs = 0; // required for calculating firing rates
 	//(*lif_p).subpopulation_flag = calloc(NO_LIFS, sizeof(unsigned char));
 	//(*syn_p).receives_stimulation_flag = calloc(estimated_total_synapses, sizeof(unsigned char));
+	(*syn_p).initially_UP = calloc(estimated_total_synapses, sizeof(unsigned char));
 	
 	printf("Space allocation, mean_ee_syn_per_neuron: %d, est_ee_syn_per_neuron: %d, est_total_ee_synapses: %d, est_total_syn_per_neuron: %d\n", mean_ee_synapses_per_neuron, estimated_ee_synapses_per_neuron, estimated_total_ee_synapses, estimated_total_synapses_per_neuron);
 	
@@ -213,6 +214,7 @@ unsigned int generateNetwork(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynaps
 	(*fixed_syn_p).Jx = realloc((*fixed_syn_p).Jx, sizeof(float) * total_fixed_synapses);
 	(*fixed_syn_p).post_lif = realloc((*fixed_syn_p).post_lif, sizeof(signed int) * total_fixed_synapses);
 	//(*syn_p).receives_stimulation_flag = realloc((*syn_p).receives_stimulation_flag, sizeof(unsigned char) * total_ee_synapses);
+	(*syn_p).initially_UP = realloc((*syn_p).initially_UP, sizeof(unsigned char) * total_ee_synapses);
 	for(int i = 0; i < NO_LIFS; i++){
 		(*lif_p).incoming_synapse_index[i] = realloc((*lif_p).incoming_synapse_index[i], sizeof(signed int) * (*lif_p).no_incoming_synapses[i]);
 		(*lif_p).outgoing_synapse_index[i] = realloc((*lif_p).outgoing_synapse_index[i], sizeof(signed int) * (*lif_p).no_outgoing_synapses[i]);
@@ -235,7 +237,7 @@ int main (int argc, const char * argv[]) {
 	int i, j, k;
 	int offset;
 	float isi; // new ISI variable (local to main sim loop)
-	//long uniform_synaptic_seed = UNIFORM_SYNAPTIC_SEED;
+	long uniform_synaptic_seed = UNIFORM_SYNAPTIC_SEED;
 	//long gaussian_lif_seed = (GAUSSIAN_SYNAPTIC_SEED - 1);
 	
 	clock_t start_t,finish_t;
@@ -440,8 +442,14 @@ int main (int argc, const char * argv[]) {
          (*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1;
          }*/
 		//else{
-        (*syn_p).rho[i] = (*syn_p).rho_initial[i] = SYN_RHO_INITIAL;//ran2(&uniform_synaptic_seed);//0.377491; //
+        //(*syn_p).rho[i] = (*syn_p).rho_initial[i] = SYN_RHO_INITIAL;//ran2(&uniform_synaptic_seed);//0.377491; //
+		(*syn_p).rho[i] = (*syn_p).rho_initial[i] = invivo_double_well_distribution(&uniform_synaptic_seed);
 		//}
+		
+		if(ran2(&uniform_synaptic_seed) < 0.05){
+			(*syn_p).rho[i] = (*syn_p).rho_initial[i] = 0.9;
+			(*syn_p).initially_UP[i] = 1;
+		}
 		
 		(*syn_p).ca[i] = SYN_CA_INITIAL;
 		(*rnd_syn_p).d_z[i] = 362436069 - i + PARALLEL_SEED;
@@ -611,7 +619,8 @@ int main (int argc, const char * argv[]) {
 							//local_count++;
 							//TODO: change plastic versus fixed transfer voltage here
 							//lif_currents_EE[j] += transfer_voltage * (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
-							lif_currents_EE[j] += transfer_voltage * SYN_RHO_FIXED; //(*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
+							//lif_currents_EE[j] += transfer_voltage * SYN_RHO_FIXED; //(*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
+							lif_currents_EE[j] += transfer_voltage * (*syn_p).rho_initial[(*lif_p).outgoing_synapse_index[i][k]];
 							
 							//printf("DEBUG: synaptic transfer voltage: %f, rho: %f, transfer voltage: %fc\n", (transfer_voltage * (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]]), (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]], transfer_voltage);
 							//printf("DEBUG: total transfer voltage: %f, time: %f\n", lif_currents_EE[j], (j * LIF_DT));
@@ -623,7 +632,9 @@ int main (int argc, const char * argv[]) {
 					#endif /* DEBUG_MODE_SPIKES */
 					//TODO: change plastic versus fixed transfer voltage here
 					//(*lif_p).I[(*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]]] += transfer_voltage * (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
-					(*lif_p).I[(*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]]] += transfer_voltage * SYN_RHO_FIXED; //(*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
+					//(*lif_p).I[(*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]]] += transfer_voltage * SYN_RHO_FIXED; //(*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
+					(*lif_p).I[(*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]]] += transfer_voltage * (*syn_p).rho_initial[(*lif_p).outgoing_synapse_index[i][k]];
+					
 					/*if(i==0){
 						printf("current transfer, I: %f, to post-synaptic neuron(%d)\n", (transfer_voltage * (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]]), (*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]]);
 					}*/				
@@ -987,6 +998,34 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 	if(syn_id == RECORDER_SYNAPSE_ID){
 		// Print state of a single synapse
 		print_synapse_activity(current_time, syn);
+	}
+	
+	// Monitor pop which begins life in UP state
+	if( (*syn).initially_UP[syn_id] == 1 ){
+		int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
+		UP_pop_rho[time_bin_index] += (*syn).rho[syn_id];
+		UP_pop_n[time_bin_index]++;
+		
+		if(UP_pop_n[time_bin_index] == 1){ // initialise on first entry to time bin
+			UP_pop_M[time_bin_index] = (*syn).rho[syn_id];
+			//stim_summary_S[time_bin_index] = 0; //done via calloc()
+			UP_pop_min[time_bin_index] = (*syn).rho[syn_id];
+			UP_pop_max[time_bin_index] = (*syn).rho[syn_id];
+		}
+		else{
+			//Mk = Mk-1+ (xk - Mk-1)/k
+			//Sk = Sk-1 + (xk - Mk-1)*(xk - Mk).
+			float Mk;
+			Mk = UP_pop_M[time_bin_index] + ( ( (*syn).rho[syn_id] - UP_pop_M[time_bin_index] ) / UP_pop_n[time_bin_index] );
+			UP_pop_S[time_bin_index] = UP_pop_S[time_bin_index] + ( ( (*syn).rho[syn_id] - UP_pop_M[time_bin_index] ) * ( (*syn).rho[syn_id] - Mk ) );
+			UP_pop_M[time_bin_index] = Mk;
+			if ((*syn).rho[syn_id] > UP_pop_max[time_bin_index]){
+				UP_pop_max[time_bin_index] = (*syn).rho[syn_id];
+			} // these are mutually exclusive events, so using elseif to cut number of computations
+			else if ((*syn).rho[syn_id] < UP_pop_min[time_bin_index]){
+				UP_pop_min[time_bin_index] = (*syn).rho[syn_id];
+			}
+		}	
 	}
 	
 	//TODO: stdev is probably incorrect as each value is actually getting counted one-two times (on spike transfer and after delay)
