@@ -62,7 +62,7 @@ float *DOWN_pop_min;
 
 
 // Summary variables for monitoring synapses which receive only background activity
-double *non_summary_rho;
+/*double *non_summary_rho;
 double *non_summary_M;
 double *non_summary_S;
 unsigned int *non_summary_n;
@@ -88,7 +88,7 @@ double *post_summary_M;
 double *post_summary_S;
 unsigned int *post_summary_n;
 float *post_summary_max;
-float *post_summary_min;
+float *post_summary_min;*/
 
 
 //Debugging variables

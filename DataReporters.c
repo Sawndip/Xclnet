@@ -87,7 +87,7 @@ void reporters_setup(){
 	
 	
 	//TODO: new code for monitoring multiple synapses here
-	non_summary_rho = calloc(no_spiking_bins, sizeof(double));
+	/*non_summary_rho = calloc(no_spiking_bins, sizeof(double));
 	non_summary_M = calloc(no_spiking_bins, sizeof(double));
 	non_summary_S = calloc(no_spiking_bins, sizeof(double));
 	non_summary_n = calloc(no_spiking_bins, sizeof(unsigned int));
@@ -113,7 +113,7 @@ void reporters_setup(){
 	post_summary_S = calloc(no_spiking_bins, sizeof(double));
 	post_summary_n = calloc(no_spiking_bins, sizeof(unsigned int));
     post_summary_max = calloc(no_spiking_bins, sizeof(float));
-    post_summary_min = calloc(no_spiking_bins, sizeof(float));
+    post_summary_min = calloc(no_spiking_bins, sizeof(float));*/
 	// Set min values to theoretical max, moved to updateSynapse()
     /*for( int i = 0; i < no_spiking_bins; i++){
         non_summary_min[i] = 1;
@@ -192,7 +192,8 @@ void print_network_summary_activity(){
 	printf("Outputting network summary activity\n");
 	for(int i = 0; i < no_spiking_bins; i++){
 		//fprintf(average_activity_ouput, "%d %f %f %f %f %f %f %f %f %f %f %d\n", i, ((summary_inh_spikes[i] + summary_exc_spikes[i] + lif_injection_spikes[i]) / NO_LIFS), (summary_exc_spikes[i] / (NO_EXC - no_injection_lifs)), (summary_inh_spikes[i] / NO_INH), ((summary_exc_spikes[i] / (NO_EXC - no_injection_lifs)) * (1.0 / BIN_SIZE)), ((summary_inh_spikes[i] / NO_INH) * (1.0 / BIN_SIZE)), summary_rho[i]/summary_n[i], sqrt(summary_S[i]/(summary_n[i]-1)),  pop_summary_rho[i]/pop_summary_n[i], sqrt(pop_summary_S[i]/(pop_summary_n[i]-1)), ((lif_injection_spikes[i] / no_injection_lifs) * (1.0 / BIN_SIZE)), (int) summary_exc_spikes[i] );
-		fprintf(average_activity_ouput, "%d %f %f %f %f %f %f %f %f %f %f %f %d %d %d %d %f %f %f %f %f %f %f %f %f %f %d %f %f\n", i, ((summary_exc_spikes[i] / (NO_EXC - NO_STIM_LIFS)) * (1.0 / BIN_SIZE)), ((summary_inh_spikes[i] / NO_INH) * (1.0 / BIN_SIZE)), ((lif_injection_spikes[i] / NO_STIM_LIFS) * (1.0 / BIN_SIZE)), non_summary_rho[i]/non_summary_n[i], sqrt(non_summary_S[i]/(non_summary_n[i]-1)),  stim_summary_rho[i]/stim_summary_n[i], sqrt(stim_summary_S[i]/(stim_summary_n[i]-1)),  pre_summary_rho[i]/pre_summary_n[i], sqrt(pre_summary_S[i]/(pre_summary_n[i]-1)),  post_summary_rho[i]/post_summary_n[i], sqrt(post_summary_S[i]/(post_summary_n[i]-1)), non_summary_n[i], stim_summary_n[i], pre_summary_n[i], post_summary_n[i], non_summary_max[i], non_summary_min[i], stim_summary_max[i], stim_summary_min[i], pre_summary_max[i], pre_summary_min[i], post_summary_max[i], post_summary_min[i], UP_pop_rho[i]/UP_pop_n[i], sqrt(UP_pop_S[i]/(UP_pop_n[i]-1)), UP_pop_n[i], UP_pop_max[i], UP_pop_min[i] );
+		fprintf(average_activity_ouput, "%d %f %f %f %f %f %d %f %f %f %f %d %f %f\n", i, ((summary_exc_spikes[i] / (NO_EXC - NO_STIM_LIFS)) * (1.0 / BIN_SIZE)), ((summary_inh_spikes[i] / NO_INH) * (1.0 / BIN_SIZE)), ((lif_injection_spikes[i] / NO_STIM_LIFS) * (1.0 / BIN_SIZE)), UP_pop_rho[i]/UP_pop_n[i], sqrt(UP_pop_S[i]/(UP_pop_n[i]-1)), UP_pop_n[i], UP_pop_max[i], UP_pop_min[i], DOWN_pop_rho[i]/DOWN_pop_n[i], sqrt(DOWN_pop_S[i]/(DOWN_pop_n[i]-1)), DOWN_pop_n[i], DOWN_pop_max[i], DOWN_pop_min[i] );
+		//fprintf(average_activity_ouput, "%d %f %f %f %f %f %f %f %f %f %f %f %d %d %d %d %f %f %f %f %f %f %f %f %f %f %d %f %f %f %f %d %f %f\n", i, ((summary_exc_spikes[i] / (NO_EXC - NO_STIM_LIFS)) * (1.0 / BIN_SIZE)), ((summary_inh_spikes[i] / NO_INH) * (1.0 / BIN_SIZE)), ((lif_injection_spikes[i] / NO_STIM_LIFS) * (1.0 / BIN_SIZE)), non_summary_rho[i]/non_summary_n[i], sqrt(non_summary_S[i]/(non_summary_n[i]-1)),  stim_summary_rho[i]/stim_summary_n[i], sqrt(stim_summary_S[i]/(stim_summary_n[i]-1)),  pre_summary_rho[i]/pre_summary_n[i], sqrt(pre_summary_S[i]/(pre_summary_n[i]-1)),  post_summary_rho[i]/post_summary_n[i], sqrt(post_summary_S[i]/(post_summary_n[i]-1)), non_summary_n[i], stim_summary_n[i], pre_summary_n[i], post_summary_n[i], non_summary_max[i], non_summary_min[i], stim_summary_max[i], stim_summary_min[i], pre_summary_max[i], pre_summary_min[i], post_summary_max[i], post_summary_min[i], UP_pop_rho[i]/UP_pop_n[i], sqrt(UP_pop_S[i]/(UP_pop_n[i]-1)), UP_pop_n[i], UP_pop_max[i], UP_pop_min[i], DOWN_pop_rho[i]/DOWN_pop_n[i], sqrt(DOWN_pop_S[i]/(DOWN_pop_n[i]-1)), DOWN_pop_n[i], DOWN_pop_max[i], DOWN_pop_min[i] );
 	}
 }
 
