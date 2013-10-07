@@ -17,7 +17,7 @@
 #define RECORDER_SYNAPSE_ID (201) /* for modulo addressed multiple synaptic recordings this needs to be less than 400*/
 //#define RECORDER_MULTI_SYNAPSE_SKIP (64000) /*(64000)*/ /*(450)*/
 
-#define USE_GPU (1) /* 1=gpu, 0=cpu */
+#define USE_GPU (0) /* 1=gpu, 0=cpu */
 #define NETWORK_SEED (-14) /*(-14)*/
 #define PARALLEL_SEED (2) /*keep positive for random123*/
 #define GAUSSIAN_SYNAPTIC_SEED (-12)
@@ -77,7 +77,7 @@
 #define SYN_C_PRE (0.33705) /*(0.33705)*/ /*(0.5617539)*/
 #define SYN_C_POST (0.74378) /*(0.74378)*/ /*(1.23964)*/
 
-#define SYN_RHO_FIXED SYN_RHO_INITIAL /*(0.5)*/
+//#define SYN_RHO_FIXED SYN_RHO_INITIAL /*(0.5)*/
 
 
 
