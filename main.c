@@ -237,7 +237,7 @@ int main (int argc, const char * argv[]) {
 	int i, j, k;
 	int offset;
 	float isi; // new ISI variable (local to main sim loop)
-	long uniform_synaptic_seed = UNIFORM_SYNAPTIC_SEED;
+	//long uniform_synaptic_seed = UNIFORM_SYNAPTIC_SEED;
 	//long gaussian_lif_seed = (GAUSSIAN_SYNAPTIC_SEED - 1);
 	
 	clock_t start_t,finish_t;
@@ -442,15 +442,15 @@ int main (int argc, const char * argv[]) {
          (*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1;
          }*/
 		//else{
-        //(*syn_p).rho[i] = (*syn_p).rho_initial[i] = SYN_RHO_INITIAL; //ran2(&uniform_synaptic_seed);//0.377491; //
-		(*syn_p).rho[i] = (*syn_p).rho_initial[i] = invivo_double_well_distribution(&uniform_synaptic_seed);
+        (*syn_p).rho[i] = (*syn_p).rho_initial[i] = SYN_RHO_INITIAL; //ran2(&uniform_synaptic_seed);//0.377491; //
+		//(*syn_p).rho[i] = (*syn_p).rho_initial[i] = invivo_double_well_distribution(&uniform_synaptic_seed);
 		//}
 		
 		// Set a subset of synapses to UP initially
-		if(ran2(&uniform_synaptic_seed) < 0.05){
-			(*syn_p).rho[i] = (*syn_p).rho_initial[i] = 0.85;
+		/*if(ran2(&uniform_synaptic_seed) < 0.05){
+			(*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1; //0.85;
 			(*syn_p).initially_UP[i] = 1;
-		}
+		}*/
 		
 		(*syn_p).ca[i] = SYN_CA_INITIAL;
 		(*rnd_syn_p).d_z[i] = 362436069 - i + PARALLEL_SEED;
@@ -920,7 +920,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 	}
 	
 	//TODO: flat potential hack here
-	//t_deter = 0;
+	t_deter = 0;
 	//TODO: comment out following section if double-well desired
 	// Deterministic update for piecewise-quadratic potential well
 	/*if (t_deter > 0){
