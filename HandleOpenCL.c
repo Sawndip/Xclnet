@@ -715,13 +715,19 @@ int enqueueSynKernel(CL *cl){
 	return !(EXIT_FAILURE);
 }
 
-void waitForKernel(CL *cl){
+int waitForKernel(CL *cl){
 	// Wait for the command commands to get serviced before reading back results
 	//
 	
 	//printf("waiting for kernel to finish...\n");
 	
-	clFinish((*cl).commands);
+	(*cl).err = clFinish((*cl).commands);
+	if ((*cl).err)
+	{
+		printf("Error: Failed to finish command queue!\n%s\n", print_cl_errstring((*cl).err));
+		return EXIT_FAILURE;
+	}
+	return !(EXIT_FAILURE);
 }
 
 //int enqueueOutputBuf(CL *cl, unsigned int count){

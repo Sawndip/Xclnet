@@ -87,7 +87,7 @@ int getMaxWorkSize(CL *cl);
 //int enqueueKernel(CL *cl, unsigned int count);
 int enqueueLifKernel(CL *cl);
 int enqueueSynKernel(CL *cl);
-void waitForKernel(CL *cl);
+int waitForKernel(CL *cl);
 //int enqueueOutputBuf(CL *cl, unsigned int count);
 int enqueueLifOutputBuf(CL *cl, cl_LIFNeuron *lif, cl_MarsagliaStruct *rnd);
 int enqueueSynOutputBuf(CL *cl, cl_Synapse *syn, SynapseConsts *syn_const, cl_MarsagliaStruct *rnd);
