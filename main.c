@@ -511,6 +511,7 @@ int main (int argc, const char * argv[]) {
 		//TODO: make update interval much longer for clFinish()
 		if((j % 100000) == 0){
 			printf("DEBUG: calling clFinish() on the command queue, timestep: %d\n", j);
+            fflush(stdout);
 			if( waitForKernel(cl_lif_p) == EXIT_FAILURE){
 				return EXIT_FAILURE;
 			}
