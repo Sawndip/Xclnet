@@ -442,8 +442,8 @@ int main (int argc, const char * argv[]) {
          (*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1;
          }*/
 		//else{
-        //(*syn_p).rho[i] = (*syn_p).rho_initial[i] = SYN_RHO_INITIAL; //ran2(&uniform_synaptic_seed);//0.377491; //
-		(*syn_p).rho[i] = (*syn_p).rho_initial[i] = invivo_double_well_distribution(&uniform_synaptic_seed);
+        (*syn_p).rho[i] = (*syn_p).rho_initial[i] = SYN_RHO_INITIAL; //ran2(&uniform_synaptic_seed);//0.377491; //
+		//(*syn_p).rho[i] = (*syn_p).rho_initial[i] = invivo_double_well_distribution(&uniform_synaptic_seed);
 		//}
 		
 		// Set a subset of synapses to UP initially
