@@ -509,13 +509,13 @@ int main (int argc, const char * argv[]) {
 		//Re-enabled waitForKernel() every 10^8 timesteps in the hope that this will free Nvidia memory store,
 		//  it didn't!
 		//if((j % 100000000) == 0){
-		if((j % 1000000) == 0){
+		/*if((j % 1000000) == 0){
 			printf("DEBUG: calling clFinish() on the command queue, timestep: %d\n", j);
             fflush(stdout);
 			if( waitForKernel(cl_lif_p) == EXIT_FAILURE){
 				return EXIT_FAILURE;
 			}
-		}
+		}*/
 		// Read the OpenCL output
 		if( enqueueLifOutputBuf(cl_lif_p, lif_p, rnd_lif_p) == EXIT_FAILURE){
 			return EXIT_FAILURE;

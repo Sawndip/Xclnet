@@ -452,9 +452,9 @@ int enqueueLifInputBuf(CL *cl, cl_LIFNeuron *lif, cl_MarsagliaStruct *rnd){
     //TODO: modified here, to not write to so many buffers
     //TODO: check that the Macbook Pro doesn't choke on this lack of updates
     //TODO: modified to use return writing event
-	//(*cl).err = clEnqueueWriteBuffer((*cl).commands, (*cl).input_current, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).I, 0, NULL, NULL);
-    cl_event event;
-    (*cl).err = clEnqueueWriteBuffer((*cl).commands, (*cl).input_current, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).I, 0, NULL, &event);
+	(*cl).err = clEnqueueWriteBuffer((*cl).commands, (*cl).input_current, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).I, 0, NULL, NULL);
+    /*cl_event event;
+    (*cl).err = clEnqueueWriteBuffer((*cl).commands, (*cl).input_current, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).I, 0, NULL, &event);*/
     //(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).input_v, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).V, 0, NULL, NULL);
 	//(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).input_spike, CL_TRUE, 0, sizeof(unsigned int) * (*lif).no_lifs, (*lif).time_since_spike, 0, NULL, NULL);
 	
@@ -468,7 +468,7 @@ int enqueueLifInputBuf(CL *cl, cl_LIFNeuron *lif, cl_MarsagliaStruct *rnd){
 	(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).d_jcong, CL_TRUE, 0, sizeof(unsigned int) * (*lif).no_lifs, (*rnd).d_jcong, 0, NULL, NULL);*/
     
     // Clear the event variable (maybe this will help with Nvidia memory overflow)
-    clReleaseEvent(event);
+    //clReleaseEvent(event);
     
     if ((*cl).err != CL_SUCCESS)
     {
@@ -689,9 +689,9 @@ int enqueueLifKernel(CL *cl){
 	*/
     
     //TODO: modified enqueue kernel to return an event, which will then be waited for and cleared (hopefully a fix for nvidia)
-	cl_event event;
-	(*cl).err = clEnqueueNDRangeKernel((*cl).commands, (*cl).kernel, 1, NULL, &(*cl).global, &(*cl).local, 0, NULL, &event);
-	//(*cl).err = clEnqueueNDRangeKernel((*cl).commands, (*cl).kernel, 1, NULL, &(*cl).global, &(*cl).local, 0, NULL, NULL);
+	/*cl_event event;
+	(*cl).err = clEnqueueNDRangeKernel((*cl).commands, (*cl).kernel, 1, NULL, &(*cl).global, &(*cl).local, 0, NULL, &event);*/
+	(*cl).err = clEnqueueNDRangeKernel((*cl).commands, (*cl).kernel, 1, NULL, &(*cl).global, &(*cl).local, 0, NULL, NULL);
     
     
 	if ((*cl).err)
@@ -701,9 +701,9 @@ int enqueueLifKernel(CL *cl){
 	}
     
     //Wait for event
-    clWaitForEvents(1, &event);
+    //clWaitForEvents(1, &event);
     //Clear event
-    clReleaseEvent(event);
+    //clReleaseEvent(event);
     
 	return !(EXIT_FAILURE);
 }
@@ -779,12 +779,14 @@ int enqueueLifOutputBuf(CL *cl, cl_LIFNeuron *lif, cl_MarsagliaStruct *rnd){
 	
     // Read these memory buffers on each kernel run
 	//TODO: modified to return events, which will then be released before sim can proceed (potential nvidia memory leak workaround)
-    /*(*cl).err = clEnqueueReadBuffer( (*cl).commands, (*cl).input_v, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).V, 0, NULL, NULL );
+    (*cl).err = clEnqueueReadBuffer( (*cl).commands, (*cl).input_v, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).V, 0, NULL, NULL );
     (*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).input_spike, CL_TRUE, 0, sizeof(unsigned int) * (*lif).no_lifs, (*lif).time_since_spike, 0, NULL, NULL );
-	(*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).gauss, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).gauss, 0, NULL, NULL );*/
-    cl_event event1, event2;//, event3;
-	(*cl).err = clEnqueueReadBuffer( (*cl).commands, (*cl).input_v, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).V, 0, NULL, &event1 );
-    (*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).input_spike, CL_TRUE, 0, sizeof(unsigned int) * (*lif).no_lifs, (*lif).time_since_spike, 0, NULL, &event2 );
+	/*(*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).gauss, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).gauss, 0, NULL, NULL );*/
+    //cl_event event1;
+	//cl_event event2;
+	//cl_event event3;
+	//(*cl).err = clEnqueueReadBuffer( (*cl).commands, (*cl).input_v, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).V, 0, NULL, &event1 );
+    //(*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).input_spike, CL_TRUE, 0, sizeof(unsigned int) * (*lif).no_lifs, (*lif).time_since_spike, 0, NULL, &event2 );
 	//(*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).gauss, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).gauss, 0, NULL, &event3 );
     
     // An attempt to re-map the memory buffers on each step, it runs out of memory
@@ -801,8 +803,8 @@ int enqueueLifOutputBuf(CL *cl, cl_LIFNeuron *lif, cl_MarsagliaStruct *rnd){
 	(*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).d_jcong, CL_TRUE, 0, sizeof(unsigned int) * (*lif).no_lifs, (*rnd).d_jcong, 0, NULL, NULL );*/
     
     // Release events
-    clReleaseEvent(event1);
-    clReleaseEvent(event2);
+    //clReleaseEvent(event1);
+    //clReleaseEvent(event2);
     //clReleaseEvent(event3);
     
 	if ((*cl).err != CL_SUCCESS)
