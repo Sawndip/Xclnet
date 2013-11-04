@@ -17,13 +17,13 @@
 #define RECORDER_SYNAPSE_ID (201) /* for modulo addressed multiple synaptic recordings this needs to be less than 400*/
 //#define RECORDER_MULTI_SYNAPSE_SKIP (64000) /*(64000)*/ /*(450)*/
 
-#define USE_GPU (0) /* 1=gpu, 0=cpu */
+#define USE_GPU (1) /* 1=gpu, 0=cpu */
 #define NETWORK_SEED (-14) /*(-14)*/
 #define PARALLEL_SEED (2) /*keep positive for random123*/
 #define GAUSSIAN_SYNAPTIC_SEED (-12)
 #define UNIFORM_SYNAPTIC_SEED (-11)
 
-#define MAX_TIME_STEPS (10000) /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
+#define MAX_TIME_STEPS (480000000) /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
 
 // Network schema
 #define NO_EXC (8000) /*(400)*/ /*(10000)*/
@@ -50,7 +50,7 @@
 #define J_II (-0.4)
 #define J_EI (-0.4)
 
-#define J_EXT (11.046) /*(15.315)*/ /*(11.046)*/ /*(11.45) new in-vivo*/ /*(11.046) new in-vitro*/ /*(7.07)*/ /*(6.966) in-vivo*/ /*(7.07) 1hz in-vitro*/
+#define J_EXT (11.45) /*(15.315)*/ /*(11.046)*/ /*(11.45) new in-vivo*/ /*(11.046) new in-vitro*/ /*(7.07)*/ /*(6.966) in-vivo*/ /*(7.07) 1hz in-vitro*/
 
 
 // LIF specific

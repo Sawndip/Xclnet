@@ -506,10 +506,10 @@ int main (int argc, const char * argv[]) {
 		if( enqueueLifKernel(cl_lif_p) == EXIT_FAILURE){
 			return EXIT_FAILURE;
 		}
-		//Re-enabled waitForKernel() every 10^8 timesteps in the hope that this will free Nvidia memory store
+		//Re-enabled waitForKernel() every 10^8 timesteps in the hope that this will free Nvidia memory store,
+		//  it didn't!
 		//if((j % 100000000) == 0){
-		//TODO: make update interval much longer for clFinish()
-		if((j % 100000) == 0){
+		if((j % 1000000) == 0){
 			printf("DEBUG: calling clFinish() on the command queue, timestep: %d\n", j);
             fflush(stdout);
 			if( waitForKernel(cl_lif_p) == EXIT_FAILURE){
@@ -928,7 +928,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 	}
 	
 	//TODO: flat potential hack here
-	t_deter = 0;
+	//t_deter = 0;
 	//TODO: comment out following section if double-well desired
 	// Deterministic update for piecewise-quadratic potential well
 	/*if (t_deter > 0){
