@@ -14,7 +14,7 @@
 
 // Data reporters
 #define RECORDER_NEURON_ID (3)
-#define RECORDER_SYNAPSE_ID (201) /* for modulo addressed multiple synaptic recordings this needs to be less than 400*/
+#define RECORDER_SYNAPSE_ID (9) /* for modulo addressed multiple synaptic recordings this needs to be less than 400*/
 //#define RECORDER_MULTI_SYNAPSE_SKIP (64000) /*(64000)*/ /*(450)*/
 
 #define USE_GPU (1) /* 1=gpu, 0=cpu */
