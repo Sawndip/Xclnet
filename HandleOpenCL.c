@@ -333,19 +333,19 @@ int createLifIObufs(CL *cl){
     
     //TODO: modified here for Mapped memory (pinned memory is faster)
 	// Unmapped memory version
-    //(*cl).input_v = clCreateBuffer((*cl).context,  CL_MEM_READ_WRITE,  sizeof(float) * (*cl).job_size, NULL, NULL);
-    //(*cl).input_current = clCreateBuffer((*cl).context,  CL_MEM_WRITE_ONLY,  sizeof(float) * (*cl).job_size, NULL, NULL);
-	//(*cl).input_spike = clCreateBuffer((*cl).context,  CL_MEM_READ_WRITE,  sizeof(unsigned int) * (*cl).job_size, NULL, NULL);
+    (*cl).input_v = clCreateBuffer((*cl).context,  CL_MEM_READ_WRITE,  sizeof(float) * (*cl).job_size, NULL, NULL);
+    (*cl).input_current = clCreateBuffer((*cl).context,  CL_MEM_WRITE_ONLY,  sizeof(float) * (*cl).job_size, NULL, NULL);
+	(*cl).input_spike = clCreateBuffer((*cl).context,  CL_MEM_READ_WRITE,  sizeof(unsigned int) * (*cl).job_size, NULL, NULL);
     
-    //(*cl).gauss = clCreateBuffer((*cl).context,  CL_MEM_READ_ONLY,  sizeof(float) * (*cl).job_size, NULL, NULL);
+    (*cl).gauss = clCreateBuffer((*cl).context,  CL_MEM_READ_ONLY,  sizeof(float) * (*cl).job_size, NULL, NULL);
     
 	// Mapped memory with returned error values for debugging if a failure occurs
-    (*cl).input_v = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err1); // read-write
-	(*cl).input_spike = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(unsigned int) * (*cl).job_size, NULL, &err2); // read-write
+    //(*cl).input_v = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err1); // read-write
+	//(*cl).input_spike = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(unsigned int) * (*cl).job_size, NULL, &err2); // read-write
     
-    (*cl).input_current = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err3); // write only
+    //(*cl).input_current = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err3); // write only
 	
-	(*cl).gauss = clCreateBuffer((*cl).context,  CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err4); // read only
+	//(*cl).gauss = clCreateBuffer((*cl).context,  CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err4); // read only
 	
 	// Buffers for Marsaglia RND generator
 	/*(*cl).d_z = clCreateBuffer((*cl).context,  CL_MEM_READ_WRITE,  sizeof(unsigned int) * (*cl).job_size, NULL, NULL);

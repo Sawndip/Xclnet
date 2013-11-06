@@ -23,7 +23,7 @@
 #define GAUSSIAN_SYNAPTIC_SEED (-12)
 #define UNIFORM_SYNAPTIC_SEED (-11)
 
-#define MAX_TIME_STEPS (1000000) /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
+#define MAX_TIME_STEPS (100000) /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
 
 // Network schema
 #define NO_EXC (8000) /*(400)*/ /*(10000)*/
@@ -64,7 +64,7 @@
 #define LIF_REFRAC_TIME (0) /*200*/ /*timesteps*/
 
 // Synapse model specific
-#define SYN_RHO_INITIAL (0.164840) /*(0.406595)*/ /*(0.019) in-vivo*/ /*(0.164840) new in-vitro*/ /*(0.16492)*/ /*(0.203586)*/ /*(1.0)*/
+//#define SYN_RHO_INITIAL (0.164840) /*(0.406595)*/ /*(0.019) in-vivo*/ /*(0.164840) new in-vitro*/ /*(0.16492)*/ /*(0.203586)*/ /*(1.0)*/
 #define SYN_CA_INITIAL (0.0)
 #define SYN_CALCIUM_DELAY (461) /*46*/ /*4.6098ms*/ /*timesteps (needs to be modified when DT is modified above*/
 #define SYN_GAMMA_P (725.085)
@@ -74,8 +74,8 @@
 #define SYN_SIGMA (3.35) /*(3.35)*/ /*3.35;*/ /*TODO: switch synapse noise back on*/
 #define SYN_TAU (346.3615)
 #define SYN_TAU_CA (0.0226936)
-#define SYN_C_PRE (0.56175) /*(0.33705)*/ /*(0.56175)*/ /*(0.5617539)*/
-#define SYN_C_POST (1.23964) /*(0.74378)*/ /*(1.23964)*/
+#define SYN_C_PRE (0.33705) /*(0.33705)*/ /*(0.56175)*/ /*(0.5617539)*/
+#define SYN_C_POST (0.74378) /*(0.74378)*/ /*(1.23964)*/
 
 //#define SYN_RHO_FIXED SYN_RHO_INITIAL /*(0.5)*/
 

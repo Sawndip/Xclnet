@@ -237,7 +237,7 @@ int main (int argc, const char * argv[]) {
 	int i, j, k;
 	int offset;
 	float isi; // new ISI variable (local to main sim loop)
-	long uniform_synaptic_seed = UNIFORM_SYNAPTIC_SEED;
+	//long uniform_synaptic_seed = UNIFORM_SYNAPTIC_SEED;
 	//long gaussian_lif_seed = (GAUSSIAN_SYNAPTIC_SEED - 1);
 	
 	clock_t start_t,finish_t;
@@ -255,10 +255,11 @@ int main (int argc, const char * argv[]) {
 	cl_LIFNeuron *lif_p = &lif;
 	
     //These guys get initialise as maps to device memory now (below)
-	//(*lif_p).V = malloc(sizeof(float) * NO_LIFS);
-	//(*lif_p).I = malloc(sizeof(float) * NO_LIFS);
-	//(*lif_p).gauss = calloc(NO_LIFS, sizeof(float));
-	//(*lif_p).time_since_spike = calloc(NO_LIFS, sizeof(unsigned int));
+	//Reenabled as we're not using mapped memory in this version
+	(*lif_p).V = malloc(sizeof(float) * NO_LIFS);
+	(*lif_p).I = malloc(sizeof(float) * NO_LIFS);
+	(*lif_p).gauss = calloc(NO_LIFS, sizeof(float));
+	(*lif_p).time_since_spike = calloc(NO_LIFS, sizeof(unsigned int));
     
 	(*lif_p).time_of_last_spike = calloc(NO_LIFS, sizeof(unsigned int));
 	
@@ -412,9 +413,10 @@ int main (int argc, const char * argv[]) {
     
     // Mapped memory is pinned (prevented from being swapped) hence faster (on occasion)
     // so our buffers are now in mapped memory
-    if( mapLifIObufs(cl_lif_p, lif_p) == EXIT_FAILURE){
+    // Disabled: for CPU non mapped memory appears to be much faster
+	/*if( mapLifIObufs(cl_lif_p, lif_p) == EXIT_FAILURE){
 		return EXIT_FAILURE;
-	}
+	}*/
 
     
     // Prepopulate data set, including with random values
@@ -442,8 +444,8 @@ int main (int argc, const char * argv[]) {
          (*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1;
          }*/
 		//else{
-        (*syn_p).rho[i] = (*syn_p).rho_initial[i] = SYN_RHO_INITIAL; //ran2(&uniform_synaptic_seed);//0.377491; //
-		//(*syn_p).rho[i] = (*syn_p).rho_initial[i] = invivo_double_well_distribution(&uniform_synaptic_seed);
+        //(*syn_p).rho[i] = (*syn_p).rho_initial[i] = SYN_RHO_INITIAL; //ran2(&uniform_synaptic_seed);//0.377491; //
+		(*syn_p).rho[i] = (*syn_p).rho_initial[i] = invivo_double_well_distribution(&uniform_synaptic_seed);
 		//}
 		
 		// Set a subset of synapses to UP initially
