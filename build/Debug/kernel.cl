@@ -130,9 +130,9 @@ void MWC_GetNormal(MWCRandomStruct *rnd)
 //
 __kernel void lif(
 	__global float* input_v, // membrane voltage
-	__global float* input_i, // input current
+	//__global float* input_i, // input current
 	//__global float* input_gauss, // gaussian noise on membrane potential
-	__global unsigned int* input_spike, // refractory period count up variable
+	//__global unsigned int* input_spike, // refractory period count up variable
 	
 	//State variables for random number generator
 	/*__global unsigned int* d_z,
@@ -151,17 +151,17 @@ __kernel void lif(
 	const unsigned int no_lifs, // number of lifs in simulation
 	
 	const unsigned int time_step, // used for indexing the random number generator
-	const unsigned int random_seed, // seed for the random number generator
+	const unsigned int random_seed // seed for the random number generator
 	
 	//TODO: if gauss stream permanently removed then it should be removed from here, etc.
-	__global float* output_gauss 
+	//__global float* output_gauss 
 	)
 {
 	int i = get_global_id(0);
 	if ( i < no_lifs ){
 		float v = input_v[i];
-		float input_current = input_i[i];
-		unsigned int time_since_spike = input_spike[i];
+		float input_current = 10;//input_i[i];
+		unsigned int time_since_spike = 1;//input_spike[i];
 		
 		philox2x32_key_t key;
 		philox2x32_ctr_t ctr;
@@ -254,9 +254,9 @@ __kernel void lif(
 		d_jsr[i] = rnd.d_jsr;
 		d_jcong[i] = rnd.d_jcong;*/
 
-		input_spike[i] = time_since_spike;
+		//input_spike[i] = time_since_spike;
 		input_v[i] = new_v;
-		output_gauss[i] = random_value;
+		//output_gauss[i] = random_value;
 	}
 }
 
