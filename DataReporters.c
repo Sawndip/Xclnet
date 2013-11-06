@@ -140,7 +140,7 @@ void reporters_setup(){
 	if(synaptic_strength_output == NULL){
 		perror("Error: failed to open synaptic strength output file\n");
 	}
-	fprintf(synaptic_strength_output, "\n\n\n\n\n# Final synaptic strengths (syn_id, pre_syn_lif_id, post_syn_lif_id, rho_initial, rho_final)\n");
+	fprintf(synaptic_strength_output, "\n\n\n\n\n# Final synaptic strengths (syn_id, pre_syn_lif_id, post_syn_lif_id, rho_initial, rho_final, initially_UP)\n");
 	//fprintf(synaptic_strength_output, "# Receives high rate stim, Pre: %d and Post: %d\n", ((*syn).pre_lif[RECORDER_SYNAPSE_ID]<100?1,0), ((*syn).post_lif[RECORDER_SYNAPSE_ID]<100?1,0));
 	
 	#ifdef DEBUG_MODE_NETWORK
@@ -209,7 +209,7 @@ void print_synapses_final_state(cl_Synapse *syn, SynapseConsts *syn_const){
 	// syn_id, pre_lif_id, post_lif_id, rho_initial, rho_final
 	for(int i = 0; i < (*syn_const).no_syns; i++){
 		//fprintf(synaptic_strength_output, "%d %d %d %f %f %d\n", i, (*syn).pre_lif[i], (*syn).post_lif[i], (*syn).rho_initial[i], (*syn).rho[i], (*syn).receives_stimulation_flag[i]);
-		fprintf(synaptic_strength_output, "%d %d %d %0.10f %0.10f\n", i, (*syn).pre_lif[i], (*syn).post_lif[i], (*syn).rho_initial[i], (*syn).rho[i]);
+		fprintf(synaptic_strength_output, "%d %d %d %0.10f %0.10f %d\n", i, (*syn).pre_lif[i], (*syn).post_lif[i], (*syn).rho_initial[i], (*syn).rho[i], (*syn).initially_UP[i]);
 	}
 }
 
