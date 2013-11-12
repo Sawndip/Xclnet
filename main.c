@@ -488,7 +488,8 @@ int main (int argc, const char * argv[]) {
     
     
 	
-	if( setLifKernelArgs(cl_lif_p, lif_p) == EXIT_FAILURE){
+	//if( setLifKernelArgs(cl_lif_p, lif_p) == EXIT_FAILURE){
+	if( setCurrentsLifKernelArgs(cl_lif_p, lif_p) == EXIT_FAILURE){
 		return EXIT_FAILURE;
 	}
 	/*if( setSynKernelArgs(cl_syn_p, syn_p, syn_const_p) == EXIT_FAILURE){
@@ -515,7 +516,8 @@ int main (int argc, const char * argv[]) {
 	while(j < MAX_TIME_STEPS){
 		// Kernel args need to be set on each time step in order to update index of RND
 		//TODO: remove setKernelArgs before this loop?
-		if( setLifKernelArgs(cl_lif_p, lif_p) == EXIT_FAILURE){
+		//if( setLifKernelArgs(cl_lif_p, lif_p) == EXIT_FAILURE){
+		if( setCurrentsLifKernelArgs(cl_lif_p, lif_p) == EXIT_FAILURE){
 			printf("Error on time step %d setting kernel arguments\n", j);
 			return EXIT_FAILURE;
 		}

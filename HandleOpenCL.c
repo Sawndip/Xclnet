@@ -602,7 +602,7 @@ int setCurrentsLifKernelArgs(CL *cl, cl_LIFNeuron *lif){
 	// Set the Kernel arguments
 	//
 	
-	//printf("setting args for LIF compute kernel...\n");
+	printf("setting args for Currents_LIF compute kernel...\n");
 	
     // Set the arguments to our compute kernel
     //
@@ -773,7 +773,7 @@ int enqueueLifKernel(CL *cl){
     
 	if ((*cl).err)
 	{
-		printf("Error: Failed to execute kernel!\n%s\n", print_cl_errstring((*cl).err));
+		printf("Error: Failed to execute kernel! \n%s\n", print_cl_errstring((*cl).err));
 		return EXIT_FAILURE;
 	}
     
