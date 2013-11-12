@@ -526,6 +526,7 @@ int main (int argc, const char * argv[]) {
 		if( enqueueLifKernel(cl_lif_p) == EXIT_FAILURE){
 			return EXIT_FAILURE;
 		}
+		printf("DEBUG: first pass of kernel done\n");
 		//Re-enabled waitForKernel() every 10^8 timesteps in the hope that this will free Nvidia memory store,
 		//  it didn't!
 		//if((j % 100000000) == 0){
@@ -540,6 +541,7 @@ int main (int argc, const char * argv[]) {
 		if( enqueueLifOutputBuf(cl_lif_p, lif_p, rnd_lif_p) == EXIT_FAILURE){
 			return EXIT_FAILURE;
 		}
+		printf("DEBUG: first buffer read back done\n");
 		
 		/*
 		// -----Process Synapse Kernel-----
@@ -597,27 +599,32 @@ int main (int argc, const char * argv[]) {
 			//TODO: apply serialised external noise here
 			//(*lif_p).gauss[i] = gasdev(&gaussian_lif_seed);
 			
+			printf("DEBUG: first application of currents beginning\n");
 			// Apply synaptic currents
 			if( i < NO_EXC){
 				for ( k = 0; k < (*lif_p).no_incoming_synapses[i]; k++){
 					if ( (*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]] < NO_EXC ){ // EE
 						(*lif_p).I[i] += (*syn_p).rho[(*lif_p).incoming_synapse_index[i][k]] * ( ( (*lif_p).s_fast[(*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]]] + (*lif_p).s_slow[(*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]]]) / 2.0 );
+					printf("DEBUG: EE\n");
 					}
 					else{ // IE
 						(*lif_p).I[i] += (*fixed_syn_p).Jx[ ((*lif_p).incoming_synapse_index[i][k] - (*syn_const_p).no_syns) ] * (*lif_p).s_fast[(*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]]];
-
+						printf("DEBUG: IE\n");
 					}
 				}
 			}
 			else{
 				if( (*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]] < NO_EXC ){ //EI
 					(*lif_p).I[i] += ( (*fixed_syn_p).Jx[ ((*lif_p).incoming_synapse_index[i][k] - (*syn_const_p).no_syns) ] * ( (*lif_p).s_fast[(*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]]] + (*lif_p).s_slow[(*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]]] ) / 2.0 );
+					printf("DEBUG: EI\n");
 				}
-				else{
+				else{ //II
 					(*lif_p).I[i] += (*fixed_syn_p).Jx[ ((*lif_p).incoming_synapse_index[i][k] - (*syn_const_p).no_syns) ] * (*lif_p).s_fast[(*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]]];
+					printf("DEBUG: II\n");
 				}
 			}
 		}
+		printf("DEBUG: Application of currents done\n");
 		// For a brief period apply stimulation to a subset of neurons
 		if((STIM_ON < (j * LIF_DT)) && ((j * LIF_DT) < STIM_OFF)){
 			for( i = 0; i < NO_STIM_LIFS; i++){

@@ -602,7 +602,7 @@ int setCurrentsLifKernelArgs(CL *cl, cl_LIFNeuron *lif){
 	// Set the Kernel arguments
 	//
 	
-	printf("setting args for Currents_LIF compute kernel...\n");
+	//printf("setting args for Currents_LIF compute kernel...\n");
 	
     // Set the arguments to our compute kernel
     //
