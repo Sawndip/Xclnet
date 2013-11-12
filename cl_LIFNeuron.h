@@ -34,6 +34,24 @@ typedef struct LIFNeuron{
 	unsigned int random123_seed;
 	
 	//unsigned char * subpopulation_flag; // manipulations will be performed on this population
+	
+	// All outgoing synaptic dynamics are identical so we keep them with their associated pre-synaptic neurons
+	//synaptic dynamics variables
+	unsigned int no_exc;
+	float tau_ampa_decay;
+	float tau_nmda_decay;
+	float tau_gaba_decay;
+	float tau_ampa_rise;
+	float tau_nmda_rise;
+	float tau_gaba_rise;
+	
+	unsigned int spike_delay; // no of timesteps since a spike occurred before it gets added to synaptic dynamics
+	// Warning: the above variable assumes that the ISI is never less than this delay
+	
+	float * s_fast;
+	float * x_fast;
+	float * s_slow;
+	float * x_slow;
 } cl_LIFNeuron;
 
 

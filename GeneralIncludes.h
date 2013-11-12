@@ -63,7 +63,7 @@
 #define LIF_SIGMA (5)
 #define LIF_REFRAC_TIME (0) /*200*/ /*timesteps*/
 
-// Synapse model specific
+// Synapse plasticity model specific
 #define SYN_RHO_INITIAL (0.164840) /*(0.406595)*/ /*(0.019) in-vivo*/ /*(0.164840) new in-vitro*/ /*(0.16492)*/ /*(0.203586)*/ /*(1.0)*/
 #define SYN_CA_INITIAL (0.0)
 #define SYN_CALCIUM_DELAY (461) /*46*/ /*4.6098ms*/ /*timesteps (needs to be modified when DT is modified above*/
@@ -78,6 +78,17 @@
 #define SYN_C_POST (1.23964) /*(0.74378)*/ /*(1.23964)*/
 
 //#define SYN_RHO_FIXED SYN_RHO_INITIAL /*(0.5)*/
+
+// Synaptic current dynamics
+#define SYN2_AMPA_DELAY (0.001)
+#define SYN2_NMDA_DELAY SYN2_AMPA_DELAY
+#define SYN2_GABA_DELAY SYN2_AMPA_DELAY
+#define SYN2_TAU_AMPA_RISE (0.0005)
+#define SYN2_TAU_NMDA_RISE (0.0050)
+#define SYN2_TAU_GABA_RISE (0.0005)
+#define SYN2_TAU_AMPA_DECAY (0.0050)
+#define SYN2_TAU_NMDA_DECAY (0.0500)
+#define SYN2_TAU_GABA_DECAY (0.0050)
 
 
 

@@ -58,6 +58,12 @@ typedef struct cl_struct{
 	cl_mem d_jsr;
 	cl_mem d_jcong;
 	
+	// Synaptic dynamics memory streams
+	cl_mem s_fast;
+	cl_mem x_fast;
+	cl_mem s_slow;
+	cl_mem x_slow;
+	
 	
 	int job_size;
 } CL;
@@ -82,6 +88,7 @@ int enqueueLifInputBuf(CL *cl, cl_LIFNeuron *lif, cl_MarsagliaStruct *rnd);
 int enqueueSynInputBuf(CL *cl, cl_Synapse *syn, SynapseConsts *syn_const, cl_MarsagliaStruct *rnd);
 //int setKernelArgs(CL *cl, unsigned int count);
 int setLifKernelArgs(CL *cl, cl_LIFNeuron *lif);
+int setCurrentsLifKernelArgs(CL *cl, cl_LIFNeuron *lif);
 int setSynKernelArgs(CL *cl, cl_Synapse *syn, SynapseConsts *syn_const);
 int getMaxWorkSize(CL *cl);
 //int enqueueKernel(CL *cl, unsigned int count);

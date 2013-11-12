@@ -261,6 +261,186 @@ __kernel void lif(
 }
 
 
+// Leaky integrate and fire kernel with updating of synaptic current variables
+//
+__kernel void lif_with_currents(
+	__global float* input_v, // membrane voltage
+	__global float* input_i, // input current
+	//__global float* input_gauss, // gaussian noise on membrane potential
+	__global unsigned int* input_spike, // refractory period count up variable
+	
+	//State variables for random number generator
+	/*__global unsigned int* d_z,
+	__global unsigned int* d_w,
+	__global unsigned int* d_jsr,
+	__global unsigned int* d_jcong,*/
+	
+	const float v_rest, // resting membrane voltage
+	const float v_reset, // reset membrane voltage
+	const float v_threshold, // threshold voltage for spiking
+	const float tau_m, // membrane time constant
+	//const float c_m, // membrane capacitance
+	const float sigma, // size of noise
+	const float refrac_time, // duration of refractory period
+	const float dt, // time step size
+	const unsigned int no_lifs, // number of lifs in simulation
+	
+	const unsigned int time_step, // used for indexing the random number generator
+	const unsigned int random_seed, // seed for the random number generator
+	
+	//synaptic dynamics variables
+	const unsigned int no_exc,
+	const float tau_ampa_decay,
+	const float tau_nmda_decay,
+	const float tau_gaba_decay,
+	const float tau_ampa_rise,
+	const float tau_nmda_rise,
+	const float tau_gaba_rise,
+	const unsigned int spike_delay, // no of timesteps since a spike occurred before it gets added to synaptic dynamics
+	// Warning: the above variable assumes that the ISI is never less than this delay
+	__global float* s_fast,
+	__global float* x_fast,
+	__global float* s_slow,
+	__global float* x_slow,
+	
+	
+	//TODO: if gauss stream permanently removed then it should be removed from here, etc.
+	__global float* output_gauss 
+	)
+{
+	int i = get_global_id(0);
+	if ( i < no_lifs ){
+		float v = input_v[i];
+		float input_current = input_i[i];
+		unsigned int time_since_spike = input_spike[i];
+		
+		philox2x32_key_t key;
+		philox2x32_ctr_t ctr;
+		philox2x32_ctr_t rand_val;
+		float2 uni_rand;
+		
+		// Generate Gaussian(0,1) noise using Random123 library implementation		
+		key.v[0] = i;
+		ctr.v[0] = time_step;
+		ctr.v[1] = random_seed;
+		rand_val = philox2x32_R(10, ctr, key);
+		// Convert to Uniform distribution (1/(2^32 +2))
+		uni_rand.x = rand_val.v[0] * 2.328306435454494e-10;
+		uni_rand.y = rand_val.v[1] * 2.328306435454494e-10;
+		// Box-Muller transform
+		float r = sqrt( (float)(-2.0*log(uni_rand.x)) );
+		float theta = 2.0 * PI * uni_rand.y;
+		float random_value = r * sin(theta);
+		
+		//TODO: delete Marsaglia approach
+		// Generate Gaussian(0,1) noise
+		/*MarsagliaStruct rnd;
+		rnd.d_z = d_z[i];
+		rnd.d_w = d_w[i];
+		rnd.d_jsr = d_jsr[i];
+		rnd.d_jcong = d_jcong[i];
+		Marsaglia_GetNormal(&rnd);*/
+		
+		float new_v;
+		float dv = 0;
+		float noise = 0;
+		//float tau_m = r_m * c_m;
+		
+		//----------- Testing
+		//float dave_temp;
+		//float my_random_value;
+		//my_random_value = r * sin(((float)theta);
+		//dave_temp = r * sin(theta);
+		
+		//dave_temp = dave_temp + 1;
+		//dv = 0;
+		//noise = 0;
+		//my_random_value = 1.34;
+		
+		//my_random_value = my_random_value + 3.;
+		//------------- End testing
+	
+		//REMINDER: initialise time_since_spike to refrac_time in main program,
+		// otherwise system always resets to V_reset upon initialisation
+		if (time_since_spike == 0){
+			// A spike has just occurred, reset membrane voltage to reset potential
+			v = v_reset;
+		}
+	
+		// If refractory period is 0 OR if it's been longer than the refractory period since the last spike
+		//CONSIDER: changed to >= to allow removal of logical OR which didn't work: (refrac_time==0)||
+		if ( time_since_spike >= refrac_time ){
+			// Apply leak current
+			dv = (-(v - v_rest) / tau_m);
+			// Apply the external current
+			// Note: I use one input current variable (to cut down on streams to GPU)
+			//  an external current/voltage should be added directly to this variable (outside the kernel)
+			//  a synaptic current/voltage step should be multiplied by (tau_m/dt), for a delta spike, before adding to this variable,
+			//  in order to counter rescaling which happens on next three lines of executable code.
+			// input_current is treated as a voltage step, despite the variable name, hence the division by tau_m
+			dv += (input_current / tau_m);
+			// Apply noise
+			//noise = sqrt(dt / tau_m) * sigma * rnd.value;
+			noise = sqrt(dt / tau_m) * sigma * random_value;
+		}
+
+		new_v = v + (dv * dt) + noise;
+		// Apply lower threshold to membrane voltage (no longer desired)
+		/*if (new_v < v_rest){
+			new_v = v_rest;
+		}*/
+	
+
+		/*d_z[i] = rnd.d_z;
+		d_w[i] = rnd.d_w;
+		d_jsr[i] = rnd.d_jsr;
+		d_jcong[i] = rnd.d_jcong;*/
+		
+		
+		// Synaptic currents update
+		float spike_effect = 0;
+		float x_f = x_fast[i];
+		float x_s = x_slow[i];
+		float s_f = s_fast[i];
+		float s_s = s_slow[i];
+		if( time_since_spike ==  spike_delay){
+			spike_effect = tau_m;
+		}
+		// update fast x variable
+		//TODO: when AMPA and GABA have separate paramter values then we'll need to modify this equation
+		x_f = x_f * exp(-dt / tau_ampa_rise) + spike_effect;
+		// update fast s variable
+		s_f = s_f * exp(-dt / tau_ampa_decay) + x_f;
+		if (i < no_exc){ // there is some speed gain to not updating the slow current for INH neurons
+			// update slow x variable
+			x_s = x_s * exp(-dt / tau_nmda_rise) + spike_effect;
+			// update slow s variable
+			s_s = s_s * exp(-dt / tau_nmda_decay) + x_s;
+		}
+		
+		
+		//Check if a spike has just occurred
+		if (new_v > v_threshold){
+			// A spike has just occurred, set time since last spike to 0
+			time_since_spike = 0;
+		}
+		else{
+			// No spike occurred, increment time since last spike
+			time_since_spike++;
+		}
+
+		input_spike[i] = time_since_spike;
+		input_v[i] = new_v;
+		output_gauss[i] = random_value;
+		
+		x_fast[i] = x_f;
+		x_slow[i] = x_s;
+		s_fast[i] = s_f;
+		s_slow[i] = s_s;
+	}
+}
+
+
 // Graupner 2012 Synapse kernel
 //
 __kernel void synapse( 
