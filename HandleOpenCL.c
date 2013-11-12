@@ -367,9 +367,9 @@ int createLifIObufs(CL *cl){
 	
 	//(*cl).output_v = clCreateBuffer((*cl).context, CL_MEM_WRITE_ONLY, sizeof(float) * NO_LIFS, NULL, NULL);
 	//(*cl).output_spike = clCreateBuffer((*cl).context, CL_MEM_WRITE_ONLY, sizeof(unsigned int) * NO_LIFS, NULL, NULL);
-    if (!(*cl).input_v || !(*cl).input_current || !(*cl).gauss || !(*cl).input_spike || (*cl).s_fast || (*cl).s_slow || (*cl).x_fast || (*cl).x_slow) // || !(*cl).d_z || !(*cl).d_w || !(*cl).d_jsr || !(*cl).d_jcong)
+    if (!(*cl).input_v || !(*cl).input_current || !(*cl).gauss || !(*cl).input_spike || !(*cl).s_fast || !(*cl).s_slow || !(*cl).x_fast || !(*cl).x_slow) // || !(*cl).d_z || !(*cl).d_w || !(*cl).d_jsr || !(*cl).d_jcong)
     {
-        printf("Error: Failed to allocate device memory!\n%s\n%s\n%s\n%s\n", print_cl_errstring(err1), print_cl_errstring(err2), print_cl_errstring(err3), print_cl_errstring(err4));
+        printf("Error: Failed to allocate device memory!\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n", print_cl_errstring(err1), print_cl_errstring(err2), print_cl_errstring(err3), print_cl_errstring(err4), print_cl_errstring(err5), print_cl_errstring(err6), print_cl_errstring(err7), print_cl_errstring(err8));
 	    exit(1);
 	}
 	return !(EXIT_FAILURE);
