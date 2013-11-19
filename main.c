@@ -290,14 +290,14 @@ int main (int argc, const char * argv[]) {
 	
 	// LIF currents variables
 	(*lif_p).no_exc = NO_EXC;
-	(*lif_p).tau_ampa_decay = SYN2_TAU_AMPA_DECAY;
-	(*lif_p).tau_nmda_decay = SYN2_TAU_NMDA_DECAY;
-	(*lif_p).tau_gaba_decay = SYN2_TAU_GABA_DECAY;
-	(*lif_p).tau_ampa_rise = SYN2_TAU_AMPA_RISE;
-	(*lif_p).tau_nmda_rise = SYN2_TAU_NMDA_RISE;
-	(*lif_p).tau_gaba_rise = SYN2_TAU_GABA_RISE;
+	(*lif_p).tau_ampa_decay = SYN_DYN_TAU_AMPA_DECAY;
+	(*lif_p).tau_nmda_decay = SYN_DYN_TAU_NMDA_DECAY;
+	(*lif_p).tau_gaba_decay = SYN_DYN_TAU_GABA_DECAY;
+	(*lif_p).tau_ampa_rise = SYN_DYN_TAU_AMPA_RISE;
+	(*lif_p).tau_nmda_rise = SYN_DYN_TAU_NMDA_RISE;
+	(*lif_p).tau_gaba_rise = SYN_DYN_TAU_GABA_RISE;
 	
-	(*lif_p).spike_delay = (int) ( (SYN2_AMPA_DELAY + EPSILLON) / (*lif_p).dt); // no of timesteps since a spike occurred before it gets added to synaptic dynamics
+	(*lif_p).spike_delay = (int) ( (SYN_DYN_AMPA_DELAY + EPSILLON) / (*lif_p).dt); // no of timesteps since a spike occurred before it gets added to synaptic dynamics
 
 	(*lif_p).s_fast = calloc(NO_LIFS, sizeof(float));
 	(*lif_p).x_fast = calloc(NO_LIFS, sizeof(float));
@@ -397,12 +397,12 @@ int main (int argc, const char * argv[]) {
 	(*rnd_lif_p).d_jsr = malloc((*lif_p).no_lifs * sizeof(unsigned int));
 	(*rnd_lif_p).d_jcong = malloc((*lif_p).no_lifs * sizeof(unsigned int));*/
 	//for Synapse
-	cl_MarsagliaStruct rnd_syn;
-	cl_MarsagliaStruct *rnd_syn_p = &rnd_syn;
-	(*rnd_syn_p).d_z = malloc((*syn_const_p).no_syns * sizeof(unsigned int));
+	/*cl_MarsagliaStruct rnd_syn;
+	cl_MarsagliaStruct *rnd_syn_p = &rnd_syn;*/
+	/*(*rnd_syn_p).d_z = malloc((*syn_const_p).no_syns * sizeof(unsigned int));
 	(*rnd_syn_p).d_w = malloc((*syn_const_p).no_syns * sizeof(unsigned int));
 	(*rnd_syn_p).d_jsr = malloc((*syn_const_p).no_syns * sizeof(unsigned int));
-	(*rnd_syn_p).d_jcong = malloc((*syn_const_p).no_syns * sizeof(unsigned int));
+	(*rnd_syn_p).d_jcong = malloc((*syn_const_p).no_syns * sizeof(unsigned int));*/
 	
 	
     // OpenCL functions
@@ -443,7 +443,8 @@ int main (int argc, const char * argv[]) {
         (*lif_p).V[i] = (float)LIF_V_INITIAL;
         (*lif_p).I[i] = external_voltage;
         (*lif_p).time_since_spike[i] = (*lif_p).refrac_time;
-        /*(*rnd_lif_p).d_z[i] = 362436069 + i + 1 + PARALLEL_SEED;
+        
+		/*(*rnd_lif_p).d_z[i] = 362436069 + i + 1 + PARALLEL_SEED;
          (*rnd_lif_p).d_w[i] = 521288629 + i + 1 + PARALLEL_SEED;
          (*rnd_lif_p).d_jsr[i] = 123456789 + i + 1 + PARALLEL_SEED;
          (*rnd_lif_p).d_jcong[i] = 380116160 + i + 1 + PARALLEL_SEED;*/
@@ -471,10 +472,10 @@ int main (int argc, const char * argv[]) {
 		}
 		
 		(*syn_p).ca[i] = SYN_CA_INITIAL;
-		(*rnd_syn_p).d_z[i] = 362436069 - i + PARALLEL_SEED;
+		/*(*rnd_syn_p).d_z[i] = 362436069 - i + PARALLEL_SEED;
 		(*rnd_syn_p).d_w[i] = 521288629 - i + PARALLEL_SEED;
 		(*rnd_syn_p).d_jsr[i] = 123456789 - i + PARALLEL_SEED;
-		(*rnd_syn_p).d_jcong[i] = 380116160 - i + PARALLEL_SEED;
+		(*rnd_syn_p).d_jcong[i] = 380116160 - i + PARALLEL_SEED;*/
 	}
     printf("DEBUG: final contents of V[0]: %f\n", (*lif_p).V[0]);
     

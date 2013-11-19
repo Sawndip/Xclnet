@@ -429,13 +429,13 @@ int mapLifIObufs(CL *cl, cl_LIFNeuron *lif){
     (*lif).gauss = clEnqueueMapBuffer( (*cl).commands, (*cl).gauss , CL_TRUE,  (CL_MAP_READ), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err4 );
     
 	// synaptic dynamics mapped buffers
+	(*lif).s_fast = clEnqueueMapBuffer( (*cl).commands, (*cl).s_fast , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err7 );
 	(*lif).x_fast = clEnqueueMapBuffer( (*cl).commands, (*cl).x_fast , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err5 );
-    (*lif).x_slow = clEnqueueMapBuffer( (*cl).commands, (*cl).x_slow , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err6 );
-    (*lif).s_fast = clEnqueueMapBuffer( (*cl).commands, (*cl).s_fast , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err7 );
     (*lif).s_slow = clEnqueueMapBuffer( (*cl).commands, (*cl).s_slow , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err8 );
+	(*lif).x_slow = clEnqueueMapBuffer( (*cl).commands, (*cl).x_slow , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err6 );
+    	
 	
-	
-	printf("DEBUG: maps created\n");
+	printf("Memory maps created\n");
     
 
     if (!(*lif).V || !(*lif).I|| !(*lif).time_since_spike || !(*lif).gauss || !(*lif).x_fast || !(*lif).x_slow || !(*lif).x_slow || !(*lif).s_fast || !(*lif).s_slow)
@@ -859,10 +859,11 @@ int enqueueLifOutputBuf(CL *cl, cl_LIFNeuron *lif, cl_MarsagliaStruct *rnd){
     (*cl).err = clEnqueueReadBuffer( (*cl).commands, (*cl).input_v, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).V, 0, NULL, NULL );
     (*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).input_spike, CL_TRUE, 0, sizeof(unsigned int) * (*lif).no_lifs, (*lif).time_since_spike, 0, NULL, NULL );
 	
-	(*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).x_fast, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).x_fast, 0, NULL, NULL );
-    (*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).x_slow, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).x_slow, 0, NULL, NULL );
 	(*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).s_fast, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).s_fast, 0, NULL, NULL );
-    (*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).s_slow, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).s_slow, 0, NULL, NULL );
+	(*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).x_fast, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).x_fast, 0, NULL, NULL );
+	//TODO: consider only reading back no_exc entries from the slow current buffers
+	(*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).s_slow, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).s_slow, 0, NULL, NULL );
+    (*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).x_slow, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).x_slow, 0, NULL, NULL );
 	
 	/*(*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).gauss, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).gauss, 0, NULL, NULL );*/
     //cl_event event1;
