@@ -296,9 +296,12 @@ int main (int argc, const char * argv[]) {
 	(*lif_p).tau_ampa_rise = SYN_DYN_TAU_AMPA_RISE;
 	(*lif_p).tau_nmda_rise = SYN_DYN_TAU_NMDA_RISE;
 	(*lif_p).tau_gaba_rise = SYN_DYN_TAU_GABA_RISE;
+	(*lif_p).proportion_fast_slow = SYN_DYN_PROPORTION_FAST_SLOW;
 	
 	(*lif_p).spike_delay = (int) ( (SYN_DYN_AMPA_DELAY + EPSILLON) / (*lif_p).dt); // no of timesteps since a spike occurred before it gets added to synaptic dynamics
 
+	printf("DEBUG: spike_delay as int %d \n", (*lif_p).spike_delay);
+	
 	(*lif_p).s_fast = calloc(NO_LIFS, sizeof(float));
 	(*lif_p).x_fast = calloc(NO_LIFS, sizeof(float));
 	(*lif_p).s_slow = calloc(NO_LIFS, sizeof(float));

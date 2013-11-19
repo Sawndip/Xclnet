@@ -44,6 +44,7 @@ typedef struct LIFNeuron{
 	float tau_ampa_rise;
 	float tau_nmda_rise;
 	float tau_gaba_rise;
+	float proportion_fast_slow;
 	
 	unsigned int spike_delay; // no of timesteps since a spike occurred before it gets added to synaptic dynamics
 	// Warning: the above variable assumes that the ISI is never less than this delay
