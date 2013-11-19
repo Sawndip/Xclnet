@@ -675,7 +675,7 @@ int main (int argc, const char * argv[]) {
 		// For a brief period apply stimulation to a subset of neurons
 		if((STIM_ON < (j * LIF_DT)) && ((j * LIF_DT) < STIM_OFF)){
 			for( i = 0; i < NO_STIM_LIFS; i++){
-				(*lif_p).I[i + STIM_OFFSET] = J_STIM;
+				(*lif_p).I[i + STIM_OFFSET] += J_STIM;
 				//printf("DEBUG: (j*LIF_DT) %f, i %d\n", (j*LIF_DT), i);
 			}
 		}
