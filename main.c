@@ -643,7 +643,7 @@ int main (int argc, const char * argv[]) {
 					(*lif_p).I[i] += ((*syn_p).rho[(*lif_p).incoming_synapse_index[i][k]] * J_EE) * ( ( (*lif_p).s_fast[(*lif_p).incoming_lif_index[i][k]] * (*lif_p).proportion_fast_slow ) + ( (*lif_p).s_slow[(*lif_p).incoming_lif_index[i][k]] * (1 - (*lif_p).proportion_fast_slow) ) );
 					//printf("DEBUG: EE %d\n", count_ee);
 				}
-				for(k; k < (*lif_p).no_incoming_synapses[i]; k++){ //EI (INH source)
+				for(;k < (*lif_p).no_incoming_synapses[i]; k++){ //EI (INH source)
 					count_ei++;
 					(*lif_p).I[i] += J_EI * (*lif_p).s_fast[(*lif_p).incoming_synapse_index[i][k]];
 					//printf("DEBUG: IE %d\n", count_ie);
@@ -655,7 +655,7 @@ int main (int argc, const char * argv[]) {
 					(*lif_p).I[i] += J_IE * ( ( (*lif_p).s_fast[(*lif_p).incoming_lif_index[i][k]] * (*lif_p).proportion_fast_slow ) + ( (*lif_p).s_slow[(*lif_p).incoming_lif_index[i][k]] * (1 - (*lif_p).proportion_fast_slow) ) );
 					//printf("DEBUG: EI %d\n", count_ei);
 				}
-				for ( k; k < (*lif_p).no_incoming_synapses[i]; k++){ // II (INH source)
+				for ( ; k < (*lif_p).no_incoming_synapses[i]; k++){ // II (INH source)
 					count_ii++;
 					(*lif_p).I[i] += J_II * (*lif_p).s_fast[(*lif_p).incoming_lif_index[i][k]];
 					//printf("DEBUG: II %d\n", count_ii);

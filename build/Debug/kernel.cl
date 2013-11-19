@@ -390,6 +390,7 @@ __kernel void lif_with_currents(
 		float s_f = s_fast[i];
 		float x_s = x_slow[i];
 		float s_s = s_slow[i];
+		float d_x_f, d_s_f, d_x_s, d_s_s;
 		if( time_since_spike ==  spike_delay){
 			spike_effect = tau_m;
 		}
@@ -397,21 +398,33 @@ __kernel void lif_with_currents(
 		//TODO: when AMPA and GABA have separate paramter values then we'll need to modify this equation
 		if( i < no_exc){
 			// update fast x variable (AMPA)
-			x_f = x_f * exp(-dt / tau_ampa_rise) + spike_effect;
+			d_x_f = (-x_f + spike_effect)/ tau_ampa_rise;
+			x_f = x_f + (d_x_f * dt);
+			//x_f = x_f * exp(-dt / tau_ampa_rise) + spike_effect;
 			// update fast s variable (AMPA)
-			s_f = s_f * exp(-dt / tau_ampa_decay) + x_f;
+			d_s_f = (-s_f + x_f) / tau_ampa_decay;
+			s_f = s_f + (d_s_f * dt);
+			//s_f = s_f * exp(-dt / tau_ampa_decay) + x_f;
 			
 			// There is some speed gain to not updating the slow current for INH neurons
 			// update slow x variable (NMDA)
-			x_s = x_s * exp(-dt / tau_nmda_rise) + spike_effect;
+			d_x_s = (-x_s + spike_effect)/ tau_nmda_rise;
+			x_s = x_s + (d_x_s * dt);
+			//x_s = x_s * exp(-dt / tau_nmda_rise) + spike_effect;
 			// update slow s variable (NMDA)
-			s_s = s_s * exp(-dt / tau_nmda_decay) + x_s;
+			d_s_s = (-s_s + x_s) / tau_nmda_decay;
+			s_s = s_s + (d_s_s * dt);
+			//s_s = s_s * exp(-dt / tau_nmda_decay) + x_s;
 		}
 		else{
 			// update fast x variable (GABA)
-			x_f = x_f * exp(-dt / tau_gaba_rise) + spike_effect;
+			d_x_f = (-x_f + spike_effect)/ tau_gaba_rise;
+			x_f = x_f + (d_x_f * dt);
+			//x_f = x_f * exp(-dt / tau_gaba_rise) + spike_effect;
 			// update fast s variable (GABA)
-			s_f = s_f * exp(-dt / tau_gaba_decay) + x_f;
+			d_s_f = (-s_f + x_f) / tau_gaba_decay;
+			s_f = s_f + (d_s_f * dt);
+			//s_f = s_f * exp(-dt / tau_gaba_decay) + x_f;
 		}
 		
 		
