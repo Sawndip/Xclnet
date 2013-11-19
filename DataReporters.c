@@ -223,6 +223,7 @@ void print_lif_debug(cl_LIFNeuron *lif){
 		
 		//printf("%d %f %d %f\n", i, lif_mean_destination[i], (*lif).no_outgoing_synapses[i], lif_gauss_totals[i]);
 	}
+	fflush(lif_debug_output);
 }
 
 

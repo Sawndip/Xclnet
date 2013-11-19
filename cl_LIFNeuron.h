@@ -19,6 +19,7 @@ typedef struct LIFNeuron{
 	unsigned int * no_incoming_synapses;
 	signed int ** incoming_synapse_index;
 	
+	unsigned int * no_incoming_exc_synapses;
 	signed int ** incoming_lif_index;
 
 	float v_rest;

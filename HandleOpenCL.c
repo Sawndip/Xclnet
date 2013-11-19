@@ -421,7 +421,7 @@ int mapLifIObufs(CL *cl, cl_LIFNeuron *lif){
     cl_int err8 = 0;
 	
     // Mapped memory is pinned (prevented from being swapped) hence faster (on occasion)
-    printf("DEBUG: beginning map operation\n");
+    //printf("DEBUG: beginning map operation\n");
 
     (*lif).V = clEnqueueMapBuffer( (*cl).commands, (*cl).input_v , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err1 );
     (*lif).I = clEnqueueMapBuffer( (*cl).commands, (*cl).input_current , CL_TRUE,  (CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err2);

@@ -54,7 +54,7 @@ unsigned int generateNetwork(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynaps
 	(*lif_p).outgoing_synapse_index = malloc(sizeof(signed int *) * NO_LIFS);
 	
 	(*lif_p).no_incoming_synapses = calloc(NO_LIFS, sizeof(unsigned int));
-	//(*lif_p).no_incoming_exc_synapses = calloc(NO_LIFS, sizeof(unsigned int));
+	(*lif_p).no_incoming_exc_synapses = calloc(NO_LIFS, sizeof(unsigned int));
 	(*lif_p).incoming_lif_index = malloc(sizeof(signed int *) * NO_LIFS);
 	(*lif_p).incoming_synapse_index = malloc(sizeof(signed int *) * NO_LIFS);
 	
@@ -89,6 +89,7 @@ unsigned int generateNetwork(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynaps
 					// Update post-synaptic neuron relationship with synapse and pre-synaptic neuron					
 					(*lif_p).incoming_synapse_index[j][(*lif_p).no_incoming_synapses[j]] = (int)total_ee_synapses; //syn id
 					(*lif_p).incoming_lif_index[j][(*lif_p).no_incoming_synapses[j]] = i;
+					(*lif_p).no_incoming_exc_synapses[j]++;
 					(*lif_p).no_incoming_synapses[j]++;
 					//printf("in_id: %d, no_in: %d \n", (*lif_p).incoming_synapse_index[j][(*lif_p).no_incoming_synapses[j]-1], (*lif_p).no_incoming_synapses[j]);
 					
@@ -128,6 +129,7 @@ unsigned int generateNetwork(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynaps
 					
 					// Update post-synaptic neuron relationship with pre-synaptic neuron
 					(*lif_p).incoming_lif_index[j][(*lif_p).no_incoming_synapses[j]] = i;
+					(*lif_p).no_incoming_exc_synapses[j]++;
 					(*lif_p).no_incoming_synapses[j]++;
 					
 					total_fixed_synapses++;
@@ -244,6 +246,7 @@ unsigned int generateNetwork(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynaps
 			lif_mean_dest_IE[i] /= lif_debug_no_IE[i];
 			lif_mean_dest_EI[i] /= lif_debug_no_EI[i];
 			lif_mean_dest_II[i] /= lif_debug_no_II[i];
+			
 		#endif /* DEBUG_MODE_NETWORK */
 	}
 	
@@ -500,7 +503,7 @@ int main (int argc, const char * argv[]) {
 		(*rnd_syn_p).d_jsr[i] = 123456789 - i + PARALLEL_SEED;
 		(*rnd_syn_p).d_jcong[i] = 380116160 - i + PARALLEL_SEED;*/
 	}
-    printf("DEBUG: final contents of V[0]: %f\n", (*lif_p).V[0]);
+    //printf("DEBUG: final contents of V[0]: %f\n", (*lif_p).V[0]);
     
     
 	if( enqueueLifInputBuf(cl_lif_p, lif_p, rnd_lif_p) == EXIT_FAILURE){
@@ -550,7 +553,8 @@ int main (int argc, const char * argv[]) {
 		if( enqueueLifKernel(cl_lif_p) == EXIT_FAILURE){
 			return EXIT_FAILURE;
 		}
-		printf("DEBUG: first pass of kernel done\n");
+		if (j ==0)
+			printf("DEBUG: first pass of kernel done\n");
 		//Re-enabled waitForKernel() every 10^8 timesteps in the hope that this will free Nvidia memory store,
 		//  it didn't!
 		//if((j % 100000000) == 0){
@@ -565,7 +569,8 @@ int main (int argc, const char * argv[]) {
 		if( enqueueLifOutputBuf(cl_lif_p, lif_p, rnd_lif_p) == EXIT_FAILURE){
 			return EXIT_FAILURE;
 		}
-		printf("DEBUG: first buffer read back done\n");
+		if (j ==0)
+			printf("DEBUG: first buffer read back done\n");
 		
 		/*
 		// -----Process Synapse Kernel-----
@@ -623,40 +628,50 @@ int main (int argc, const char * argv[]) {
 			//TODO: apply serialised external noise here
 			//(*lif_p).gauss[i] = gasdev(&gaussian_lif_seed);
 			
-			printf("DEBUG: first application of currents beginning\n");
+			//TODO: updating of total input currents here
+			if(i == 0 && j==0){
+				printf("DEBUG: first application of currents beginning\n");
+			}
 			int count_ee = 0;
 			int count_ei = 0;
 			int count_ie = 0;
 			int count_ii = 0;
 			// Apply synaptic currents
-			if( i < NO_EXC){
-				for ( k = 0; k < (*lif_p).no_incoming_synapses[i]; k++){
-					if ( (*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]] < NO_EXC ){ // EE
-						count_ee++;
-						(*lif_p).I[i] += (*syn_p).rho[(*lif_p).incoming_synapse_index[i][k]] * ( ( (*lif_p).s_fast[(*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]]] + (*lif_p).s_slow[(*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]]]) / 2.0 );
-					printf("DEBUG: EE %d\n", count_ee);
-					}
-					else{ // IE
-						count_ie++;
-						(*lif_p).I[i] += (*fixed_syn_p).Jx[ ((*lif_p).incoming_synapse_index[i][k] - (*syn_const_p).no_syns) ] * (*lif_p).s_fast[(*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]]];
-						printf("DEBUG: IE %d\n", count_ie);
-					}
+			if( i < NO_EXC){ // EXC destination
+				for ( k = 0; k < (*lif_p).no_incoming_exc_synapses[i]; k++){ // EE
+					count_ee++;
+					(*lif_p).I[i] += ((*syn_p).rho[(*lif_p).incoming_synapse_index[i][k]] * J_EE) * ( ( (*lif_p).s_fast[(*lif_p).incoming_lif_index[i][k]] * (*lif_p).proportion_fast_slow ) + ( (*lif_p).s_slow[(*lif_p).incoming_lif_index[i][k]] * (1 - (*lif_p).proportion_fast_slow) ) );
+					//printf("DEBUG: EE %d\n", count_ee);
 				}
-			}
-			else{
-				if( (*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]] < NO_EXC ){ //EI
+				for(k; k < (*lif_p).no_incoming_synapses[i]; k++){ //EI (INH source)
 					count_ei++;
-					(*lif_p).I[i] += ( (*fixed_syn_p).Jx[ ((*lif_p).incoming_synapse_index[i][k] - (*syn_const_p).no_syns) ] * ( (*lif_p).s_fast[(*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]]] + (*lif_p).s_slow[(*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]]] ) / 2.0 );
-					printf("DEBUG: EI %d\n", count_ei);
-				}
-				else{ //II
-					count_ii++;
-					(*lif_p).I[i] += (*fixed_syn_p).Jx[ ((*lif_p).incoming_synapse_index[i][k] - (*syn_const_p).no_syns) ] * (*lif_p).s_fast[(*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]]];
-					printf("DEBUG: II %d\n", count_ii);
+					(*lif_p).I[i] += J_EI * (*lif_p).s_fast[(*lif_p).incoming_synapse_index[i][k]];
+					//printf("DEBUG: IE %d\n", count_ie);
 				}
 			}
+			else{ // INH destination
+				for ( k = 0; k < (*lif_p).no_incoming_exc_synapses[i]; k++){ // IE (EXC source)
+					count_ie++;
+					(*lif_p).I[i] += J_IE * ( ( (*lif_p).s_fast[(*lif_p).incoming_lif_index[i][k]] * (*lif_p).proportion_fast_slow ) + ( (*lif_p).s_slow[(*lif_p).incoming_lif_index[i][k]] * (1 - (*lif_p).proportion_fast_slow) ) );
+					//printf("DEBUG: EI %d\n", count_ei);
+				}
+				for ( k; k < (*lif_p).no_incoming_synapses[i]; k++){ // II (INH source)
+					count_ii++;
+					(*lif_p).I[i] += J_II * (*lif_p).s_fast[(*lif_p).incoming_lif_index[i][k]];
+					//printf("DEBUG: II %d\n", count_ii);
+				}
+			}
+			
+			/*printf("DEBUG(%d): EE %d\n", i, count_ee);
+			printf("DEBUG: IE %d\n", count_ie);
+			printf("DEBUG: EI %d\n", count_ei);
+			printf("DEBUG: II %d\n", count_ii);*/
+			//end of voltage summation loop
 		}
-		printf("DEBUG: Application of currents done\n");
+		
+		if (j ==0)
+			printf("DEBUG: Application of currents done\n");
+		
 		// For a brief period apply stimulation to a subset of neurons
 		if((STIM_ON < (j * LIF_DT)) && ((j * LIF_DT) < STIM_OFF)){
 			for( i = 0; i < NO_STIM_LIFS; i++){

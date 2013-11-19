@@ -3,7 +3,7 @@
 
 //#define DEBUG_MODE // not currently used
 //#define DEBUG_MODE_MAIN // screen display of timestep based change of V and RHO
-#define DEBUG_MODE_NETWORK // print to file of connectivity statistics
+//#define DEBUG_MODE_NETWORK // print to file of connectivity statistics
 //#define DEBUG_MODE_SPIKES // screen display of spike transfers
 //#define DEBUG_MODE_SYNAPSE // screen display of synapse updates
 
@@ -80,7 +80,8 @@
 //#define SYN_RHO_FIXED SYN_RHO_INITIAL /*(0.5)*/
 
 // Synaptic current dynamics
-#define SYN_DYN_AMPA_DELAY (0.001)
+//#define SYN_DYN_AMPA_DELAY (0.001)
+#define SYN_DYN_AMPA_DELAY (0.00001)
 #define SYN_DYN_NMDA_DELAY SYN_DYN_AMPA_DELAY
 #define SYN_DYN_GABA_DELAY SYN_DYN_AMPA_DELAY
 #define SYN_DYN_TAU_AMPA_RISE (0.0005)
