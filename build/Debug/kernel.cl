@@ -346,20 +346,6 @@ __kernel void lif_with_currents(
 		float noise = 0;
 		//float tau_m = r_m * c_m;
 		
-		//----------- Testing
-		//float dave_temp;
-		//float my_random_value;
-		//my_random_value = r * sin(((float)theta);
-		//dave_temp = r * sin(theta);
-		
-		//dave_temp = dave_temp + 1;
-		//dv = 0;
-		//noise = 0;
-		//my_random_value = 1.34;
-		
-		//my_random_value = my_random_value + 3.;
-		//------------- End testing
-	
 		//REMINDER: initialise time_since_spike to refrac_time in main program,
 		// otherwise system always resets to V_reset upon initialisation
 		if (time_since_spike == 0){
@@ -390,7 +376,8 @@ __kernel void lif_with_currents(
 			new_v = v_rest;
 		}*/
 	
-
+	
+		//Marsaglia RND generator
 		/*d_z[i] = rnd.d_z;
 		d_w[i] = rnd.d_w;
 		d_jsr[i] = rnd.d_jsr;
@@ -400,22 +387,31 @@ __kernel void lif_with_currents(
 		// Synaptic currents update
 		float spike_effect = 0;
 		float x_f = x_fast[i];
-		float x_s = x_slow[i];
 		float s_f = s_fast[i];
+		float x_s = x_slow[i];
 		float s_s = s_slow[i];
 		if( time_since_spike ==  spike_delay){
 			spike_effect = tau_m;
 		}
-		// update fast x variable
+		
 		//TODO: when AMPA and GABA have separate paramter values then we'll need to modify this equation
-		x_f = x_f * exp(-dt / tau_ampa_rise) + spike_effect;
-		// update fast s variable
-		s_f = s_f * exp(-dt / tau_ampa_decay) + x_f;
-		if (i < no_exc){ // there is some speed gain to not updating the slow current for INH neurons
-			// update slow x variable
+		if( i < no_exc){
+			// update fast x variable (AMPA)
+			x_f = x_f * exp(-dt / tau_ampa_rise) + spike_effect;
+			// update fast s variable (AMPA)
+			s_f = s_f * exp(-dt / tau_ampa_decay) + x_f;
+			
+			// There is some speed gain to not updating the slow current for INH neurons
+			// update slow x variable (NMDA)
 			x_s = x_s * exp(-dt / tau_nmda_rise) + spike_effect;
-			// update slow s variable
+			// update slow s variable (NMDA)
 			s_s = s_s * exp(-dt / tau_nmda_decay) + x_s;
+		}
+		else{
+			// update fast x variable (GABA)
+			x_f = x_f * exp(-dt / tau_gaba_rise) + spike_effect;
+			// update fast s variable (GABA)
+			s_f = s_f * exp(-dt / tau_gaba_decay) + x_f;
 		}
 		
 		
@@ -434,9 +430,12 @@ __kernel void lif_with_currents(
 		output_gauss[i] = random_value;
 		
 		x_fast[i] = x_f;
-		x_slow[i] = x_s;
 		s_fast[i] = s_f;
-		s_slow[i] = s_s;
+		if ( i < no_exc){
+			//CONSIDER: shortening the slow buffers to no_exc rather than no_lif in length
+			x_slow[i] = x_s;
+			s_slow[i] = s_s;
+		}
 	}
 }
 

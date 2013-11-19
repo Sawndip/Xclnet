@@ -600,27 +600,35 @@ int main (int argc, const char * argv[]) {
 			//(*lif_p).gauss[i] = gasdev(&gaussian_lif_seed);
 			
 			printf("DEBUG: first application of currents beginning\n");
+			int count_ee = 0;
+			int count_ei = 0;
+			int count_ie = 0;
+			int count_ii = 0;
 			// Apply synaptic currents
 			if( i < NO_EXC){
 				for ( k = 0; k < (*lif_p).no_incoming_synapses[i]; k++){
 					if ( (*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]] < NO_EXC ){ // EE
+						count_ee++;
 						(*lif_p).I[i] += (*syn_p).rho[(*lif_p).incoming_synapse_index[i][k]] * ( ( (*lif_p).s_fast[(*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]]] + (*lif_p).s_slow[(*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]]]) / 2.0 );
-					printf("DEBUG: EE\n");
+					printf("DEBUG: EE %d\n", count_ee);
 					}
 					else{ // IE
+						count_ie++;
 						(*lif_p).I[i] += (*fixed_syn_p).Jx[ ((*lif_p).incoming_synapse_index[i][k] - (*syn_const_p).no_syns) ] * (*lif_p).s_fast[(*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]]];
-						printf("DEBUG: IE\n");
+						printf("DEBUG: IE %d\n", count_ie);
 					}
 				}
 			}
 			else{
 				if( (*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]] < NO_EXC ){ //EI
+					count_ei++;
 					(*lif_p).I[i] += ( (*fixed_syn_p).Jx[ ((*lif_p).incoming_synapse_index[i][k] - (*syn_const_p).no_syns) ] * ( (*lif_p).s_fast[(*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]]] + (*lif_p).s_slow[(*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]]] ) / 2.0 );
-					printf("DEBUG: EI\n");
+					printf("DEBUG: EI %d\n", count_ei);
 				}
 				else{ //II
+					count_ii++;
 					(*lif_p).I[i] += (*fixed_syn_p).Jx[ ((*lif_p).incoming_synapse_index[i][k] - (*syn_const_p).no_syns) ] * (*lif_p).s_fast[(*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][k]]];
-					printf("DEBUG: II\n");
+					printf("DEBUG: II %d\n", count_ii);
 				}
 			}
 		}
