@@ -3,7 +3,7 @@
 
 //#define DEBUG_MODE // not currently used
 //#define DEBUG_MODE_MAIN // screen display of timestep based change of V and RHO
-//#define DEBUG_MODE_NETWORK // print to file of connectivity statistics
+#define DEBUG_MODE_NETWORK // print to file of connectivity statistics
 //#define DEBUG_MODE_SPIKES // screen display of spike transfers
 //#define DEBUG_MODE_SYNAPSE // screen display of synapse updates
 
