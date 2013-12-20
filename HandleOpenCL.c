@@ -334,6 +334,7 @@ int createLifIObufs(CL *cl){
 	cl_int err6 = 0;
 	cl_int err7 = 0;
 	cl_int err8 = 0;
+	cl_int err9 = 0;
     
     //TODO: modified here for Mapped memory (pinned memory is faster)
 	// Unmapped memory version
@@ -357,6 +358,8 @@ int createLifIObufs(CL *cl){
 	(*cl).s_slow = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err7); // read-write
 	(*cl).x_slow = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err8); // read-write
 	
+	(*cl).H_input_spike = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err9); // write only
+	
 	
 	// Buffers for Marsaglia RND generator
 	/*(*cl).d_z = clCreateBuffer((*cl).context,  CL_MEM_READ_WRITE,  sizeof(unsigned int) * (*cl).job_size, NULL, NULL);
@@ -367,9 +370,9 @@ int createLifIObufs(CL *cl){
 	
 	//(*cl).output_v = clCreateBuffer((*cl).context, CL_MEM_WRITE_ONLY, sizeof(float) * NO_LIFS, NULL, NULL);
 	//(*cl).output_spike = clCreateBuffer((*cl).context, CL_MEM_WRITE_ONLY, sizeof(unsigned int) * NO_LIFS, NULL, NULL);
-    if (!(*cl).input_v || !(*cl).input_current || !(*cl).gauss || !(*cl).input_spike || !(*cl).s_fast || !(*cl).s_slow || !(*cl).x_fast || !(*cl).x_slow) // || !(*cl).d_z || !(*cl).d_w || !(*cl).d_jsr || !(*cl).d_jcong)
+    if (!(*cl).input_v || !(*cl).input_current || !(*cl).gauss || !(*cl).input_spike || !(*cl).s_fast || !(*cl).s_slow || !(*cl).x_fast || !(*cl).x_slow || !(*cl).H_input_spike) // || !(*cl).d_z || !(*cl).d_w || !(*cl).d_jsr || !(*cl).d_jcong)
     {
-        printf("Error: Failed to allocate device memory!\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n", print_cl_errstring(err1), print_cl_errstring(err2), print_cl_errstring(err3), print_cl_errstring(err4), print_cl_errstring(err5), print_cl_errstring(err6), print_cl_errstring(err7), print_cl_errstring(err8));
+        printf("Error: Failed to allocate device memory!\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n", print_cl_errstring(err1), print_cl_errstring(err2), print_cl_errstring(err3), print_cl_errstring(err4), print_cl_errstring(err5), print_cl_errstring(err6), print_cl_errstring(err7), print_cl_errstring(err8), print_cl_errstring(err9));
 	    exit(1);
 	}
 	return !(EXIT_FAILURE);
@@ -419,6 +422,7 @@ int mapLifIObufs(CL *cl, cl_LIFNeuron *lif){
     cl_int err6 = 0;
     cl_int err7 = 0;
     cl_int err8 = 0;
+	cl_int err9 = 0;
 	
     // Mapped memory is pinned (prevented from being swapped) hence faster (on occasion)
     //printf("DEBUG: beginning map operation\n");
@@ -433,14 +437,16 @@ int mapLifIObufs(CL *cl, cl_LIFNeuron *lif){
 	(*lif).x_fast = clEnqueueMapBuffer( (*cl).commands, (*cl).x_fast , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err5 );
     (*lif).s_slow = clEnqueueMapBuffer( (*cl).commands, (*cl).s_slow , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err8 );
 	(*lif).x_slow = clEnqueueMapBuffer( (*cl).commands, (*cl).x_slow , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err6 );
-    	
+    
+	(*lif).H_spike_input = clEnqueueMapBuffer( (*cl).commands, (*cl).H_input_spike , CL_TRUE,  (CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err9);
+    
 	
 	printf("Memory maps created\n");
     
 
-    if (!(*lif).V || !(*lif).I|| !(*lif).time_since_spike || !(*lif).gauss || !(*lif).x_fast || !(*lif).x_slow || !(*lif).x_slow || !(*lif).s_fast || !(*lif).s_slow)
+    if (!(*lif).V || !(*lif).I|| !(*lif).time_since_spike || !(*lif).gauss || !(*lif).x_fast || !(*lif).x_slow || !(*lif).x_slow || !(*lif).s_fast || !(*lif).s_slow || !(*lif).H_spike_input)
     {
-        printf("Error: Failed to create maps to device memory!\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n", print_cl_errstring(err1), print_cl_errstring(err2), print_cl_errstring(err3), print_cl_errstring(err4), print_cl_errstring(err5), print_cl_errstring(err6), print_cl_errstring(err7), print_cl_errstring(err8));
+        printf("Error: Failed to create maps to device memory!\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n", print_cl_errstring(err1), print_cl_errstring(err2), print_cl_errstring(err3), print_cl_errstring(err4), print_cl_errstring(err5), print_cl_errstring(err6), print_cl_errstring(err7), print_cl_errstring(err8), print_cl_errstring(err9));
 	    exit(1);
 	}
 	return !(EXIT_FAILURE);
@@ -476,7 +482,8 @@ int enqueueLifInputBuf(CL *cl, cl_LIFNeuron *lif, cl_MarsagliaStruct *rnd){
     //TODO: check that the Macbook Pro doesn't choke on this lack of updates
     //TODO: modified to use return writing event
 	(*cl).err = clEnqueueWriteBuffer((*cl).commands, (*cl).input_current, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).I, 0, NULL, NULL);
-    /*cl_event event;
+    (*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).H_input_spike, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).H_spike_input, 0, NULL, NULL);
+	/*cl_event event;
     (*cl).err = clEnqueueWriteBuffer((*cl).commands, (*cl).input_current, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).I, 0, NULL, &event);*/
     //(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).input_v, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).V, 0, NULL, NULL);
 	//(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).input_spike, CL_TRUE, 0, sizeof(unsigned int) * (*lif).no_lifs, (*lif).time_since_spike, 0, NULL, NULL);
@@ -631,8 +638,9 @@ int setCurrentsLifKernelArgs(CL *cl, cl_LIFNeuron *lif){
 	(*cl).err  |= clSetKernelArg((*cl).kernel, 17, sizeof(float), &(*lif).tau_ampa_rise);
 	(*cl).err  |= clSetKernelArg((*cl).kernel, 18, sizeof(float), &(*lif).tau_nmda_rise);
 	(*cl).err  |= clSetKernelArg((*cl).kernel, 19, sizeof(float), &(*lif).tau_gaba_rise);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 20, sizeof(unsigned int), &(*lif).spike_delay);
-
+	//(*cl).err  |= clSetKernelArg((*cl).kernel, 20, sizeof(unsigned int), &(*lif).spike_delay);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 20, sizeof(unsigned int), &(*cl).H_input_spike);
+	
 	(*cl).err  |= clSetKernelArg((*cl).kernel, 21, sizeof(cl_mem), &(*cl).s_fast);
 	(*cl).err  |= clSetKernelArg((*cl).kernel, 22, sizeof(cl_mem), &(*cl).x_fast);
 	(*cl).err  |= clSetKernelArg((*cl).kernel, 23, sizeof(cl_mem), &(*cl).s_slow);

@@ -63,6 +63,7 @@ typedef struct cl_struct{
 	cl_mem x_fast;
 	cl_mem s_slow;
 	cl_mem x_slow;
+	cl_mem H_input_spike;
 	
 	
 	int job_size;

@@ -260,7 +260,7 @@ int main (int argc, const char * argv[]) {
 	int i, j, k;
 	int offset;
 	float isi; // new ISI variable (local to main sim loop)
-	long uniform_synaptic_seed = UNIFORM_SYNAPTIC_SEED;
+	//long uniform_synaptic_seed = UNIFORM_SYNAPTIC_SEED;
 	//long gaussian_lif_seed = (GAUSSIAN_SYNAPTIC_SEED - 1);
 	
 	clock_t start_t,finish_t;
@@ -329,6 +329,8 @@ int main (int argc, const char * argv[]) {
 	(*lif_p).x_fast = calloc(NO_LIFS, sizeof(float));
 	(*lif_p).s_slow = calloc(NO_LIFS, sizeof(float));
 	(*lif_p).x_slow = calloc(NO_LIFS, sizeof(float));
+	
+	(*lif_p).H_spike_input = calloc(NO_LIFS, sizeof(float));
 	
 	
 	// Synapse compute kernel
@@ -492,10 +494,10 @@ int main (int argc, const char * argv[]) {
 		//}
 		
 		// Set a subset of synapses to UP initially
-		if(ran2(&uniform_synaptic_seed) < 0.05){
+		/*if(ran2(&uniform_synaptic_seed) < 0.05){
 			(*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1; //0.85;
 			(*syn_p).initially_UP[i] = 1;
-		}
+		}*/
 		
 		(*syn_p).ca[i] = SYN_CA_INITIAL;
 		/*(*rnd_syn_p).d_z[i] = 362436069 - i + PARALLEL_SEED;
@@ -619,6 +621,7 @@ int main (int argc, const char * argv[]) {
 		
 
 		// Apply external voltage (this cannot be done in same loop as spike detection/propagation)
+		//TODO: move this section out of main simulation loop, spike transfer is now separate from external currents
 		for( i = 0; i < (*lif_p).no_lifs; i++){
 			// Fixed external current
 			(*lif_p).I[i] = external_voltage;
@@ -629,15 +632,15 @@ int main (int argc, const char * argv[]) {
 			//(*lif_p).gauss[i] = gasdev(&gaussian_lif_seed);
 			
 			//TODO: updating of total input currents here
-			if(i == 0 && j==0){
+			/*if(i == 0 && j==0){
 				printf("DEBUG: first application of currents beginning\n");
 			}
 			int count_ee = 0;
 			int count_ei = 0;
 			int count_ie = 0;
-			int count_ii = 0;
+			int count_ii = 0;*/
 			// Apply synaptic currents
-			if( i < NO_EXC){ // EXC destination
+			/*if( i < NO_EXC){ // EXC destination
 				for ( k = 0; k < (*lif_p).no_incoming_exc_synapses[i]; k++){ // EE
 					count_ee++;
 					(*lif_p).I[i] += ((*syn_p).rho[(*lif_p).incoming_synapse_index[i][k]] * J_EE) * ( ( (*lif_p).s_fast[(*lif_p).incoming_lif_index[i][k]] * (*lif_p).proportion_fast_slow ) + ( (*lif_p).s_slow[(*lif_p).incoming_lif_index[i][k]] * (1 - (*lif_p).proportion_fast_slow) ) );
@@ -660,7 +663,7 @@ int main (int argc, const char * argv[]) {
 					(*lif_p).I[i] += J_II * (*lif_p).s_fast[(*lif_p).incoming_lif_index[i][k]];
 					//printf("DEBUG: II %d\n", count_ii);
 				}
-			}
+			}*/
 			
 			/*printf("DEBUG(%d): EE %d\n", i, count_ee);
 			printf("DEBUG: IE %d\n", count_ie);
@@ -1295,6 +1298,8 @@ void freeMemory(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynapse *fixed_syn_
 	}
 	free((*lif_p).outgoing_synapse_index);
 	free((*lif_p).incoming_synapse_index);
+	
+	free((*lif_p).H_spike_input);
 	
 	// Synapse variables
 	free((*syn_p).rho);

@@ -56,6 +56,7 @@ typedef struct LIFNeuron{
 	float * x_fast;
 	float * s_slow;
 	float * x_slow;
+	float * H_spike_input;
 } cl_LIFNeuron;
 
 
