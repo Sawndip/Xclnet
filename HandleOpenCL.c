@@ -639,7 +639,7 @@ int setCurrentsLifKernelArgs(CL *cl, cl_LIFNeuron *lif){
 	(*cl).err  |= clSetKernelArg((*cl).kernel, 18, sizeof(float), &(*lif).tau_nmda_rise);
 	(*cl).err  |= clSetKernelArg((*cl).kernel, 19, sizeof(float), &(*lif).tau_gaba_rise);
 	//(*cl).err  |= clSetKernelArg((*cl).kernel, 20, sizeof(unsigned int), &(*lif).spike_delay);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 20, sizeof(unsigned int), &(*cl).H_input_spike);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 20, sizeof(cl_mem), &(*cl).H_input_spike);
 	
 	(*cl).err  |= clSetKernelArg((*cl).kernel, 21, sizeof(cl_mem), &(*cl).s_fast);
 	(*cl).err  |= clSetKernelArg((*cl).kernel, 22, sizeof(cl_mem), &(*cl).x_fast);
