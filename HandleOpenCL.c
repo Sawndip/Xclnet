@@ -358,7 +358,7 @@ int createLifIObufs(CL *cl){
 	(*cl).s_slow = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err7); // read-write
 	(*cl).x_slow = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err8); // read-write
 	
-	(*cl).H_input_spike = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err9); // write only
+	(*cl).H_input_spike = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err9); // read-write 
 	
 	
 	// Buffers for Marsaglia RND generator
@@ -438,7 +438,7 @@ int mapLifIObufs(CL *cl, cl_LIFNeuron *lif){
     (*lif).s_slow = clEnqueueMapBuffer( (*cl).commands, (*cl).s_slow , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err8 );
 	(*lif).x_slow = clEnqueueMapBuffer( (*cl).commands, (*cl).x_slow , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err6 );
     
-	(*lif).H_spike_input = clEnqueueMapBuffer( (*cl).commands, (*cl).H_input_spike , CL_TRUE,  (CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err9);
+	(*lif).H_spike_input = clEnqueueMapBuffer( (*cl).commands, (*cl).H_input_spike , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err9);
     
 	
 	printf("Memory maps created\n");
@@ -873,6 +873,7 @@ int enqueueLifOutputBuf(CL *cl, cl_LIFNeuron *lif, cl_MarsagliaStruct *rnd){
 	(*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).s_slow, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).s_slow, 0, NULL, NULL );
     (*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).x_slow, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).x_slow, 0, NULL, NULL );
 	
+	(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).H_input_spike, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).H_spike_input, 0, NULL, NULL);
 	/*(*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).gauss, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).gauss, 0, NULL, NULL );*/
     //cl_event event1;
 	//cl_event event2;

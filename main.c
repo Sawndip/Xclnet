@@ -315,9 +315,9 @@ int main (int argc, const char * argv[]) {
 	// Setup external and synaptic voltages/currents
 	double external_voltage = J_EXT;
 	// Syanptic currents must be modified by (tau_m/dt) as they are delta current spikes
-	double delta_spike_modifier = (*lif_p).tau_m / (*lif_p).dt;
+	/*double delta_spike_modifier = (*lif_p).tau_m / (*lif_p).dt;
 	double transfer_voltage = J_EE;
-	transfer_voltage *= delta_spike_modifier;
+	transfer_voltage *= delta_spike_modifier;*/
 	//printf("DEBUG: delta_spike_modifier %f, transfer_voltage %f\n", delta_spike_modifier, transfer_voltage);
 	 
 	//char *k_name_lif = "lif";
@@ -816,15 +816,20 @@ int main (int argc, const char * argv[]) {
 				else { //Non-stim pop
 					lif_injection_spikes[(int) ( ( (*lif_p).dt / BIN_SIZE) * j + EPSILLON)]++;
 				}
-			} // end of handling spike
+			} // end of handling immediate spike
 			else if((*lif_p).time_since_spike[i] == ( (*lif_p).spike_delay - 1 ) ){
 				//Pre-synaptic spike hits the dynamic synapse after a delay
 				// Shortest possible delay is dt (one time step)
 				for ( k = 0; k < (*lif_p).no_outgoing_ee_synapses[i]; k++){
 					// across EE synapses
-					
+					//TODO: don't forget to reset H in the kernel
+					//TODO: should we multiply this weight by dt or some spike transfer constant?
+					(*lif_p).H_spike_input[(*lif_p).outgoing_lif_index[i][k]] += (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]]; 
 				}
-			}
+				for ( k = (*lif_p).no_outgoing_ee_synapses[i]; k < (*lif_p).no_outgoing_synapses[i]; k++){
+					(*lif_p).H_spike_input[(*lif_p).outgoing_lif_index[i][k]] += (*fixed_syn_p).Jx[((*lif_p).outgoing_synapse_index[i][k] - (*syn_const_p).no_syns)];
+				}
+			} // end of handling of delayed spike propagation
 			// Pre-synaptic spike propagates across synapse after delay
 			// Alternative to event queue system, assumes only 1 spike can occur in delay period
 			// Only one of these two systems can be used at a time, currently using event queue system

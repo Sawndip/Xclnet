@@ -439,6 +439,7 @@ __kernel void lif_with_currents(
 			//s_f = s_f * exp(-dt / tau_gaba_decay) + x_f;
 		}
 		
+		H_spike_input[i] = 0;
 		
 		x_fast[i] = x_f;
 		s_fast[i] = s_f;
