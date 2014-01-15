@@ -28,8 +28,10 @@ unsigned int generateNetwork(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynaps
 	unsigned int estimated_ee_synapses_per_neuron = (mean_ee_synapses_per_neuron) + (int)(mean_ee_synapses_per_neuron/2) + 1000; // mean + wide margin + constant (for small nets)
 	unsigned int estimated_total_synapses_per_neuron = (mean_total_synapses_per_neuron) + (int)(mean_total_synapses_per_neuron/2) + 2000; // mean + wide margin + constant (for small nets)
 	
-	float delta_spike_modifier = (*lif_p).tau_m / (*lif_p).dt;
-	//printf("DEBUG: delta_spike_modifier %f\n", delta_spike_modifier);
+	//float delta_spike_modifier = (*lif_p).tau_m / (*lif_p).dt;
+    //NOTE: spike transfer is not modified by dt or tau in dynamic current equations
+    float delta_spike_modifier = 1;
+	printf("DEBUG: delta_spike_modifier %f\n", delta_spike_modifier);
 	
 	(*syn_p).pre_lif = calloc(estimated_total_ee_synapses, sizeof(signed int));
 	(*syn_p).post_lif = calloc(estimated_total_ee_synapses, sizeof(signed int));
@@ -82,6 +84,7 @@ unsigned int generateNetwork(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynaps
 					(*syn_p).post_lif[total_ee_synapses] = j;
 					//printf("pre_lif: %d, post_lif: %d, ", (*syn_p).pre_lif[total_synapses], (*syn_p).post_lif[total_synapses]);
 					
+                    // For current transfer, store index of post-synaptic neuron
 					(*lif_p).outgoing_lif_index[i][(*lif_p).no_outgoing_ee_synapses[i]] = j;
 					
 					// Update pre-synaptic neuron relationship with synapse
@@ -313,8 +316,9 @@ int main (int argc, const char * argv[]) {
 	(*cl_lif_p).job_size = (*lif_p).no_lifs;
 	
 	// Setup external and synaptic voltages/currents
-	double external_voltage = J_EXT;
+	double external_voltage = J_EXT / (*lif_p).dt;
 	// Syanptic currents must be modified by (tau_m/dt) as they are delta current spikes
+    //    No longer applicable since move to dynamics synaptic currents
 	/*double delta_spike_modifier = (*lif_p).tau_m / (*lif_p).dt;
 	double transfer_voltage = J_EE;
 	transfer_voltage *= delta_spike_modifier;*/
@@ -647,49 +651,8 @@ int main (int argc, const char * argv[]) {
 			//TODO: apply serialised external noise here
 			//(*lif_p).gauss[i] = gasdev(&gaussian_lif_seed);
 			
-			//TODO: updating of total input currents here
-			/*if(i == 0 && j==0){
-				printf("DEBUG: first application of currents beginning\n");
-			}
-			int count_ee = 0;
-			int count_ei = 0;
-			int count_ie = 0;
-			int count_ii = 0;*/
-			// Apply synaptic currents
-			/*if( i < NO_EXC){ // EXC destination
-				for ( k = 0; k < (*lif_p).no_incoming_exc_synapses[i]; k++){ // EE
-					count_ee++;
-					(*lif_p).I[i] += ((*syn_p).rho[(*lif_p).incoming_synapse_index[i][k]] * J_EE) * ( ( (*lif_p).s_fast[(*lif_p).incoming_lif_index[i][k]] * (*lif_p).proportion_fast_slow ) + ( (*lif_p).s_slow[(*lif_p).incoming_lif_index[i][k]] * (1 - (*lif_p).proportion_fast_slow) ) );
-					//printf("DEBUG: EE %d\n", count_ee);
-				}
-				for(;k < (*lif_p).no_incoming_synapses[i]; k++){ //EI (INH source)
-					count_ei++;
-					(*lif_p).I[i] += J_EI * (*lif_p).s_fast[(*lif_p).incoming_synapse_index[i][k]];
-					//printf("DEBUG: IE %d\n", count_ie);
-				}
-			}
-			else{ // INH destination
-				for ( k = 0; k < (*lif_p).no_incoming_exc_synapses[i]; k++){ // IE (EXC source)
-					count_ie++;
-					(*lif_p).I[i] += J_IE * ( ( (*lif_p).s_fast[(*lif_p).incoming_lif_index[i][k]] * (*lif_p).proportion_fast_slow ) + ( (*lif_p).s_slow[(*lif_p).incoming_lif_index[i][k]] * (1 - (*lif_p).proportion_fast_slow) ) );
-					//printf("DEBUG: EI %d\n", count_ei);
-				}
-				for ( ; k < (*lif_p).no_incoming_synapses[i]; k++){ // II (INH source)
-					count_ii++;
-					(*lif_p).I[i] += J_II * (*lif_p).s_fast[(*lif_p).incoming_lif_index[i][k]];
-					//printf("DEBUG: II %d\n", count_ii);
-				}
-			}*/
-			
-			/*printf("DEBUG(%d): EE %d\n", i, count_ee);
-			printf("DEBUG: IE %d\n", count_ie);
-			printf("DEBUG: EI %d\n", count_ei);
-			printf("DEBUG: II %d\n", count_ii);*/
 			//end of voltage summation loop
 		}
-		
-		if (j ==0)
-			printf("DEBUG: Application of external currents done\n");
 		
 		// For a brief period apply stimulation to a subset of neurons
 		if((STIM_ON < (j * LIF_DT)) && ((j * LIF_DT) < STIM_OFF)){
@@ -707,7 +670,7 @@ int main (int argc, const char * argv[]) {
 		//int local_count = 0;
 		// Update LIFs: spike detection/propagation to post-synaptic lifs as well as pre- and post-lif neurons
 		for ( i = 0; i < (*lif_p).no_lifs; i++){
-			if((*lif_p).time_since_spike[i] == 0){				
+			if((*lif_p).time_since_spike[i] == 0){	// A spike just occurred
 				// New, ISI calculation code
 				isi = ( j - (*lif_p).time_of_last_spike[i] ) * (*lif_p).dt;
 				(*lif_p).time_of_last_spike[i] = j;
@@ -820,33 +783,26 @@ int main (int argc, const char * argv[]) {
 					lif_injection_spikes[(int) ( ( (*lif_p).dt / BIN_SIZE) * j + EPSILLON)]++;
 				}
 			} // end of handling immediate spike
-			else if((*lif_p).time_since_spike[i] == ( (*lif_p).spike_delay - 1 ) ){
+			else if((*lif_p).time_since_spike[i] == ( (*lif_p).spike_delay - 1 ) ){ // delayed transfer of spike across synapse
 				//Pre-synaptic spike hits the dynamic synapse after a delay
 				// Shortest possible delay is dt (one time step)
-				for ( k = 0; k < (*lif_p).no_outgoing_ee_synapses[i]; k++){
-					// across EE synapses
-					//TODO: don't forget to reset H in the kernel
-					//TODO: should we multiply this weight by dt or some spike transfer constant?
-                    //TODO: multiply by J_EE
-					(*lif_p).H_exc_spike_input[(*lif_p).outgoing_lif_index[i][k]] += (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
-				}
-				for ( k = (*lif_p).no_outgoing_ee_synapses[i]; k < (*lif_p).no_outgoing_synapses[i]; k++){
-                    //TODO: following line needs to differentiate between EXC and INH spikes
-					(*lif_p).H_exc_spike_input[(*lif_p).outgoing_lif_index[i][k]] += (*fixed_syn_p).Jx[((*lif_p).outgoing_synapse_index[i][k] - (*syn_const_p).no_syns)];
-				}
+                if ( i < NO_EXC){ // EXC spike
+                    for ( k = 0; k < (*lif_p).no_outgoing_ee_synapses[i]; k++){
+                        // across EE synapses
+                        (*lif_p).H_exc_spike_input[(*lif_p).outgoing_lif_index[i][k]] += (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]] * J_EE;
+                    }
+                    for ( k = (*lif_p).no_outgoing_ee_synapses[i]; k < (*lif_p).no_outgoing_synapses[i]; k++){
+                        // across IE synapses
+                        (*lif_p).H_exc_spike_input[(*lif_p).outgoing_lif_index[i][k]] += (*fixed_syn_p).Jx[((*lif_p).outgoing_synapse_index[i][k] - (*syn_const_p).no_syns)];
+                    }
+                }
+                else{ // INH spike
+                    for ( k = 0; k < (*lif_p).no_outgoing_synapses[i]; k++){
+                        // EI and II synapses
+                        (*lif_p).H_inh_spike_input[(*lif_p).outgoing_lif_index[i][k]] += (*fixed_syn_p).Jx[((*lif_p).outgoing_synapse_index[i][k] - (*syn_const_p).no_syns)];
+                    }
+                }
 			} // end of handling of delayed spike propagation
-			// Pre-synaptic spike propagates across synapse after delay
-			// Alternative to event queue system, assumes only 1 spike can occur in delay period
-			// Only one of these two systems can be used at a time, currently using event queue system
-			/*else if((*lif_p).time_since_spike[i] == (*syn_const_p).delay){
-				for ( k = 0; k < (*lif_p).no_outgoing_synapses[i]; k++){
-					(*syn_p).preT[(*lif_p).outgoing_synapse_index[i][k]] = 1;
-					if(i==0){
-						printf("Delayed spike transferred to post-lif synapse(%d)\n", (*lif_p).outgoing_synapse_index[i][k]);
-					}
-				}
-			}
-			*/
 		} // end of loop over neurons
 		//printf("count: %d\n", local_count);
 		
