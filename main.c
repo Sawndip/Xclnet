@@ -824,6 +824,7 @@ int main (int argc, const char * argv[]) {
 					// across EE synapses
 					//TODO: don't forget to reset H in the kernel
 					//TODO: should we multiply this weight by dt or some spike transfer constant?
+                    //TODO: multiply by J_EE
 					(*lif_p).H_spike_input[(*lif_p).outgoing_lif_index[i][k]] += (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]]; 
 				}
 				for ( k = (*lif_p).no_outgoing_ee_synapses[i]; k < (*lif_p).no_outgoing_synapses[i]; k++){
