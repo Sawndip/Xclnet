@@ -316,7 +316,7 @@ int main (int argc, const char * argv[]) {
 	(*cl_lif_p).job_size = (*lif_p).no_lifs;
 	
 	// Setup external and synaptic voltages/currents
-	double external_voltage = J_EXT / (*lif_p).dt;
+	double external_voltage = J_EXT; //TODO: DEBUG tomorrow here / (*lif_p).dt;
 	// Syanptic currents must be modified by (tau_m/dt) as they are delta current spikes
     //    No longer applicable since move to dynamics synaptic currents
 	/*double delta_spike_modifier = (*lif_p).tau_m / (*lif_p).dt;
@@ -489,7 +489,7 @@ int main (int argc, const char * argv[]) {
 	for ( i = 0; i < (*lif_p).no_lifs; i++){
         //CONSIDER: initialising V and time_since_spike to random values (within reasonable ranges)
         (*lif_p).V[i] = (float)LIF_V_INITIAL;
-        (*lif_p).I[i] = external_voltage;
+        (*lif_p).I[i] = external_voltage;// * (*lif_p).dt;
         (*lif_p).time_since_spike[i] = (*lif_p).refrac_time;
         
 		/*(*rnd_lif_p).d_z[i] = 362436069 + i + 1 + PARALLEL_SEED;
@@ -790,6 +790,8 @@ int main (int argc, const char * argv[]) {
                     for ( k = 0; k < (*lif_p).no_outgoing_ee_synapses[i]; k++){
                         // across EE synapses
                         (*lif_p).H_exc_spike_input[(*lif_p).outgoing_lif_index[i][k]] += (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]] * J_EE;
+                        //(*lif_p).H_exc_spike_input[(*lif_p).outgoing_lif_index[i][k]] += SYN_RHO_FIXED * J_EE;
+                        // reminder: transfer voltage normalisation is taken care of in kernel now
                     }
                     for ( k = (*lif_p).no_outgoing_ee_synapses[i]; k < (*lif_p).no_outgoing_synapses[i]; k++){
                         // across IE synapses
@@ -1016,7 +1018,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 	}
 	
 	//TODO: flat potential hack here
-	//t_deter = 0;
+	t_deter = 0;
 	//TODO: comment out following section if double-well desired
 	// Deterministic update for piecewise-quadratic potential well
 	/*if (t_deter > 0){
@@ -1287,8 +1289,9 @@ void freeMemory(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynapse *fixed_syn_
 	free((*lif_p).outgoing_synapse_index);
 	free((*lif_p).incoming_synapse_index);
 	
+    //TODO: why do the following calls to free() crash the program?
     // free on H was previously crashing program
-    printf("DEBUG: attempting to free dynamic synapse variables\n");
+    /*printf("DEBUG: attempting to free dynamic synapse variables");
     fflush(stdout);
     free((*lif_p).s_ampa);
     free((*lif_p).x_ampa);
@@ -1298,6 +1301,8 @@ void freeMemory(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynapse *fixed_syn_
     free((*lif_p).x_gaba);
 	free((*lif_p).H_exc_spike_input);
 	free((*lif_p).H_inh_spike_input);
+    printf("...done\n");
+    fflush(stdout);*/
     
 	// Synapse variables
 	free((*syn_p).rho);

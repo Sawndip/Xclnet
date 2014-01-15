@@ -395,7 +395,7 @@ __kernel void lif_with_currents(
 			dv += (input_current / tau_m);
             
             // New code: synaptic currents driving membrane voltage
-            dv += ( (proportion_ampa * s_a) / tau_m ) + ( ( (1-proportion_ampa) * s_n ) / tau_m ) - ( s_g / tau_m );
+            dv += ( (proportion_ampa * s_a) + ( (1-proportion_ampa) * s_n ) + ( s_g ) ) / tau_m ;
 			
 			
 			// Apply noise

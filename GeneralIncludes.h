@@ -23,7 +23,7 @@
 #define GAUSSIAN_SYNAPTIC_SEED (-12)
 #define UNIFORM_SYNAPTIC_SEED (-11)
 
-#define MAX_TIME_STEPS (2) /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
+#define MAX_TIME_STEPS (5) /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
 
 // Network schema
 #define NO_EXC (8000) /*(400)*/ /*(10000)*/
@@ -77,7 +77,7 @@
 #define SYN_C_PRE (0.56175) /*(0.33705)*/ /*(0.56175)*/ /*(0.5617539)*/
 #define SYN_C_POST (1.23964) /*(0.74378)*/ /*(1.23964)*/
 
-//#define SYN_RHO_FIXED SYN_RHO_INITIAL /*(0.5)*/
+#define SYN_RHO_FIXED SYN_RHO_INITIAL /*(0.5)*/
 
 // Synaptic current dynamics
 //#define SYN_DYN_AMPA_DELAY (0.001)
