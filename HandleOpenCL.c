@@ -335,6 +335,9 @@ int createLifIObufs(CL *cl){
 	cl_int err7 = 0;
 	cl_int err8 = 0;
 	cl_int err9 = 0;
+    cl_int err10 = 0;
+    cl_int err11 = 0;
+    cl_int err12 = 0;
     
     //TODO: modified here for Mapped memory (pinned memory is faster)
 	// Unmapped memory version
@@ -353,13 +356,16 @@ int createLifIObufs(CL *cl){
 	(*cl).gauss = clCreateBuffer((*cl).context,  CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err4); // read only
 	
 	// New buffers for synaptic dynamics
-	(*cl).s_fast = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err5); // read-write
-	(*cl).x_fast = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err6); // read-write
-	(*cl).s_slow = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err7); // read-write
-	(*cl).x_slow = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err8); // read-write
-	
-	(*cl).H_input_spike = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err9); // read-write 
-	
+	(*cl).s_ampa = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err5); // read-write
+	(*cl).x_ampa = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err6); // read-write
+	(*cl).s_nmda = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err7); // read-write
+	(*cl).x_nmda = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err8); // read-write
+	(*cl).s_gaba = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err9); // read-write
+	(*cl).x_gaba = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err10); // read-write
+    
+	(*cl).H_exc_input_spike = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err11); // read-write
+	(*cl).H_inh_input_spike = clCreateBuffer((*cl).context, CL_MEM_ALLOC_HOST_PTR,  sizeof(float) * (*cl).job_size, NULL, &err12); // read-write
+    
 	
 	// Buffers for Marsaglia RND generator
 	/*(*cl).d_z = clCreateBuffer((*cl).context,  CL_MEM_READ_WRITE,  sizeof(unsigned int) * (*cl).job_size, NULL, NULL);
@@ -370,9 +376,9 @@ int createLifIObufs(CL *cl){
 	
 	//(*cl).output_v = clCreateBuffer((*cl).context, CL_MEM_WRITE_ONLY, sizeof(float) * NO_LIFS, NULL, NULL);
 	//(*cl).output_spike = clCreateBuffer((*cl).context, CL_MEM_WRITE_ONLY, sizeof(unsigned int) * NO_LIFS, NULL, NULL);
-    if (!(*cl).input_v || !(*cl).input_current || !(*cl).gauss || !(*cl).input_spike || !(*cl).s_fast || !(*cl).s_slow || !(*cl).x_fast || !(*cl).x_slow || !(*cl).H_input_spike) // || !(*cl).d_z || !(*cl).d_w || !(*cl).d_jsr || !(*cl).d_jcong)
+    if (!(*cl).input_v || !(*cl).input_current || !(*cl).gauss || !(*cl).input_spike || !(*cl).s_ampa || !(*cl).x_ampa || !(*cl).s_nmda || !(*cl).x_nmda || !(*cl).s_gaba || !(*cl).x_gaba || !(*cl).H_exc_input_spike || !(*cl).H_inh_input_spike) // || !(*cl).d_z || !(*cl).d_w || !(*cl).d_jsr || !(*cl).d_jcong)
     {
-        printf("Error: Failed to allocate device memory!\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n", print_cl_errstring(err1), print_cl_errstring(err2), print_cl_errstring(err3), print_cl_errstring(err4), print_cl_errstring(err5), print_cl_errstring(err6), print_cl_errstring(err7), print_cl_errstring(err8), print_cl_errstring(err9));
+        printf("Error: Failed to allocate device memory!\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n", print_cl_errstring(err1), print_cl_errstring(err2), print_cl_errstring(err3), print_cl_errstring(err4), print_cl_errstring(err5), print_cl_errstring(err6), print_cl_errstring(err7), print_cl_errstring(err8), print_cl_errstring(err9), print_cl_errstring(err10), print_cl_errstring(err11), print_cl_errstring(err12));
 	    exit(1);
 	}
 	return !(EXIT_FAILURE);
@@ -423,6 +429,9 @@ int mapLifIObufs(CL *cl, cl_LIFNeuron *lif){
     cl_int err7 = 0;
     cl_int err8 = 0;
 	cl_int err9 = 0;
+    cl_int err10 = 0;
+    cl_int err11 = 0;
+	cl_int err12 = 0;
 	
     // Mapped memory is pinned (prevented from being swapped) hence faster (on occasion)
     //printf("DEBUG: beginning map operation\n");
@@ -433,20 +442,23 @@ int mapLifIObufs(CL *cl, cl_LIFNeuron *lif){
     (*lif).gauss = clEnqueueMapBuffer( (*cl).commands, (*cl).gauss , CL_TRUE,  (CL_MAP_READ), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err4 );
     
 	// synaptic dynamics mapped buffers
-	(*lif).s_fast = clEnqueueMapBuffer( (*cl).commands, (*cl).s_fast , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err7 );
-	(*lif).x_fast = clEnqueueMapBuffer( (*cl).commands, (*cl).x_fast , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err5 );
-    (*lif).s_slow = clEnqueueMapBuffer( (*cl).commands, (*cl).s_slow , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err8 );
-	(*lif).x_slow = clEnqueueMapBuffer( (*cl).commands, (*cl).x_slow , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err6 );
+	(*lif).s_ampa = clEnqueueMapBuffer( (*cl).commands, (*cl).s_ampa , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err5 );
+	(*lif).x_ampa = clEnqueueMapBuffer( (*cl).commands, (*cl).x_ampa , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err6 );
+    (*lif).s_nmda = clEnqueueMapBuffer( (*cl).commands, (*cl).s_nmda , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err7 );
+	(*lif).x_nmda = clEnqueueMapBuffer( (*cl).commands, (*cl).x_nmda , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err8 );
+    (*lif).s_gaba = clEnqueueMapBuffer( (*cl).commands, (*cl).s_gaba , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err9 );
+	(*lif).x_gaba = clEnqueueMapBuffer( (*cl).commands, (*cl).x_gaba , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err10 );
     
-	(*lif).H_spike_input = clEnqueueMapBuffer( (*cl).commands, (*cl).H_input_spike , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err9);
-    
+	(*lif).H_exc_spike_input = clEnqueueMapBuffer( (*cl).commands, (*cl).H_exc_input_spike , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err11);
+    (*lif).H_exc_spike_input = clEnqueueMapBuffer( (*cl).commands, (*cl).H_exc_input_spike , CL_TRUE,  (CL_MAP_READ | CL_MAP_WRITE), 0, sizeof(cl_float) * (*lif).no_lifs, 0, NULL, NULL, &err12);
 	
+    
 	printf("Memory maps created\n");
     
 
-    if (!(*lif).V || !(*lif).I|| !(*lif).time_since_spike || !(*lif).gauss || !(*lif).x_fast || !(*lif).x_slow || !(*lif).x_slow || !(*lif).s_fast || !(*lif).s_slow || !(*lif).H_spike_input)
+    if (!(*lif).V || !(*lif).I || !(*lif).time_since_spike || !(*lif).gauss || !(*lif).s_ampa || !(*lif).x_ampa || !(*lif).s_nmda || !(*lif).x_nmda || !(*lif).s_gaba || !(*lif).x_gaba || !(*lif).H_exc_spike_input || !(*lif).H_inh_spike_input)
     {
-        printf("Error: Failed to create maps to device memory!\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n", print_cl_errstring(err1), print_cl_errstring(err2), print_cl_errstring(err3), print_cl_errstring(err4), print_cl_errstring(err5), print_cl_errstring(err6), print_cl_errstring(err7), print_cl_errstring(err8), print_cl_errstring(err9));
+        printf("Error: Failed to create maps to device memory!\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n", print_cl_errstring(err1), print_cl_errstring(err2), print_cl_errstring(err3), print_cl_errstring(err4), print_cl_errstring(err5), print_cl_errstring(err6), print_cl_errstring(err7), print_cl_errstring(err8), print_cl_errstring(err9), print_cl_errstring(err10), print_cl_errstring(err11), print_cl_errstring(err12));
 	    exit(1);
 	}
 	return !(EXIT_FAILURE);
@@ -480,17 +492,21 @@ int enqueueLifInputBuf(CL *cl, cl_LIFNeuron *lif, cl_MarsagliaStruct *rnd){
     
     //TODO: modified here, to not write to so many buffers
     //TODO: check that the Macbook Pro doesn't choke on this lack of updates
-    //TODO: modified to use return writing event
+    // tried modifying to use return writing event as a way to avoid memory exhaustion on Nvidia, but it didn't help
+    /*cl_event event;
+     (*cl).err = clEnqueueWriteBuffer((*cl).commands, (*cl).input_current, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).I, 0, NULL, &event);*/
 	(*cl).err = clEnqueueWriteBuffer((*cl).commands, (*cl).input_current, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).I, 0, NULL, NULL);
-    (*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).H_input_spike, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).H_spike_input, 0, NULL, NULL);
-	/*cl_event event;
-    (*cl).err = clEnqueueWriteBuffer((*cl).commands, (*cl).input_current, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).I, 0, NULL, &event);*/
+    (*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).H_exc_input_spike, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).H_exc_spike_input, 0, NULL, NULL);
+    (*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).H_inh_input_spike, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).H_inh_spike_input, 0, NULL, NULL);
+	
     //(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).input_v, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).V, 0, NULL, NULL);
 	//(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).input_spike, CL_TRUE, 0, sizeof(unsigned int) * (*lif).no_lifs, (*lif).time_since_spike, 0, NULL, NULL);
-	//(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).x_fast, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).x_fast, 0, NULL, NULL);
-	//(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).x_slow, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).x_slow, 0, NULL, NULL);
-	//(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).s_fast, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).s_fast, 0, NULL, NULL);
-	//(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).s_slow, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).s_slow, 0, NULL, NULL);
+	//(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).x_ampa, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).x_ampa, 0, NULL, NULL);
+	//(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).s_ampa, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).s_ampa, 0, NULL, NULL);
+	//(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).x_nmda, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).x_nmda, 0, NULL, NULL);
+	//(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).s_nmda, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).s_nmda, 0, NULL, NULL);
+	//(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).x_gaba, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).x_gaba, 0, NULL, NULL);
+	//(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).s_gaba, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).s_gaba, 0, NULL, NULL);
 	
     //TODO: enable/disable inputting gauss values to kernel here (also change to a RW buffer)
 	//(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).gauss, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).gauss, 0, NULL, NULL);
@@ -631,22 +647,27 @@ int setCurrentsLifKernelArgs(CL *cl, cl_LIFNeuron *lif){
 	(*cl).err  |= clSetKernelArg((*cl).kernel, 12, sizeof(unsigned int), &(*lif).random123_seed);
 	
 	//synaptic dynamics variables
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 13, sizeof(unsigned int), &(*lif).no_exc);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 14, sizeof(float), &(*lif).tau_ampa_decay);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 15, sizeof(float), &(*lif).tau_nmda_decay);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 16, sizeof(float), &(*lif).tau_gaba_decay);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 17, sizeof(float), &(*lif).tau_ampa_rise);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 18, sizeof(float), &(*lif).tau_nmda_rise);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 19, sizeof(float), &(*lif).tau_gaba_rise);
-	//(*cl).err  |= clSetKernelArg((*cl).kernel, 20, sizeof(unsigned int), &(*lif).spike_delay);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 20, sizeof(cl_mem), &(*cl).H_input_spike);
+	//(*cl).err  |= clSetKernelArg((*cl).kernel, 13, sizeof(unsigned int), &(*lif).no_exc); // no longer used in kernel-side logic
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 13, sizeof(float), &(*lif).tau_ampa_decay);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 14, sizeof(float), &(*lif).tau_nmda_decay);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 15, sizeof(float), &(*lif).tau_gaba_decay);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 16, sizeof(float), &(*lif).tau_ampa_rise);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 17, sizeof(float), &(*lif).tau_nmda_rise);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 18, sizeof(float), &(*lif).tau_gaba_rise);
+    (*cl).err  |= clSetKernelArg((*cl).kernel, 19, sizeof(float), &(*lif).proportion_ampa);
+    
+	//(*cl).err  |= clSetKernelArg((*cl).kernel, 20, sizeof(unsigned int), &(*lif).spike_delay); // not used in kernel-side logic
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 20, sizeof(cl_mem), &(*cl).H_exc_input_spike);
+    (*cl).err  |= clSetKernelArg((*cl).kernel, 21, sizeof(cl_mem), &(*cl).H_inh_input_spike);
 	
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 21, sizeof(cl_mem), &(*cl).s_fast);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 22, sizeof(cl_mem), &(*cl).x_fast);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 23, sizeof(cl_mem), &(*cl).s_slow);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 24, sizeof(cl_mem), &(*cl).x_slow);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 22, sizeof(cl_mem), &(*cl).s_ampa);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 23, sizeof(cl_mem), &(*cl).x_ampa);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 24, sizeof(cl_mem), &(*cl).s_nmda);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 25, sizeof(cl_mem), &(*cl).x_nmda);
+    (*cl).err  |= clSetKernelArg((*cl).kernel, 26, sizeof(cl_mem), &(*cl).s_gaba);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 27, sizeof(cl_mem), &(*cl).x_gaba);
 	
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 25, sizeof(cl_mem), &(*cl).gauss);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 28, sizeof(cl_mem), &(*cl).gauss);
 	
     if ((*cl).err != CL_SUCCESS)
     {
@@ -867,14 +888,18 @@ int enqueueLifOutputBuf(CL *cl, cl_LIFNeuron *lif, cl_MarsagliaStruct *rnd){
     (*cl).err = clEnqueueReadBuffer( (*cl).commands, (*cl).input_v, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).V, 0, NULL, NULL );
     (*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).input_spike, CL_TRUE, 0, sizeof(unsigned int) * (*lif).no_lifs, (*lif).time_since_spike, 0, NULL, NULL );
 	
-	(*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).s_fast, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).s_fast, 0, NULL, NULL );
-	(*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).x_fast, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).x_fast, 0, NULL, NULL );
-	//TODO: consider only reading back no_exc entries from the slow current buffers
-	(*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).s_slow, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).s_slow, 0, NULL, NULL );
-    (*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).x_slow, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).x_slow, 0, NULL, NULL );
+	(*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).s_ampa, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).s_ampa, 0, NULL, NULL );
+	(*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).x_ampa, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).x_ampa, 0, NULL, NULL );
+	(*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).s_nmda, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).s_nmda, 0, NULL, NULL );
+    (*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).x_nmda, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).x_nmda, 0, NULL, NULL );
+    (*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).s_gaba, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).s_gaba, 0, NULL, NULL );
+    (*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).x_gaba, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).x_gaba, 0, NULL, NULL );
 	
-	(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).H_input_spike, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).H_spike_input, 0, NULL, NULL);
+	(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).H_exc_input_spike, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).H_exc_spike_input, 0, NULL, NULL);
+    (*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).H_inh_input_spike, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).H_inh_spike_input, 0, NULL, NULL);
 	/*(*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).gauss, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).gauss, 0, NULL, NULL );*/
+    
+    // There follows various debugging attempts for Nvidia hardware out of memory problems
     //cl_event event1;
 	//cl_event event2;
 	//cl_event event3;
@@ -970,6 +995,43 @@ void shutdownLifKernel(CL *cl){
 	clReleaseContext((*cl).context);
 	
 	printf("done\n");
+}
+
+void shutdownCurrentsLifKernel(CL *cl){
+	// Shutdown and cleanup
+	//
+	
+	printf("shutting down and cleaning up LIF kernel memory...");
+    //TODO: remove fflush()
+    fflush(stdout);
+	
+	clReleaseMemObject((*cl).input_v);
+	clReleaseMemObject((*cl).input_current);
+	clReleaseMemObject((*cl).gauss);
+	clReleaseMemObject((*cl).input_spike);
+    
+    clReleaseMemObject((*cl).s_ampa);
+    clReleaseMemObject((*cl).x_ampa);
+    clReleaseMemObject((*cl).s_nmda);
+    clReleaseMemObject((*cl).x_nmda);
+    clReleaseMemObject((*cl).s_gaba);
+    clReleaseMemObject((*cl).x_gaba);
+    
+    clReleaseMemObject((*cl).H_exc_input_spike);
+    clReleaseMemObject((*cl).H_inh_input_spike);
+	
+	/*clReleaseMemObject((*cl).d_z);
+     clReleaseMemObject((*cl).d_w);
+     clReleaseMemObject((*cl).d_jsr);
+     clReleaseMemObject((*cl).d_jcong);*/
+    
+	clReleaseProgram((*cl).program);
+	clReleaseKernel((*cl).kernel);
+	clReleaseCommandQueue((*cl).commands);
+	clReleaseContext((*cl).context);
+	
+	printf("done\n");
+    fflush(stdout);
 }
 
 void shutdownSynKernel(CL *cl){

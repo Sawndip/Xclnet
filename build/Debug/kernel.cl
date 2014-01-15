@@ -289,7 +289,7 @@ __kernel void lif_with_currents(
 	const unsigned int random_seed, // seed for the random number generator
 	
 	//synaptic dynamics variables
-	const unsigned int no_exc,
+	//const unsigned int no_exc, // no longer needed, may be restored if I try for parallel spike transfer
 	const float tau_ampa_decay,
 	const float tau_nmda_decay,
 	const float tau_gaba_decay,

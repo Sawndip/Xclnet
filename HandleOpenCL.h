@@ -52,20 +52,23 @@ typedef struct cl_struct{
 	cl_mem post_spike;
 	
 	
-	// Random number memory streams
+	// Random number memory streams (Marsaglia RND)
 	cl_mem d_z;
 	cl_mem d_w;
 	cl_mem d_jsr;
 	cl_mem d_jcong;
 	
 	// Synaptic dynamics memory streams
-	cl_mem s_fast;
-	cl_mem x_fast;
-	cl_mem s_slow;
-	cl_mem x_slow;
-	cl_mem H_input_spike;
+	cl_mem s_ampa;
+	cl_mem x_ampa;
+	cl_mem s_nmda;
+	cl_mem x_nmda;
+    cl_mem s_gaba;
+	cl_mem x_gaba;
+	cl_mem H_exc_input_spike;
+	cl_mem H_inh_input_spike;
 	
-	
+    
 	int job_size;
 } CL;
 
@@ -102,6 +105,7 @@ int enqueueSynOutputBuf(CL *cl, cl_Synapse *syn, SynapseConsts *syn_const, cl_Ma
 
 //void shutdownKernel(CL *cl);
 void shutdownLifKernel(CL *cl);
+void shutdownCurrentsLifKernel(CL *cl);
 void shutdownSynKernel(CL *cl);
 
 // My Macro functions

@@ -332,20 +332,23 @@ int main (int argc, const char * argv[]) {
 	(*lif_p).tau_ampa_rise = SYN_DYN_TAU_AMPA_RISE;
 	(*lif_p).tau_nmda_rise = SYN_DYN_TAU_NMDA_RISE;
 	(*lif_p).tau_gaba_rise = SYN_DYN_TAU_GABA_RISE;
-	(*lif_p).proportion_fast_slow = SYN_DYN_PROPORTION_FAST_SLOW;
+	(*lif_p).proportion_ampa = SYN_DYN_PROPORTION_FAST_SLOW;
 	
 	(*lif_p).spike_delay = (int) ( (SYN_DYN_AMPA_DELAY + EPSILLON) / (*lif_p).dt); // no of timesteps since a spike occurred before it gets added to synaptic dynamics
 
 	printf("DEBUG: spike_delay as int %d \n", (*lif_p).spike_delay);
 	
-	(*lif_p).s_fast = calloc(NO_LIFS, sizeof(float));
-	(*lif_p).x_fast = calloc(NO_LIFS, sizeof(float));
-	(*lif_p).s_slow = calloc(NO_LIFS, sizeof(float));
-	(*lif_p).x_slow = calloc(NO_LIFS, sizeof(float));
+	(*lif_p).s_ampa = calloc(NO_LIFS, sizeof(float));
+	(*lif_p).x_ampa = calloc(NO_LIFS, sizeof(float));
+	(*lif_p).s_nmda = calloc(NO_LIFS, sizeof(float));
+	(*lif_p).x_nmda = calloc(NO_LIFS, sizeof(float));
+    (*lif_p).s_gaba = calloc(NO_LIFS, sizeof(float));
+	(*lif_p).x_gaba = calloc(NO_LIFS, sizeof(float));
 	
-	(*lif_p).H_spike_input = calloc(NO_LIFS, sizeof(float));
+	(*lif_p).H_exc_spike_input = calloc(NO_LIFS, sizeof(float));
+	(*lif_p).H_inh_spike_input = calloc(NO_LIFS, sizeof(float));
 	
-	
+    
 	// Synapse compute kernel
 	CL cl_syn;
 	CL *cl_syn_p = &cl_syn;
@@ -825,10 +828,11 @@ int main (int argc, const char * argv[]) {
 					//TODO: don't forget to reset H in the kernel
 					//TODO: should we multiply this weight by dt or some spike transfer constant?
                     //TODO: multiply by J_EE
-					(*lif_p).H_spike_input[(*lif_p).outgoing_lif_index[i][k]] += (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]]; 
+					(*lif_p).H_exc_spike_input[(*lif_p).outgoing_lif_index[i][k]] += (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
 				}
 				for ( k = (*lif_p).no_outgoing_ee_synapses[i]; k < (*lif_p).no_outgoing_synapses[i]; k++){
-					(*lif_p).H_spike_input[(*lif_p).outgoing_lif_index[i][k]] += (*fixed_syn_p).Jx[((*lif_p).outgoing_synapse_index[i][k] - (*syn_const_p).no_syns)];
+                    //TODO: following line needs to differentiate between EXC and INH spikes
+					(*lif_p).H_exc_spike_input[(*lif_p).outgoing_lif_index[i][k]] += (*fixed_syn_p).Jx[((*lif_p).outgoing_synapse_index[i][k] - (*syn_const_p).no_syns)];
 				}
 			} // end of handling of delayed spike propagation
 			// Pre-synaptic spike propagates across synapse after delay
@@ -920,7 +924,8 @@ int main (int argc, const char * argv[]) {
 	// Close output files
 	reporters_close();
 	
-    shutdownLifKernel(cl_lif_p);
+    shutdownCurrentsLifKernel(cl_lif_p);
+    //shutdownLifKernel(cl_lif_p);
 	//shutdownSynKernel(cl_syn_p);
 	
 	freeMemory(lif_p, syn_p, fixed_syn_p, spike_queue_p);
@@ -1326,8 +1331,18 @@ void freeMemory(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynapse *fixed_syn_
 	free((*lif_p).outgoing_synapse_index);
 	free((*lif_p).incoming_synapse_index);
 	
-	//free((*lif_p).H_spike_input);
-	
+    // free on H was previously crashing program
+    printf("DEBUG: attempting to free dynamic synapse variables\n");
+    fflush(stdout);
+    free((*lif_p).s_ampa);
+    free((*lif_p).x_ampa);
+    free((*lif_p).s_nmda);
+    free((*lif_p).x_nmda);
+    free((*lif_p).s_gaba);
+    free((*lif_p).x_gaba);
+	free((*lif_p).H_exc_spike_input);
+	free((*lif_p).H_inh_spike_input);
+    
 	// Synapse variables
 	free((*syn_p).rho);
 	free((*syn_p).rho_initial);

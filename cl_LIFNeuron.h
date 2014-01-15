@@ -50,16 +50,19 @@ typedef struct LIFNeuron{
 	float tau_ampa_rise;
 	float tau_nmda_rise;
 	float tau_gaba_rise;
-	float proportion_fast_slow;
+	float proportion_ampa; // versus nmda
 	
 	unsigned int spike_delay; // no of timesteps since a spike occurred before it gets added to synaptic dynamics
 	// Warning: the above variable assumes that the ISI is never less than this delay
 	
-	float * s_fast;
-	float * x_fast;
-	float * s_slow;
-	float * x_slow;
-	float * H_spike_input;
+	float * s_ampa;
+	float * x_ampa;
+	float * s_nmda;
+	float * x_nmda;
+    float * s_gaba;
+	float * x_gaba;
+	float * H_exc_spike_input;
+    float * H_inh_spike_input;
 } cl_LIFNeuron;
 
 
