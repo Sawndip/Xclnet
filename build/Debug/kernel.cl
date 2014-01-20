@@ -333,6 +333,40 @@ __kernel void lif_with_currents(
 		float s_n = s_nmda[i];
         float x_g = x_gaba[i];
 		float s_g = s_gaba[i];
+        
+        // Synaptic currents update
+		float exc_spike_effect = H_exc_spike_input[i];
+        float inh_spike_effect = H_inh_spike_input[i];
+		float d_x_a, d_s_a, d_x_n, d_s_n, d_x_g, d_s_g;
+		
+        // update fast x variable (AMPA)
+		d_x_a = -x_a / tau_ampa_rise;
+        //CONSIDER: separating following line via an if statement for numerical reasons
+		x_a = x_a + (d_x_a * dt) + ((tau_m / tau_ampa_rise) * exc_spike_effect);
+        //x_a = x_a * exp(-dt / tau_ampa_rise) + ((tau_m / tau_ampa_rise) * exc_spike_effect); // analytical version of decay
+        // update fast s variable (AMPA)
+        d_s_a = (-s_a + x_a) / tau_ampa_decay;
+        s_a = s_a + (d_s_a * dt);
+        //s_a = s_a * exp(-dt / tau_ampa_decay) + x_a;
+        
+        // update slow x variable (NMDA)
+		d_x_n = -x_n / tau_nmda_rise;
+        x_n = x_n + (d_x_n * dt) + ((tau_m / tau_ampa_rise) * exc_spike_effect);
+        //x_n = x_n * exp(-dt / tau_nmda_rise) + ((tau_m / tau_ampa_rise) * exc_spike_effect);
+        // update slow s variable (NMDA)
+        d_s_n = (-s_n + x_n) / tau_nmda_decay;
+        s_n = s_n + (d_s_n * dt);
+        //s_n = s_n * exp(-dt / tau_nmda_decay) + x_n;
+        
+        // update fast x variable (GABA)
+		d_x_g = -x_g / tau_gaba_rise;
+        x_g = x_g + (d_x_g * dt) + ((tau_m / tau_gaba_rise) * inh_spike_effect);
+        //x_g = x_g * exp(-dt / tau_gaba_rise) + ((tau_m / tau_gaba_rise) * inh_spike_effect);
+        // update fast s variable (GABA)
+        d_s_g = (-s_g + x_g) / tau_gaba_decay;
+        s_g = s_g + (d_s_g * dt);
+        //s_g = s_g * exp(-dt / tau_gaba_decay) + x_g;
+        
 		
         // Random123 random number generator variables
 		philox2x32_key_t key;
@@ -425,40 +459,6 @@ __kernel void lif_with_currents(
 		input_v[i] = new_v;
 		output_gauss[i] = random_value;
 		
-		
-		// Synaptic currents update
-		float exc_spike_effect = H_exc_spike_input[i];
-        float inh_spike_effect = H_inh_spike_input[i];
-		float d_x_a, d_s_a, d_x_n, d_s_n, d_x_g, d_s_g;
-		
-        // update fast x variable (AMPA)
-		d_x_a = -x_a / tau_ampa_rise;
-        //CONSIDER: separating following line via an if statement for numerical reasons
-		x_a = x_a + (d_x_a * dt) + ((tau_m / tau_ampa_rise) * exc_spike_effect);
-        //x_a = x_a * exp(-dt / tau_ampa_rise) + ((tau_m / tau_ampa_rise) * exc_spike_effect); // analytical version of decay
-        // update fast s variable (AMPA)
-        d_s_a = (-s_a + x_a) / tau_ampa_decay;
-        s_a = s_a + (d_s_a * dt);
-        //s_a = s_a * exp(-dt / tau_ampa_decay) + x_a;
-			
-        // update slow x variable (NMDA)
-		d_x_n = -x_n / tau_nmda_rise;
-        x_n = x_n + (d_x_n * dt) + ((tau_m / tau_ampa_rise) * exc_spike_effect);
-        //x_n = x_n * exp(-dt / tau_nmda_rise) + ((tau_m / tau_ampa_rise) * exc_spike_effect);
-        // update slow s variable (NMDA)
-        d_s_n = (-s_n + x_n) / tau_nmda_decay;
-        s_n = s_n + (d_s_n * dt);
-        //s_n = s_n * exp(-dt / tau_nmda_decay) + x_n;
-
-        // update fast x variable (GABA)
-		d_x_g = -x_g / tau_gaba_rise;
-        x_g = x_g + (d_x_g * dt) + ((tau_m / tau_gaba_rise) * inh_spike_effect);
-        //x_g = x_g * exp(-dt / tau_gaba_rise) + ((tau_m / tau_gaba_rise) * inh_spike_effect);
-        // update fast s variable (GABA)
-        d_s_g = (-s_g + x_g) / tau_gaba_decay;
-        s_g = s_g + (d_s_g * dt);
-        //s_g = s_g * exp(-dt / tau_gaba_decay) + x_g;
-
 		
         // Reset spike occurrence variable in parallel to save time
 		H_exc_spike_input[i] = 0;

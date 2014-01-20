@@ -895,8 +895,13 @@ int enqueueLifOutputBuf(CL *cl, cl_LIFNeuron *lif, cl_MarsagliaStruct *rnd){
     (*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).s_gaba, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).s_gaba, 0, NULL, NULL );
     (*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).x_gaba, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).x_gaba, 0, NULL, NULL );
 	
-	(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).H_exc_input_spike, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).H_exc_spike_input, 0, NULL, NULL);
-    (*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).H_inh_input_spike, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).H_inh_spike_input, 0, NULL, NULL);
+    // I wrote instead of read here? seriously? and this is the variable I actually need in the main program
+	/*(*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).H_exc_input_spike, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).H_exc_spike_input, 0, NULL, NULL);
+    (*cl).err |= clEnqueueWriteBuffer((*cl).commands, (*cl).H_inh_input_spike, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).H_inh_spike_input, 0, NULL, NULL);*/
+    
+    (*cl).err |= clEnqueueReadBuffer((*cl).commands, (*cl).H_exc_input_spike, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).H_exc_spike_input, 0, NULL, NULL);
+    (*cl).err |= clEnqueueReadBuffer((*cl).commands, (*cl).H_inh_input_spike, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).H_inh_spike_input, 0, NULL, NULL);
+    
 	/*(*cl).err |= clEnqueueReadBuffer( (*cl).commands, (*cl).gauss, CL_TRUE, 0, sizeof(float) * (*lif).no_lifs, (*lif).gauss, 0, NULL, NULL );*/
     
     // There follows various debugging attempts for Nvidia hardware out of memory problems

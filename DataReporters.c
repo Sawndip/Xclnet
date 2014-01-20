@@ -35,7 +35,7 @@ void reporters_setup(){
 	if(raster_output == NULL){
 		perror("Error: failed to open raster output file\n");
 	}
-	fprintf(raster_output, "\n\n\n\n\n# Raster output (t, lif_no)\n");
+	fprintf(raster_output, "\n\n\n\n\n# Raster output (t, lif_no, isi)\n");
 	
 	// Intracellular recording from a single neuron
 	strcpy(outfile, "output/");
@@ -49,7 +49,7 @@ void reporters_setup(){
 	lif_currents_EI = calloc(MAX_TIME_STEPS, sizeof(float));
 	lif_currents_IE = calloc(MAX_TIME_STEPS, sizeof(float));
 	lif_currents_II = calloc(MAX_TIME_STEPS, sizeof(float));
-	fprintf(intracellular_output, "\n\n\n\n\n# Intracellular recorder (t, V(t), time since spike(t), Iext(t), gauss(t-1), Itot(t)), currents:{EE,IE,EI,II}\n# Neuron ID: %d\n", RECORDER_NEURON_ID);
+	fprintf(intracellular_output, "\n\n\n\n\n# Intracellular recorder (t, V(t), time since spike(t), Iext(t), gauss(t-1), H_exc(t), H_inh(t), s_ampa(t), x_ampa(t), s_nmda(t), x_nmda(t), s_gaba(t), x_gaba(t)), currents:{EE,IE,EI,II}\n# Neuron ID: %d\n", RECORDER_NEURON_ID);
 	
 	// Population spiking activity
 	strcpy(outfile, "output/");
