@@ -7,11 +7,17 @@
 //#define DEBUG_MODE_SPIKES // screen display of spike transfers
 //#define DEBUG_MODE_SYNAPSE // screen display of synapse updates
 
-// #define ENABLE_SYNAPSE_UPDATES
+#define ENABLE_SYNAPSE_UPDATES
 #define ENABLE_FIXED_TRANSFERS
 // #define ENABLE_TRANSFER_RHO_INITIAL
+
 #define SYN_USE_FLAT_POTENTIAL
 #define SYN_USE_HARD_BOUNDS
+#define SYN_USE_CONST_INITIALISATION
+//#define SYN_USE_RAND_UNIFORM_INITIALISATION
+//#define SYN_USE_INVIVO_DOUBLE_WELL_INITIALISATION
+//#define SYN_POTENTIATE_SUBSET_OF_SYNS
+
 
 #define FILE_NAME_LENGTH (50)
 #define TEXT_BUFFER_LENGTH (100)
@@ -28,7 +34,7 @@
 #define GAUSSIAN_SYNAPTIC_SEED (-12)
 #define UNIFORM_SYNAPTIC_SEED (-11)
 
-#define MAX_TIME_STEPS (100000) /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
+#define MAX_TIME_STEPS (3000000) /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
 
 // Network schema
 #define NO_EXC (8000) /*(400)*/ /*(10000)*/
@@ -37,7 +43,7 @@
 #define CONNECTIVITY_PROBABILITY (0.05) /*(0.05)*/
 
 // Time step sizes and statistical bin widths
-#define LIF_DT (0.0001) /* modify refrac time and calcium delay in tandem, also MAX_TIME_STEPS */
+#define LIF_DT (0.00001) /* modify refrac time and calcium delay in tandem, also MAX_TIME_STEPS */
 #define SYN_DT LIF_DT /*TODO: at a later stage I will have the synapse update more slowly than the lif*/
 #define BIN_SIZE (1.) /*(0.1)*/
 

@@ -510,15 +510,24 @@ int main (int argc, const char * argv[]) {
          (*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1;
          }*/
 		//else{
-        (*syn_p).rho[i] = (*syn_p).rho_initial[i] = SYN_RHO_INITIAL; //ran2(&uniform_synaptic_seed);//0.377491; //
-		//(*syn_p).rho[i] = (*syn_p).rho_initial[i] = invivo_double_well_distribution(&uniform_synaptic_seed);
+        #ifdef SYN_USE_CONST_INITIALISATION
+            (*syn_p).rho[i] = (*syn_p).rho_initial[i] = SYN_RHO_INITIAL;
+        #endif /* SYN_USE_CONST_INITIALISATION */
+        #ifdef SYN_USE_RAND_UNIFORM_INITIALISATION
+            (*syn_p).rho[i] = (*syn_p).rho_initial[i] = ran2(&uniform_synaptic_seed);//0.377491; //
+        #endif /* SYN_USE_RAND_UNIFORM_INITIALISATION */
+        #ifdef SYN_USE_INVIVO_DOUBLE_WELL_INITIALISATION
+            (*syn_p).rho[i] = (*syn_p).rho_initial[i] = invivo_double_well_distribution(&uniform_synaptic_seed);
+        #endif /* SYN_USE_INVIVO_DOUBLE_WELL_INITIALISATION */
 		//}
 		
-		// Set a subset of synapses to UP initially
-		/*if(ran2(&uniform_synaptic_seed) < 0.05){
-			(*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1; //0.85;
-			(*syn_p).initially_UP[i] = 1;
-		}*/
+        #ifdef SYN_POTENTIATE_SUBSET_OF_SYNS
+            // Set a subset of synapses to UP initially
+            if(ran2(&uniform_synaptic_seed) < 0.05){
+                (*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1; //0.85;
+                (*syn_p).initially_UP[i] = 1;
+             }
+        #endif /* SYN_POTENTIATE_SUBSET_OF_SYNS */
 		
 		(*syn_p).ca[i] = SYN_CA_INITIAL;
 		/*(*rnd_syn_p).d_z[i] = 362436069 - i + PARALLEL_SEED;
@@ -732,7 +741,7 @@ int main (int argc, const char * argv[]) {
                 else if( (i > (NO_STIM_LIFS + STIM_OFFSET - 1)) || (i < (STIM_OFFSET) ) ){ //EXC pop
                     summary_exc_spikes[(int)( ( (*lif_p).dt / BIN_SIZE ) * j + EPSILLON)]++;
 				}
-				else { //Non-stim pop
+				else { //Stim pop
 					lif_injection_spikes[(int) ( ( (*lif_p).dt / BIN_SIZE) * j + EPSILLON)]++;
 				}
 			} // end of handling immediate spike
