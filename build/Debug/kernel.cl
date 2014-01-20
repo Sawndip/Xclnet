@@ -326,17 +326,52 @@ __kernel void lif_with_currents(
 		float input_current = input_i[i];
 		unsigned int time_since_spike = input_spike[i];
         
-		// Synapse state variables
+        // Synapse state variables
 		float x_a = x_ampa[i];
 		float s_a = s_ampa[i];
 		float x_n = x_nmda[i];
 		float s_n = s_nmda[i];
         float x_g = x_gaba[i];
 		float s_g = s_gaba[i];
+        float exc_spike_effect = H_exc_spike_input[i];
+        float inh_spike_effect = H_inh_spike_input[i];
+        
+        // Random123 random number generator variables
+		philox2x32_key_t key;
+		philox2x32_ctr_t ctr;
+		philox2x32_ctr_t rand_val;
+		float2 uni_rand;
+		
+		// Generate Gaussian(0,1) noise using Random123 library implementation
+		key.v[0] = i;
+		ctr.v[0] = time_step;
+		ctr.v[1] = random_seed;
+		rand_val = philox2x32_R(10, ctr, key);
+		// Convert to Uniform distribution (1/(2^32 +2))
+		uni_rand.x = rand_val.v[0] * 2.328306435454494e-10;
+		uni_rand.y = rand_val.v[1] * 2.328306435454494e-10;
+		// Box-Muller transform
+		float r = sqrt( (float)(-2.0*log(uni_rand.x)) );
+		float theta = 2.0 * PI * uni_rand.y;
+		float random_value = r * sin(theta);
+		
+		// No longer using Marsaglia RND approach, it uses too many state variables
+		// Generate Gaussian(0,1) noise
+		/*MarsagliaStruct rnd;
+         rnd.d_z = d_z[i];
+         rnd.d_w = d_w[i];
+         rnd.d_jsr = d_jsr[i];
+         rnd.d_jcong = d_jcong[i];
+         Marsaglia_GetNormal(&rnd);*/
+		
+		//Marsaglia RND generator
+		/*d_z[i] = rnd.d_z;
+         d_w[i] = rnd.d_w;
+         d_jsr[i] = rnd.d_jsr;
+         d_jcong[i] = rnd.d_jcong;*/
+        
         
         // Synaptic currents update
-		float exc_spike_effect = H_exc_spike_input[i];
-        float inh_spike_effect = H_inh_spike_input[i];
 		float d_x_a, d_s_a, d_x_n, d_s_n, d_x_g, d_s_g;
 		
         // update fast x variable (AMPA)
@@ -351,7 +386,7 @@ __kernel void lif_with_currents(
         
         // update slow x variable (NMDA)
 		d_x_n = -x_n / tau_nmda_rise;
-        x_n = x_n + (d_x_n * dt) + ((tau_m / tau_ampa_rise) * exc_spike_effect);
+        x_n = x_n + (d_x_n * dt) + ((tau_m / tau_nmda_rise) * exc_spike_effect);
         //x_n = x_n * exp(-dt / tau_nmda_rise) + ((tau_m / tau_ampa_rise) * exc_spike_effect);
         // update slow s variable (NMDA)
         d_s_n = (-s_n + x_n) / tau_nmda_decay;
@@ -368,40 +403,7 @@ __kernel void lif_with_currents(
         //s_g = s_g * exp(-dt / tau_gaba_decay) + x_g;
         
 		
-        // Random123 random number generator variables
-		philox2x32_key_t key;
-		philox2x32_ctr_t ctr;
-		philox2x32_ctr_t rand_val;
-		float2 uni_rand;
-		
-		// Generate Gaussian(0,1) noise using Random123 library implementation		
-		key.v[0] = i;
-		ctr.v[0] = time_step;
-		ctr.v[1] = random_seed;
-		rand_val = philox2x32_R(10, ctr, key);
-		// Convert to Uniform distribution (1/(2^32 +2))
-		uni_rand.x = rand_val.v[0] * 2.328306435454494e-10;
-		uni_rand.y = rand_val.v[1] * 2.328306435454494e-10;
-		// Box-Muller transform
-		float r = sqrt( (float)(-2.0*log(uni_rand.x)) );
-		float theta = 2.0 * PI * uni_rand.y;
-		float random_value = r * sin(theta);
-		
-		// No longer using Marsaglia RND approach, it uses too many state variables
-		// Generate Gaussian(0,1) noise
-		/*MarsagliaStruct rnd;
-		rnd.d_z = d_z[i];
-		rnd.d_w = d_w[i];
-		rnd.d_jsr = d_jsr[i];
-		rnd.d_jcong = d_jcong[i];
-		Marsaglia_GetNormal(&rnd);*/
-		
-		//Marsaglia RND generator
-		/*d_z[i] = rnd.d_z;
-		d_w[i] = rnd.d_w;
-		d_jsr[i] = rnd.d_jsr;
-		d_jcong[i] = rnd.d_jcong;*/
-		
+
         // Membrane voltage update
 		float new_v;
 		float dv = 0;
@@ -429,7 +431,8 @@ __kernel void lif_with_currents(
 			dv += (input_current / tau_m);
             
             // New code: synaptic currents driving membrane voltage
-            dv += ( (proportion_ampa * s_a) + ( (1-proportion_ampa) * s_n ) + ( s_g ) ) / tau_m ;
+            dv += ( ( proportion_ampa * s_a ) + ( (1-proportion_ampa) * s_n ) + ( s_g ) ) / tau_m ;
+            //TODO: is this definitely to be divided by tau_m??
 			
 			
 			// Apply noise
@@ -454,11 +457,11 @@ __kernel void lif_with_currents(
 			time_since_spike++;
 		}
 
+        
         // Return updated membrane voltage state variables
 		input_spike[i] = time_since_spike;
 		input_v[i] = new_v;
 		output_gauss[i] = random_value;
-		
 		
         // Reset spike occurrence variable in parallel to save time
 		H_exc_spike_input[i] = 0;
