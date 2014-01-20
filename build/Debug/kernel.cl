@@ -377,7 +377,8 @@ __kernel void lif_with_currents(
         // update fast x variable (AMPA)
 		d_x_a = -x_a / tau_ampa_rise;
         //CONSIDER: separating following line via an if statement for numerical reasons
-		x_a = x_a + (d_x_a * dt) + ((tau_m / tau_ampa_rise) * exc_spike_effect);
+		//x_a = x_a + (d_x_a * dt) + ((tau_m / tau_ampa_rise) * exc_spike_effect);
+        x_a = x_a + (d_x_a * dt) + (exc_spike_effect / tau_ampa_rise);
         //x_a = x_a * exp(-dt / tau_ampa_rise) + ((tau_m / tau_ampa_rise) * exc_spike_effect); // analytical version of decay
         // update fast s variable (AMPA)
         d_s_a = (-s_a + x_a) / tau_ampa_decay;
@@ -386,7 +387,8 @@ __kernel void lif_with_currents(
         
         // update slow x variable (NMDA)
 		d_x_n = -x_n / tau_nmda_rise;
-        x_n = x_n + (d_x_n * dt) + ((tau_m / tau_nmda_rise) * exc_spike_effect);
+        //x_n = x_n + (d_x_n * dt) + ((tau_m / tau_nmda_rise) * exc_spike_effect);
+        x_n = x_n + (d_x_n * dt) + (exc_spike_effect / tau_nmda_rise);
         //x_n = x_n * exp(-dt / tau_nmda_rise) + ((tau_m / tau_ampa_rise) * exc_spike_effect);
         // update slow s variable (NMDA)
         d_s_n = (-s_n + x_n) / tau_nmda_decay;
@@ -395,7 +397,8 @@ __kernel void lif_with_currents(
         
         // update fast x variable (GABA)
 		d_x_g = -x_g / tau_gaba_rise;
-        x_g = x_g + (d_x_g * dt) + ((tau_m / tau_gaba_rise) * inh_spike_effect);
+        //x_g = x_g + (d_x_g * dt) + ((tau_m / tau_gaba_rise) * inh_spike_effect);
+        x_g = x_g + (d_x_g * dt) + (inh_spike_effect / tau_gaba_rise);
         //x_g = x_g * exp(-dt / tau_gaba_rise) + ((tau_m / tau_gaba_rise) * inh_spike_effect);
         // update fast s variable (GABA)
         d_s_g = (-s_g + x_g) / tau_gaba_decay;

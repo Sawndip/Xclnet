@@ -7,7 +7,7 @@
 //#define DEBUG_MODE_SPIKES // screen display of spike transfers
 //#define DEBUG_MODE_SYNAPSE // screen display of synapse updates
 
-//#define ENABLE_SYNAPSE_UPDATES
+// #define ENABLE_SYNAPSE_UPDATES
 #define ENABLE_FIXED_TRANSFERS
 // #define ENABLE_TRANSFER_RHO_INITIAL
 #define SYN_USE_FLAT_POTENTIAL
@@ -28,7 +28,7 @@
 #define GAUSSIAN_SYNAPTIC_SEED (-12)
 #define UNIFORM_SYNAPTIC_SEED (-11)
 
-#define MAX_TIME_STEPS (30000) /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
+#define MAX_TIME_STEPS (100000) /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
 
 // Network schema
 #define NO_EXC (8000) /*(400)*/ /*(10000)*/
@@ -96,7 +96,7 @@
 #define SYN_DYN_TAU_AMPA_DECAY (0.0050)
 #define SYN_DYN_TAU_NMDA_DECAY (0.0500)
 #define SYN_DYN_TAU_GABA_DECAY (0.0050)
-#define SYN_DYN_PROPORTION_FAST_SLOW (0.5)
+#define SYN_DYN_PROPORTION_FAST_SLOW (1)
 
 
 

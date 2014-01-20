@@ -30,7 +30,7 @@ unsigned int generateNetwork(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynaps
 	
 	//float delta_spike_modifier = (*lif_p).tau_m / (*lif_p).dt;
     //NOTE: spike transfer is not modified by dt or tau in dynamic current equations
-    float delta_spike_modifier = 1;
+    float delta_spike_modifier = (*lif_p).tau_m;
 	printf("DEBUG: delta_spike_modifier %f\n", delta_spike_modifier);
 	
 	(*syn_p).pre_lif = calloc(estimated_total_ee_synapses, sizeof(signed int));
@@ -319,7 +319,7 @@ int main (int argc, const char * argv[]) {
 	double external_voltage = J_EXT;
 	// Syanptic currents must be modified by (tau_m/dt) as they are delta current spikes
     //    No longer applicable since move to dynamics synaptic currents
-	double delta_spike_modifier = 1; //(*lif_p).tau_m / (*lif_p).dt;
+	double delta_spike_modifier = (*lif_p).tau_m; // / (*lif_p).dt;
 	double transfer_voltage = J_EE;
 	transfer_voltage *= delta_spike_modifier;
 	//printf("DEBUG: delta_spike_modifier %f, transfer_voltage %f\n", delta_spike_modifier, transfer_voltage);
