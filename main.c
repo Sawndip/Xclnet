@@ -338,8 +338,8 @@ int main (int argc, const char * argv[]) {
 	(*lif_p).tau_gaba_rise = SYN_DYN_TAU_GABA_RISE;
 	(*lif_p).proportion_ampa = SYN_DYN_PROPORTION_FAST_SLOW;
 	
-	(*lif_p).spike_delay = (int) ( (SYN_DYN_AMPA_DELAY + EPSILLON) / (*lif_p).dt); // no of timesteps since a spike occurred before it gets added to synaptic dynamics
-
+	(*lif_p).spike_delay = (int) ( (SYN_DYN_AMPA_DELAY + EPSILLON) / (*lif_p).dt ) - 1; // no of timesteps since a spike occurred before it gets added to synaptic dynamics
+    // subtract 1 from spike_delay to compare with time_since_spike=0, for a spike which just occurred
 	printf("DEBUG: spike_delay as int %d \n", (*lif_p).spike_delay);
 	
 	(*lif_p).s_ampa = calloc(NO_LIFS, sizeof(float));
@@ -576,8 +576,9 @@ int main (int argc, const char * argv[]) {
 		if( enqueueLifKernel(cl_lif_p) == EXIT_FAILURE){
 			return EXIT_FAILURE;
 		}
-		if (j ==0)
-			printf("DEBUG: first pass of kernel done\n");
+		/*if (j ==0)
+			printf("DEBUG: first pass of kernel done\n");*/
+        
 		//Re-enabled waitForKernel() every 10^8 timesteps in the hope that this will free Nvidia memory store,
 		//  it didn't!
 		//if((j % 100000000) == 0){
@@ -592,8 +593,9 @@ int main (int argc, const char * argv[]) {
 		if( enqueueLifOutputBuf(cl_lif_p, lif_p, rnd_lif_p) == EXIT_FAILURE){
 			return EXIT_FAILURE;
 		}
-		if (j ==0)
-			printf("DEBUG: first buffer read back done\n");
+		/*if (j ==0)
+			printf("DEBUG: first buffer read back done\n");*/
+        
 		
 		/*
 		// -----Process Synapse Kernel-----
@@ -734,7 +736,8 @@ int main (int argc, const char * argv[]) {
 					lif_injection_spikes[(int) ( ( (*lif_p).dt / BIN_SIZE) * j + EPSILLON)]++;
 				}
 			} // end of handling immediate spike
-			else if((*lif_p).time_since_spike[i] == ( (*lif_p).spike_delay /*- 1*/ ) ){ // delayed transfer of spike across synapse
+            
+			if((*lif_p).time_since_spike[i] == (*lif_p).spike_delay ){ // delayed transfer of spike across synapse
                 #ifdef DEBUG_MODE_SPIKES
                     printf("DEBUG: delayed spike! (transferring voltage) i: %d j: %d\n", i, j);
                 #endif /* DEBUG_MODE_SPIKES */
@@ -755,10 +758,12 @@ int main (int argc, const char * argv[]) {
                             (*lif_p).H_exc_spike_input[(*lif_p).outgoing_lif_index[i][k]] += (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]] * transfer_voltage;
                         #endif
                         #ifdef ENABLE_FIXED_TRANSFERS
-                            (*lif_p).H_exc_spike_input[(*lif_p).outgoing_lif_index[i][k]] += (double) SYN_RHO_FIXED * transfer_voltage;
-                        #endif
-                        #ifdef ENABLE_TRANSFER_RHO_INITIAL
-                            (*lif_p).H_exc_spike_input[(*lif_p).outgoing_lif_index[i][k]] += transfer_voltage * (*syn_p).rho_initial[(*lif_p).outgoing_synapse_index[i][k]];
+                            #ifndef ENABLE_TRANSFER_RHO_INITIAL
+                                (*lif_p).H_exc_spike_input[(*lif_p).outgoing_lif_index[i][k]] += (double) SYN_RHO_FIXED * transfer_voltage;
+                            #endif
+                            #ifdef ENABLE_TRANSFER_RHO_INITIAL
+                                (*lif_p).H_exc_spike_input[(*lif_p).outgoing_lif_index[i][k]] += transfer_voltage * (*syn_p).rho_initial[(*lif_p).outgoing_synapse_index[i][k]];
+                            #endif
                         #endif
                         
                         
@@ -1073,7 +1078,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 	}
 	
 	//TODO: flat potential hack here
-    #ifdef USE_FLAT_POTENTIAL
+    #ifdef SYN_USE_FLAT_POTENTIAL
         t_deter = 0;
     #endif
 	//TODO: comment out following section if double-well desired
@@ -1139,7 +1144,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 	(*syn).time_of_last_update[syn_id] = current_time;
 	(*syn).ca[syn_id] = c_end;
 	//TODO: should I put hard bounds on rho?
-    #ifndef USE_HARD_BOUNDS
+    #ifndef SYN_USE_HARD_BOUNDS
         (*syn).rho[syn_id] = w;
     #else
         if (w > 0){

@@ -3,22 +3,22 @@
 
 //#define DEBUG_MODE // not currently used
 //#define DEBUG_MODE_MAIN // screen display of timestep based change of V and RHO
-#define DEBUG_MODE_NETWORK // print to file of connectivity statistics
+//#define DEBUG_MODE_NETWORK // print to file of connectivity statistics
 //#define DEBUG_MODE_SPIKES // screen display of spike transfers
 //#define DEBUG_MODE_SYNAPSE // screen display of synapse updates
 
 //#define ENABLE_SYNAPSE_UPDATES
 #define ENABLE_FIXED_TRANSFERS
 // #define ENABLE_TRANSFER_RHO_INITIAL
-#define USE_FLAT_POTENTIAL
-#define USE_HARD_BOUNDS
+#define SYN_USE_FLAT_POTENTIAL
+#define SYN_USE_HARD_BOUNDS
 
 #define FILE_NAME_LENGTH (50)
 #define TEXT_BUFFER_LENGTH (100)
 #define EPSILLON (0.0000001)
 
 // Data reporters
-#define RECORDER_NEURON_ID (8500) /*(3)*/
+#define RECORDER_NEURON_ID (500) /*(3)*/
 #define RECORDER_SYNAPSE_ID (201) /* for modulo addressed multiple synaptic recordings this needs to be less than 400*/
 //#define RECORDER_MULTI_SYNAPSE_SKIP (64000) /*(64000)*/ /*(450)*/
 
@@ -37,11 +37,11 @@
 #define CONNECTIVITY_PROBABILITY (0.05) /*(0.05)*/
 
 // Time step sizes and statistical bin widths
-#define LIF_DT (0.001) /* modify refrac time and calcium delay in tandem, also MAX_TIME_STEPS */
+#define LIF_DT (0.0001) /* modify refrac time and calcium delay in tandem, also MAX_TIME_STEPS */
 #define SYN_DT LIF_DT /*TODO: at a later stage I will have the synapse update more slowly than the lif*/
 #define BIN_SIZE (1.) /*(0.1)*/
 
-#define SYN_DYN_AMPA_DELAY (0.001)
+#define SYN_DYN_AMPA_DELAY LIF_DT
 
 // Stimulation of subpopulation /* using secs despite inconsistency with other parameter units */
 #define STIM_ON (0.)
