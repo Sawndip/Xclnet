@@ -28,7 +28,7 @@
 #define RECORDER_SYNAPSE_ID (201) /* for modulo addressed multiple synaptic recordings this needs to be less than 400*/
 //#define RECORDER_MULTI_SYNAPSE_SKIP (64000) /*(64000)*/ /*(450)*/
 
-#define USE_GPU (0) /* 1=gpu, 0=cpu */
+#define USE_GPU (1) /* 1=gpu, 0=cpu */
 #define NETWORK_SEED (-14) /*(-14)*/
 #define PARALLEL_SEED (2) /*keep positive for random123*/
 #define GAUSSIAN_SYNAPTIC_SEED (-12)
@@ -73,7 +73,7 @@
 #define LIF_CM (0.001)
 #define LIF_RM (20.0)
 #define LIF_SIGMA (5)
-#define LIF_REFRAC_TIME (20) /*200*/ /*timesteps*/
+#define LIF_REFRAC_TIME (0) /*200*/ /*timesteps*/
 
 // Synapse plasticity model specific
 #define SYN_RHO_INITIAL (0.164840) /*(0.406595)*/ /*(0.019) in-vivo*/ /*(0.164840) new in-vitro*/ /*(0.16492)*/ /*(0.203586)*/ /*(1.0)*/
@@ -102,7 +102,7 @@
 #define SYN_DYN_TAU_AMPA_DECAY (0.0050)
 #define SYN_DYN_TAU_NMDA_DECAY (0.0500)
 #define SYN_DYN_TAU_GABA_DECAY (0.0050)
-#define SYN_DYN_PROPORTION_FAST_SLOW (1)
+#define SYN_DYN_PROPORTION_FAST_SLOW (0.5)
 
 
 

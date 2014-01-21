@@ -1365,6 +1365,7 @@ void freeMemory(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynapse *fixed_syn_
 	
     //TODO: why do the following calls to free() crash the program?
     // free on H was previously crashing program
+    // Is it because I'm releasing the mapped variables (same location) via my OpenCL code? YES!! (read up on this to confirm details)
     /*printf("DEBUG: attempting to free dynamic synapse variables");
     fflush(stdout);
     free((*lif_p).s_ampa);
