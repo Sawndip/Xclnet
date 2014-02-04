@@ -32,9 +32,11 @@ typedef struct LIFNeuron{
 	//float r_m;
 	//float c_m;
 	float sigma;
-	float refrac_time;  //TODO: why is this a float? I think it was as I wasn't sure whether to use timesteps or seconds here.
+	float refrac_time_exc;  //TODO: why is this a float? I think it was as I wasn't sure whether to use timesteps or seconds here.
+	float refrac_time_inh;
 	float dt;
 	unsigned int no_lifs;
+	unsigned int no_exc;
 	
 	unsigned int time_step; // required for the random123 number generator
 	unsigned int random123_seed;
@@ -43,7 +45,6 @@ typedef struct LIFNeuron{
 	
 	// All outgoing synaptic dynamics are identical so we keep them with their associated pre-synaptic neurons
 	//synaptic dynamics variables
-	unsigned int no_exc;
 	float tau_ampa_decay;
 	float tau_nmda_decay;
 	float tau_gaba_decay;

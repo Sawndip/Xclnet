@@ -308,9 +308,11 @@ int main (int argc, const char * argv[]) {
 	//(*lif_p).r_m = LIF_RM;
 	//(*lif_p).c_m = LIF_CM;
 	(*lif_p).sigma = LIF_SIGMA; //5; 
-	(*lif_p).refrac_time = LIF_REFRAC_TIME; //20;
+	(*lif_p).refrac_time_exc = LIF_REFRAC_TIME_EXC; //20;
+	(*lif_p).refrac_time_inh = LIF_REFRAC_TIME_INH;
 	(*lif_p).dt = LIF_DT;
 	(*lif_p).no_lifs = NO_LIFS;
+	(*lif_p).no_exc = NO_EXC;
 	(*lif_p).time_step = 0;
 	(*lif_p).random123_seed = PARALLEL_SEED;
 	(*cl_lif_p).job_size = (*lif_p).no_lifs;
@@ -329,7 +331,6 @@ int main (int argc, const char * argv[]) {
 	
 	
 	// LIF currents variables
-	(*lif_p).no_exc = NO_EXC;
 	(*lif_p).tau_ampa_decay = SYN_DYN_TAU_AMPA_DECAY;
 	(*lif_p).tau_nmda_decay = SYN_DYN_TAU_NMDA_DECAY;
 	(*lif_p).tau_gaba_decay = SYN_DYN_TAU_GABA_DECAY;
@@ -491,8 +492,13 @@ int main (int argc, const char * argv[]) {
         (*lif_p).V[i] = (float)LIF_V_INITIAL;
         (*lif_p).I[i] = external_voltage;
         //(*lif_p).time_since_spike[i] = (*lif_p).refrac_time;
-        (*lif_p).time_since_spike[i] = (*lif_p).refrac_time + (*lif_p).spike_delay;
-        
+		if (i < (*lif_p).no_exc){
+			(*lif_p).time_since_spike[i] = (*lif_p).refrac_time_exc + (*lif_p).spike_delay;
+        }
+		else {
+			(*lif_p).time_since_spike[i] = (*lif_p).refrac_time_inh + (*lif_p).spike_delay;
+		}
+
 		/*(*rnd_lif_p).d_z[i] = 362436069 + i + 1 + PARALLEL_SEED;
          (*rnd_lif_p).d_w[i] = 521288629 + i + 1 + PARALLEL_SEED;
          (*rnd_lif_p).d_jsr[i] = 123456789 + i + 1 + PARALLEL_SEED;
