@@ -278,7 +278,9 @@ int main (int argc, const char * argv[]) {
 	int i, j, k;
 	int offset;
 	float isi; // new ISI variable (local to main sim loop)
-	//long uniform_synaptic_seed = UNIFORM_SYNAPTIC_SEED;
+	#ifdef SYN_POTENTIATE_SUBSET_OF_SYNS
+		long uniform_synaptic_seed = UNIFORM_SYNAPTIC_SEED;
+	#endif /* SYN_POTENTIATE_SUBSET_OF_SYNS */
 	//long gaussian_lif_seed = (GAUSSIAN_SYNAPTIC_SEED - 1);
 	
 	clock_t start_t,finish_t;
@@ -343,7 +345,7 @@ int main (int argc, const char * argv[]) {
 	(*lif_p).proportion_ampa = SYN_DYN_PROPORTION_FAST_SLOW;
 	
 	(*lif_p).spike_delay = (int) ( (SYN_DYN_AMPA_DELAY + EPSILLON) / (*lif_p).dt ) - 1; // no of timesteps since a spike occurred before it gets added to synaptic dynamics
-    // subtract 1 from spike_delay to compare with time_since_spike=0, for a spike which just occurred
+    // subtracting 1 from spike_delay to compare with time_since_spike=0, for a spike which just occurred
 	printf("DEBUG: spike_delay as int %d \n", (*lif_p).spike_delay);
 	
 	(*lif_p).s_ampa = calloc(NO_LIFS, sizeof(float));
