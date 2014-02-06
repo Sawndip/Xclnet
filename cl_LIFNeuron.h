@@ -28,7 +28,8 @@ typedef struct LIFNeuron{
 	float v_rest;
 	float v_reset;
 	float v_threshold;
-	float tau_m;
+	float tau_m_e;
+	float tau_m_i;
 	//float r_m;
 	//float c_m;
 	float sigma;

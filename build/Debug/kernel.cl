@@ -278,7 +278,8 @@ __kernel void lif_with_currents(
 	const float v_rest, // resting membrane voltage
 	const float v_reset, // reset membrane voltage
 	const float v_threshold, // threshold voltage for spiking
-	const float tau_m, // membrane time constant
+	const float tau_m_e, // excitatory membrane time constant
+	const float tau_m_e, // inhibitory membrane time constant
 	//const float c_m, // membrane capacitance
 	const float sigma, // size of noise
 	const float refrac_time_exc, // duration of refractory period
@@ -426,45 +427,45 @@ __kernel void lif_with_currents(
 		if( i < no_exc){
 			if ( time_since_spike >= refrac_time_exc ){
 				// Apply leak current
-				dv = (-(v - v_rest) / tau_m);
+				dv = (-(v - v_rest) / tau_m_e);
 				// Apply the external current
 				// Note: I use one input current variable (to cut down on streams to GPU)
 				//  an external current/voltage should be added directly to this variable (outside the kernel)
 				//  a synaptic current/voltage step should be multiplied by (tau_m/dt), for a delta spike, before adding to this variable,
 				//  in order to counter rescaling which happens on next three lines of executable code.
 				// input_current is treated as a voltage step, despite the variable name, hence the division by tau_m
-				dv += (input_current / tau_m);
+				dv += (input_current / tau_m_e);
             
 				// New code: synaptic currents driving membrane voltage
-				dv += ( ( proportion_ampa * s_a ) + ( (1-proportion_ampa) * s_n ) + ( s_g ) ) / tau_m ;
+				dv += ( ( proportion_ampa * s_a ) + ( (1-proportion_ampa) * s_n ) + ( s_g ) ) / tau_m_e ;
 				//TODO: is this definitely to be divided by tau_m??
 			
 			
 				// Apply noise
 				//noise = sqrt(dt / tau_m) * sigma * rnd.value;
-				noise = sqrt(dt / tau_m) * sigma * random_value;
+				noise = sqrt(dt / tau_m_e) * sigma * random_value;
 			}
 		}
 		else{
 			if ( time_since_spike >= refrac_time_inh ){
 				// Apply leak current
-				dv = (-(v - v_rest) / tau_m);
+				dv = (-(v - v_rest) / tau_m_i);
 				// Apply the external current
 				// Note: I use one input current variable (to cut down on streams to GPU)
 				//  an external current/voltage should be added directly to this variable (outside the kernel)
 				//  a synaptic current/voltage step should be multiplied by (tau_m/dt), for a delta spike, before adding to this variable,
 				//  in order to counter rescaling which happens on next three lines of executable code.
 				// input_current is treated as a voltage step, despite the variable name, hence the division by tau_m
-				dv += (input_current / tau_m);
+				dv += (input_current / tau_m_i);
             
 				// New code: synaptic currents driving membrane voltage
-				dv += ( ( proportion_ampa * s_a ) + ( (1-proportion_ampa) * s_n ) + ( s_g ) ) / tau_m ;
+				dv += ( ( proportion_ampa * s_a ) + ( (1-proportion_ampa) * s_n ) + ( s_g ) ) / tau_m_i ;
 				//TODO: is this definitely to be divided by tau_m??
 			
 			
 				// Apply noise
 				//noise = sqrt(dt / tau_m) * sigma * rnd.value;
-				noise = sqrt(dt / tau_m) * sigma * random_value;
+				noise = sqrt(dt / tau_m_i) * sigma * random_value;
 			}
 		}
 

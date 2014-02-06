@@ -9,7 +9,7 @@
 
 #define ENABLE_SYNAPSE_UPDATES
 #define ENABLE_FIXED_TRANSFERS
-// #define ENABLE_TRANSFER_RHO_INITIAL
+#define ENABLE_TRANSFER_RHO_INITIAL
 
 #define SYN_USE_FLAT_POTENTIAL
 #define SYN_USE_HARD_BOUNDS
@@ -25,7 +25,7 @@
 
 // Data reporters
 #define RECORDER_NEURON_ID (500) /*(3)*/
-#define RECORDER_SYNAPSE_ID (201) /* for modulo addressed multiple synaptic recordings this needs to be less than 400*/
+#define RECORDER_SYNAPSE_ID (6930) /*(201)*/ /* for modulo addressed multiple synaptic recordings this needs to be less than 400*/
 //#define RECORDER_MULTI_SYNAPSE_SKIP (64000) /*(64000)*/ /*(450)*/
 
 #define USE_GPU (1) /* 1=gpu, 0=cpu */
@@ -34,7 +34,7 @@
 #define GAUSSIAN_SYNAPTIC_SEED (-12)
 #define UNIFORM_SYNAPTIC_SEED (-11)
 
-#define MAX_TIME_STEPS (300000) /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
+#define MAX_TIME_STEPS (3000000) /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
 
 // Network schema
 #define NO_EXC (8000) /*(400)*/ /*(10000)*/
@@ -70,8 +70,10 @@
 #define LIF_V_REST (-70.0)
 #define LIF_V_RESET (-60.0)
 #define LIF_V_THRESHOLD (-50.0)
-#define LIF_CM (0.001)
-#define LIF_RM (20.0)
+/*#define LIF_CM (0.001)
+#define LIF_RM (20.0)*/
+#define LIF_TAU_ME (0.02)
+#define LIF_TAU_MI (0.01)
 #define LIF_SIGMA (5)
 #define LIF_REFRAC_TIME_EXC (2000) /*200*/ /*timesteps*/
 #define LIF_REFRAC_TIME_INH (1000) /*200*/ /*timesteps*/

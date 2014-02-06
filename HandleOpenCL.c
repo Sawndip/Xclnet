@@ -601,7 +601,7 @@ int setLifKernelArgs(CL *cl, cl_LIFNeuron *lif){
 	(*cl).err  |= clSetKernelArg((*cl).kernel, 3, sizeof(float), &(*lif).v_rest);
 	(*cl).err  |= clSetKernelArg((*cl).kernel, 4, sizeof(float), &(*lif).v_reset);
 	(*cl).err  |= clSetKernelArg((*cl).kernel, 5, sizeof(float), &(*lif).v_threshold);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 6, sizeof(float), &(*lif).tau_m);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 6, sizeof(float), &(*lif).tau_m_e);
 	//(*cl).err  |= clSetKernelArg((*cl).kernel, 12, sizeof(float), &(*lif).c_m);
 	(*cl).err  |= clSetKernelArg((*cl).kernel, 7, sizeof(float), &(*lif).sigma);
 	(*cl).err  |= clSetKernelArg((*cl).kernel, 8, sizeof(float), &(*lif).refrac_time_exc);
@@ -637,39 +637,40 @@ int setCurrentsLifKernelArgs(CL *cl, cl_LIFNeuron *lif){
 	(*cl).err  |= clSetKernelArg((*cl).kernel, 3, sizeof(float), &(*lif).v_rest);
 	(*cl).err  |= clSetKernelArg((*cl).kernel, 4, sizeof(float), &(*lif).v_reset);
 	(*cl).err  |= clSetKernelArg((*cl).kernel, 5, sizeof(float), &(*lif).v_threshold);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 6, sizeof(float), &(*lif).tau_m);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 7, sizeof(float), &(*lif).sigma);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 8, sizeof(float), &(*lif).refrac_time_exc);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 9, sizeof(float), &(*lif).refrac_time_inh);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 10, sizeof(float), &(*lif).dt);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 11, sizeof(unsigned int), &(*lif).no_lifs);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 12, sizeof(unsigned int), &(*lif).no_exc);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 6, sizeof(float), &(*lif).tau_m_e);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 7, sizeof(float), &(*lif).tau_m_i);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 8, sizeof(float), &(*lif).sigma);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 9, sizeof(float), &(*lif).refrac_time_exc);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 10, sizeof(float), &(*lif).refrac_time_inh);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 11, sizeof(float), &(*lif).dt);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 12, sizeof(unsigned int), &(*lif).no_lifs);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 13, sizeof(unsigned int), &(*lif).no_exc);
 	
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 13, sizeof(unsigned int), &(*lif).time_step);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 14, sizeof(unsigned int), &(*lif).random123_seed);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 14, sizeof(unsigned int), &(*lif).time_step);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 15, sizeof(unsigned int), &(*lif).random123_seed);
 	
 	//synaptic dynamics variables
 	//(*cl).err  |= clSetKernelArg((*cl).kernel, 13, sizeof(unsigned int), &(*lif).no_exc); // no longer used in kernel-side logic
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 15, sizeof(float), &(*lif).tau_ampa_decay);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 16, sizeof(float), &(*lif).tau_nmda_decay);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 17, sizeof(float), &(*lif).tau_gaba_decay);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 18, sizeof(float), &(*lif).tau_ampa_rise);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 19, sizeof(float), &(*lif).tau_nmda_rise);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 20, sizeof(float), &(*lif).tau_gaba_rise);
-    (*cl).err  |= clSetKernelArg((*cl).kernel, 21, sizeof(float), &(*lif).proportion_ampa);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 16, sizeof(float), &(*lif).tau_ampa_decay);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 17, sizeof(float), &(*lif).tau_nmda_decay);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 18, sizeof(float), &(*lif).tau_gaba_decay);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 19, sizeof(float), &(*lif).tau_ampa_rise);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 20, sizeof(float), &(*lif).tau_nmda_rise);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 21, sizeof(float), &(*lif).tau_gaba_rise);
+    (*cl).err  |= clSetKernelArg((*cl).kernel, 22, sizeof(float), &(*lif).proportion_ampa);
     
 	//(*cl).err  |= clSetKernelArg((*cl).kernel, 20, sizeof(unsigned int), &(*lif).spike_delay); // not used in kernel-side logic
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 22, sizeof(cl_mem), &(*cl).H_exc_input_spike);
-    (*cl).err  |= clSetKernelArg((*cl).kernel, 23, sizeof(cl_mem), &(*cl).H_inh_input_spike);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 23, sizeof(cl_mem), &(*cl).H_exc_input_spike);
+    (*cl).err  |= clSetKernelArg((*cl).kernel, 24, sizeof(cl_mem), &(*cl).H_inh_input_spike);
 	
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 24, sizeof(cl_mem), &(*cl).s_ampa);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 25, sizeof(cl_mem), &(*cl).x_ampa);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 26, sizeof(cl_mem), &(*cl).s_nmda);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 27, sizeof(cl_mem), &(*cl).x_nmda);
-    (*cl).err  |= clSetKernelArg((*cl).kernel, 28, sizeof(cl_mem), &(*cl).s_gaba);
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 29, sizeof(cl_mem), &(*cl).x_gaba);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 25, sizeof(cl_mem), &(*cl).s_ampa);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 26, sizeof(cl_mem), &(*cl).x_ampa);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 27, sizeof(cl_mem), &(*cl).s_nmda);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 28, sizeof(cl_mem), &(*cl).x_nmda);
+    (*cl).err  |= clSetKernelArg((*cl).kernel, 29, sizeof(cl_mem), &(*cl).s_gaba);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 30, sizeof(cl_mem), &(*cl).x_gaba);
 	
-	(*cl).err  |= clSetKernelArg((*cl).kernel, 30, sizeof(cl_mem), &(*cl).gauss);
+	(*cl).err  |= clSetKernelArg((*cl).kernel, 31, sizeof(cl_mem), &(*cl).gauss);
 	
     if ((*cl).err != CL_SUCCESS)
     {

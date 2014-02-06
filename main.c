@@ -29,9 +29,11 @@ unsigned int generateNetwork(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynaps
 	unsigned int estimated_total_synapses_per_neuron = (mean_total_synapses_per_neuron) + (int)(mean_total_synapses_per_neuron/2) + 2000; // mean + wide margin + constant (for small nets)
 	
 	//float delta_spike_modifier = (*lif_p).tau_m / (*lif_p).dt;
-    //NOTE: spike transfer is not modified by dt or tau in dynamic current equations
-    float delta_spike_modifier = (*lif_p).tau_m;
-	printf("DEBUG: delta_spike_modifier %f\n", delta_spike_modifier);
+    //NOTE: spike transfer is not modified by dt in dynamic current equations
+    float delta_spike_modifier_e = (*lif_p).tau_m_e;
+	float delta_spike_modifier_i = (*lif_p).tau_m_i;
+	printf("DEBUG: delta_spike_modifier_e %f\n", delta_spike_modifier_e);
+	printf("DEBUG: delta_spike_modifier_i %f\n", delta_spike_modifier_i);
 	
 	(*syn_p).pre_lif = calloc(estimated_total_ee_synapses, sizeof(signed int));
 	(*syn_p).post_lif = calloc(estimated_total_ee_synapses, sizeof(signed int));
@@ -128,7 +130,7 @@ unsigned int generateNetwork(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynaps
 					// A new synapse
 					// by not having a pre_lif variable we save on checks when backpropagating spikes
 					(*fixed_syn_p).post_lif[total_fixed_synapses] = j;
-					(*fixed_syn_p).Jx[total_fixed_synapses] = delta_spike_modifier * J_IE;
+					(*fixed_syn_p).Jx[total_fixed_synapses] = delta_spike_modifier_i * J_IE;
 				
 					(*lif_p).outgoing_lif_index[i][(*lif_p).no_outgoing_synapses[i]] = j;
 					
@@ -160,7 +162,7 @@ unsigned int generateNetwork(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynaps
 				if((ran2(&network_seed)) < p){
 					// A new synapse
 					(*fixed_syn_p).post_lif[total_fixed_synapses] = j;
-					(*fixed_syn_p).Jx[total_fixed_synapses] = delta_spike_modifier * J_EI;
+					(*fixed_syn_p).Jx[total_fixed_synapses] = delta_spike_modifier_e * J_EI;
 					
 					(*lif_p).outgoing_lif_index[i][(*lif_p).no_outgoing_synapses[i]] = j;
 					
@@ -188,7 +190,7 @@ unsigned int generateNetwork(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynaps
 				if((ran2(&network_seed)) < p){
 					// A new synapse
 					(*fixed_syn_p).post_lif[total_fixed_synapses] = j;
-					(*fixed_syn_p).Jx[total_fixed_synapses] = delta_spike_modifier * J_II;
+					(*fixed_syn_p).Jx[total_fixed_synapses] = delta_spike_modifier_i * J_II;
 					
 					(*lif_p).outgoing_lif_index[i][(*lif_p).no_outgoing_synapses[i]] = j;
 					
@@ -304,7 +306,8 @@ int main (int argc, const char * argv[]) {
 	(*lif_p).v_rest = LIF_V_REST;
 	(*lif_p).v_reset = LIF_V_RESET;
 	(*lif_p).v_threshold = LIF_V_THRESHOLD;
-	(*lif_p).tau_m = (LIF_RM * LIF_CM);
+	(*lif_p).tau_m_e = LIF_TAU_ME; //(LIF_RM * LIF_CM);
+	(*lif_p).tau_m_i = LIF_TAU_MI; //(LIF_RM * LIF_CM);
 	//(*lif_p).r_m = LIF_RM;
 	//(*lif_p).c_m = LIF_CM;
 	(*lif_p).sigma = LIF_SIGMA; //5; 
@@ -321,9 +324,9 @@ int main (int argc, const char * argv[]) {
 	double external_voltage = J_EXT;
 	// Syanptic currents must be modified by (tau_m/dt) as they are delta current spikes
     //    No longer applicable since move to dynamics synaptic currents
-	double delta_spike_modifier = (*lif_p).tau_m; // / (*lif_p).dt;
+	double delta_spike_modifier_e = (*lif_p).tau_m_e; // / (*lif_p).dt;
 	double transfer_voltage = J_EE;
-	transfer_voltage *= delta_spike_modifier;
+	transfer_voltage *= delta_spike_modifier_e;
 	//printf("DEBUG: delta_spike_modifier %f, transfer_voltage %f\n", delta_spike_modifier, transfer_voltage);
 	 
 	//char *k_name_lif = "lif";
