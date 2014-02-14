@@ -538,6 +538,11 @@ int main (int argc, const char * argv[]) {
                 (*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1; //0.85;
                 (*syn_p).initially_UP[i] = 1;
              }
+		#else /* use STIM set instead for monitoring purpuses */
+			if( ( i < (STIM_OFFSET + NO_STIM_LIFS) ) && (STIM_OFFSET <= i) ){
+				(*syn_p).initially_UP[i] = 1;
+				printf("DEBUG: i: %d\n", i);
+			}
         #endif /* SYN_POTENTIATE_SUBSET_OF_SYNS */
 		
 		(*syn_p).ca[i] = SYN_CA_INITIAL;

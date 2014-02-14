@@ -279,7 +279,7 @@ __kernel void lif_with_currents(
 	const float v_reset, // reset membrane voltage
 	const float v_threshold, // threshold voltage for spiking
 	const float tau_m_e, // excitatory membrane time constant
-	const float tau_m_e, // inhibitory membrane time constant
+	const float tau_m_i, // inhibitory membrane time constant
 	//const float c_m, // membrane capacitance
 	const float sigma, // size of noise
 	const float refrac_time_exc, // duration of refractory period
