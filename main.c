@@ -765,7 +765,77 @@ int main (int argc, const char * argv[]) {
 		offset = (++offset) % (*syn_const_p).delay;
 		j++;
 		(*lif_p).time_step = j;
-	}
+        
+        // At the end of every time bin record summary statistics for synapses (this was previously done in an on spiking manner)
+        if( ( j % (int)( (float)((BIN_SIZE / (*lif_p).dt) + EPSILLON)) ) == 0 ){ // yes, the ugly double cast is necessary for accuracy
+            printf("DEBUG: end of bin, j: %d, modulo argument: %d\n", j, (int)(float)((BIN_SIZE / (*lif_p).dt) + EPSILLON));
+            //summary_inh_spikes[(int)( ( (*lif_p).dt / BIN_SIZE ) * j + EPSILLON)]++;
+            // loop over all synapses
+            // calculate mean rho and stdev of rho
+            // save in pop variables or output to file
+            
+            int time_bin_index = (int)( ( (*syn_const_p).dt / BIN_SIZE ) * j + EPSILLON);
+            
+            for (int syn_id = 0; syn_id < (*syn_const_p).no_syns; syn_id++){
+                // Monitor pop which begins life in UP state
+                if( (*syn_p).initially_UP[syn_id] == 1 ){
+                    //int time_bin_index = (int)( ( (*syn_const_p).dt / BIN_SIZE ) * j + EPSILLON);
+                    UP_pop_rho[time_bin_index] += (*syn_p).rho[syn_id];
+                    UP_pop_n[time_bin_index]++;
+                
+                    if(UP_pop_n[time_bin_index] == 1){ // initialise on first entry to time bin
+                		UP_pop_M[time_bin_index] = (*syn_p).rho[syn_id];
+                		//stim_summary_S[time_bin_index] = 0; //done via calloc()
+                		UP_pop_min[time_bin_index] = (*syn_p).rho[syn_id];
+                		UP_pop_max[time_bin_index] = (*syn_p).rho[syn_id];
+                	}
+                	else{
+                		//Mk = Mk-1+ (xk - Mk-1)/k
+                		//Sk = Sk-1 + (xk - Mk-1)*(xk - Mk).
+                		float Mk;
+                		Mk = UP_pop_M[time_bin_index] + ( ( (*syn_p).rho[syn_id] - UP_pop_M[time_bin_index] ) / UP_pop_n[time_bin_index] );
+                		UP_pop_S[time_bin_index] = UP_pop_S[time_bin_index] + ( ( (*syn_p).rho[syn_id] - UP_pop_M[time_bin_index] ) * ( (*syn_p).rho[syn_id] - Mk ) );
+                		UP_pop_M[time_bin_index] = Mk;
+                		if ((*syn_p).rho[syn_id] > UP_pop_max[time_bin_index]){
+                			UP_pop_max[time_bin_index] = (*syn_p).rho[syn_id];
+                		} // these are mutually exclusive events, so using elseif to cut number of computations
+                		else if ((*syn_p).rho[syn_id] < UP_pop_min[time_bin_index]){
+                			UP_pop_min[time_bin_index] = (*syn_p).rho[syn_id];
+                		}
+                	}
+                }
+                // Monitor pop which begins life in DOWN state
+                else{
+                    //int time_bin_index = (int)( ( (*syn_const_p).dt / BIN_SIZE ) * j + EPSILLON);
+                    DOWN_pop_rho[time_bin_index] += (*syn_p).rho[syn_id];
+                    DOWN_pop_n[time_bin_index]++;
+                    
+                    if(DOWN_pop_n[time_bin_index] == 1){ // initialise on first entry to time bin
+                    	DOWN_pop_M[time_bin_index] = (*syn_p).rho[syn_id];
+                    	//stim_summary_S[time_bin_index] = 0; //done via calloc()
+                    	DOWN_pop_min[time_bin_index] = (*syn_p).rho[syn_id];
+                    	DOWN_pop_max[time_bin_index] = (*syn_p).rho[syn_id];
+                    }
+                    else{
+                        	//Mk = Mk-1+ (xk - Mk-1)/k
+                        	//Sk = Sk-1 + (xk - Mk-1)*(xk - Mk).
+                            float Mk;
+                        	Mk = DOWN_pop_M[time_bin_index] + ( ( (*syn_p).rho[syn_id] - DOWN_pop_M[time_bin_index] ) / DOWN_pop_n[time_bin_index] );
+                            DOWN_pop_S[time_bin_index] = DOWN_pop_S[time_bin_index] + ( ( (*syn_p).rho[syn_id] - DOWN_pop_M[time_bin_index] ) * ( (*syn_p).rho[syn_id] - Mk ) );
+                        	DOWN_pop_M[time_bin_index] = Mk;
+                        if ((*syn_p).rho[syn_id] > DOWN_pop_max[time_bin_index]){
+                        	DOWN_pop_max[time_bin_index] = (*syn_p).rho[syn_id];
+                        } // these are mutually exclusive events, so using elseif to cut number of computations
+                        else if ((*syn_p).rho[syn_id] < DOWN_pop_min[time_bin_index]){
+                            DOWN_pop_min[time_bin_index] = (*syn_p).rho[syn_id];
+                    	}
+                	}
+                } // end DOWN pop monitor update
+            } // end loop over synapses
+            printf("DEBUG: rhobar_UP %lf, rhobar_DOWN %lf\n", UP_pop_rho[time_bin_index]/UP_pop_n[time_bin_index], DOWN_pop_rho[time_bin_index]/DOWN_pop_n[time_bin_index]);
+        } // end of time-bin check
+    } // end of main program loop (over time)
+	//}
 	finish_t = clock();
 	printf("Stop\n");
 	totaltime = (double)(finish_t - start_t)/CLOCKS_PER_SEC;
@@ -1024,8 +1094,9 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 		print_synapse_activity(current_time, syn);
 	}
 	
+    // Moved monitor to periodic updating for all synapses in main program loop
 	// Monitor pop which begins life in UP state
-	if( (*syn).initially_UP[syn_id] == 1 ){
+	/*if( (*syn).initially_UP[syn_id] == 1 ){
 		int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
 		UP_pop_rho[time_bin_index] += (*syn).rho[syn_id];
 		UP_pop_n[time_bin_index]++;
@@ -1077,7 +1148,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 				DOWN_pop_min[time_bin_index] = (*syn).rho[syn_id];
 			}
 		}	
-	}
+	}*/
 	
 	
 	//TODO: stdev is probably incorrect as each value is actually getting counted one-two times (on spike transfer and after delay)
