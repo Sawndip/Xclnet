@@ -586,6 +586,8 @@ int main (int argc, const char * argv[]) {
 	//double totaltime;
 	printf("Go\n");
 	start_t = clock();
+    (*lif_p).time_next_stim_on = (int)(float)((STIM_ON / (*lif_p).dt) + EPSILLON);
+    (*lif_p).time_next_stim_off = (int)(float)((STIM_OFF / (*lif_p).dt) + EPSILLON);
 	// Print initial state of a single recorder synapse
 	print_synapse_activity(j, syn_p);
 	while(j < MAX_TIME_STEPS){
@@ -685,11 +687,22 @@ int main (int argc, const char * argv[]) {
 		}
 		
 		// For a brief period apply stimulation to a subset of neurons
-		if((STIM_ON < (j * LIF_DT)) && ((j * LIF_DT) < STIM_OFF)){
-			for( i = 0; i < NO_STIM_LIFS; i++){
+		//if((STIM_ON < (j * LIF_DT)) && ((j * LIF_DT) < STIM_OFF)){
+		if( (j < (*lif_p).time_next_stim_off) && (j > (*lif_p).time_next_stim_on) ){
+            for( i = 0; i < NO_STIM_LIFS; i++ ){
 				(*lif_p).I[i + STIM_OFFSET] += J_STIM;
 				//printf("DEBUG: (j*LIF_DT) %f, i %d\n", (j*LIF_DT), i);
 			}
+            // on last timestep of the stim update the time variables for next stim interval
+            if ( j == ((*lif_p).time_next_stim_off-1) ){
+                if ( (*lif_p).stim_repeats < STIM_NO_REPEATS ){
+                    int repeat_interval = (int)(float)( (STIM_INTERVAL / (*lif_p).dt) + EPSILLON );
+                    int intra_stim_interval = (*lif_p).time_next_stim_off - (*lif_p).time_next_stim_on;
+                    (*lif_p).time_next_stim_on = (*lif_p).time_next_stim_off + repeat_interval;
+                    (*lif_p).time_next_stim_off = (*lif_p).time_next_stim_on + intra_stim_interval;
+                    (*lif_p).stim_repeats++;
+                }
+            }
 		}
 		
 				

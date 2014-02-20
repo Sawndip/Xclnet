@@ -41,6 +41,10 @@ typedef struct LIFNeuron{
 	
 	unsigned int time_step; // required for the random123 number generator
 	unsigned int random123_seed;
+    
+    unsigned int time_next_stim_on;
+    unsigned int time_next_stim_off;
+    unsigned int stim_repeats;
 	
 	//unsigned char * subpopulation_flag; // manipulations will be performed on this population
 	
