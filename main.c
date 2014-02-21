@@ -539,10 +539,17 @@ int main (int argc, const char * argv[]) {
                 (*syn_p).initially_UP[i] = 1;
              }
 		#else /* use STIM set instead for monitoring purpuses */
-			if( ( i < (STIM_OFFSET + NO_STIM_LIFS) ) && (STIM_OFFSET <= i) ){
+			/*if( ( i < (STIM_OFFSET + NO_STIM_LIFS) ) && (STIM_OFFSET <= i) ){
 				(*syn_p).initially_UP[i] = 1;
 				printf("DEBUG: i: %d\n", i);
+			}*/
+			if( ( (*syn_p).pre_lif[i] < (STIM_OFFSET + NO_STIM_LIFS) ) && (STIM_OFFSET <= (*syn_p).pre_lif[i]) ){
+				if( ( (*syn_p).post_lif[i] < (STIM_OFFSET + NO_STIM_LIFS) ) && (STIM_OFFSET <= (*syn_p).post_lif[i]) ){
+					(*syn_p).initially_UP[i] = 1;
+					printf("DEBUG: i: %d\n", i);
+				}				
 			}
+		
         #endif /* SYN_POTENTIATE_SUBSET_OF_SYNS */
 		
 		(*syn_p).ca[i] = SYN_CA_INITIAL;
@@ -586,9 +593,15 @@ int main (int argc, const char * argv[]) {
 	//double totaltime;
 	printf("Go\n");
 	start_t = clock();
-    (*lif_p).time_next_stim_on = (int)(float)((STIM_ON / (*lif_p).dt) + EPSILLON);
-    (*lif_p).time_next_stim_off = (int)(float)((STIM_OFF / (*lif_p).dt) + EPSILLON);
-    (*lif_p).stim_repeats = 1; // init to 1 as we will already have done one stim period when the check occurs
+	if (STIM_NO_REPEATS > 0){
+		(*lif_p).time_next_stim_on = (int)(float)((STIM_ON / (*lif_p).dt) + EPSILLON);
+		(*lif_p).time_next_stim_off = (int)(float)((STIM_OFF / (*lif_p).dt) + EPSILLON);
+		(*lif_p).stim_repeats = 1; // init to 1 as we will already have done one stim period when the check occurs
+	}
+	else{
+		(*lif_p).time_next_stim_on = 0;
+		(*lif_p).time_next_stim_off = 0;
+	}
 	// Print initial state of a single recorder synapse
 	print_synapse_activity(j, syn_p);
 	while(j < MAX_TIME_STEPS){
