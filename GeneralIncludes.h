@@ -8,8 +8,8 @@
 //#define DEBUG_MODE_SYNAPSE // screen display of synapse updates
 
 #define ENABLE_SYNAPSE_UPDATES
-#define ENABLE_FIXED_TRANSFERS
-#define ENABLE_TRANSFER_RHO_INITIAL
+//#define ENABLE_FIXED_TRANSFERS   // disable this if you want plastic synapses to influence spiking
+#define ENABLE_TRANSFER_RHO_INITIAL  // only applies if ENABLE_FIXED_TRANSFERS is applied
 
 #define SYN_USE_FLAT_POTENTIAL
 #define SYN_USE_HARD_BOUNDS
@@ -24,8 +24,8 @@
 #define EPSILLON (0.0000001)
 
 // Data reporters
-#define RECORDER_NEURON_ID (500) /*(3)*/
-#define RECORDER_SYNAPSE_ID (6930) /*(201)*/ /* for modulo addressed multiple synaptic recordings this needs to be less than 400*/
+#define RECORDER_NEURON_ID (50) /*(3)*/
+#define RECORDER_SYNAPSE_ID (100) /*(201)*/ /* for modulo addressed multiple synaptic recordings this needs to be less than 400*/
 //#define RECORDER_MULTI_SYNAPSE_SKIP (64000) /*(64000)*/ /*(450)*/
 
 #define USE_GPU (1) /* 1=gpu, 0=cpu */

@@ -588,7 +588,7 @@ int main (int argc, const char * argv[]) {
 	start_t = clock();
     (*lif_p).time_next_stim_on = (int)(float)((STIM_ON / (*lif_p).dt) + EPSILLON);
     (*lif_p).time_next_stim_off = (int)(float)((STIM_OFF / (*lif_p).dt) + EPSILLON);
-    (*lif_p).stim_repeats = 0;
+    (*lif_p).stim_repeats = 1; // init to 1 as we will already have done one stim period when the check occurs
 	// Print initial state of a single recorder synapse
 	print_synapse_activity(j, syn_p);
 	while(j < MAX_TIME_STEPS){
