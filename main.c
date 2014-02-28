@@ -1082,7 +1082,9 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 	float theta_lower = fmin((*syn_const).theta_d, (*syn_const).theta_p);
 	float gamma_upper = fmax((*syn_const).gamma_d, (*syn_const).gamma_p); //what??? We're always assuming that the gamma related to the upper threshold is greater than gamma for the lower threshold
 	float gamma_lower = fmin((*syn_const).gamma_d, (*syn_const).gamma_p);
-	float gamma_sum = gamma_upper + gamma_lower;
+	#ifndef SYN_USE_EXCLUSIVE_LTP
+		float gamma_sum = gamma_upper + gamma_lower;
+	#endif /* SYN_USE_EXCLUSIVE_LTP */
 	/*float theta_upper = (*syn_const).theta_p;
 	float theta_lower = (*syn_const).theta_d;
 	float gamma_upper = (*syn_const).theta_p;
@@ -1156,26 +1158,47 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 	// Stochastic update
 	double rnd;
 	if (t_upper > 0){
-		#ifdef DEBUG_MODE_SYNAPSE
-			float random_part, rho_bar;
-			rho_bar = (gamma_upper / gamma_sum);
-		#endif /* DEBUG_MODE_SYNAPSE */
-		float in_exp, my_exp;
-		in_exp = -(t_upper * gamma_sum) / (*syn_const).tau;
-		my_exp = exp(in_exp);
+		#ifndef SYN_USE_EXCLUSIVE_LTP	/* in this case LTP and LTD are non-exclusive */
+			#ifdef DEBUG_MODE_SYNAPSE
+				float random_part, rho_bar;
+				rho_bar = (gamma_upper / gamma_sum);
+			#endif /* DEBUG_MODE_SYNAPSE */
+			float in_exp, my_exp;
+			in_exp = -(t_upper * gamma_sum) / (*syn_const).tau;
+			my_exp = exp(in_exp);
 		
-		w_stoch = (gamma_upper / gamma_sum) * ( 1 - my_exp);
-		w_stoch += w * my_exp;
-		rnd = gasdev(&gaussian_synaptic_seed);
-		#ifdef DEBUG_MODE_SYNAPSE
-			printf("\nt_upper: %f, rho_bar: %f, in_exp: %f, my_exp: %f, w_stoch: %f, ", t_upper, rho_bar, in_exp, my_exp, w_stoch);
-			random_part = (*syn_const).sigma * rnd * sqrt( (1 - exp(-(2 * gamma_sum * t_upper) / (*syn_const).tau) ) / (2 * gamma_sum) );
-		#endif /* DEBUG_MODE_SYNAPSE */
-		w_stoch += sqrt(2) * (*syn_const).sigma * rnd * sqrt( (1 - exp(-(2 * gamma_sum * t_upper) / (*syn_const).tau) ) / (2 * gamma_sum) );
-		#ifdef DEBUG_MODE_SYNAPSE
-			printf("rnd1: %f, random: %f, w_stoch: %f\n", rnd, random_part, w_stoch);
-		#endif /* DEBUG_MODE_SYNAPSE */
-		w = w_stoch;
+			w_stoch = (gamma_upper / gamma_sum) * ( 1 - my_exp);
+			w_stoch += w * my_exp;
+			rnd = gasdev(&gaussian_synaptic_seed);
+			#ifdef DEBUG_MODE_SYNAPSE
+				printf("\nt_upper: %f, rho_bar: %f, in_exp: %f, my_exp: %f, w_stoch: %f, ", t_upper, rho_bar, in_exp, my_exp, w_stoch);
+				random_part = sqrt(2) * (*syn_const).sigma * rnd * sqrt( (1 - exp(-(2 * gamma_sum * t_upper) / (*syn_const).tau) ) / (2 * gamma_sum) );
+			#endif /* DEBUG_MODE_SYNAPSE */
+			w_stoch += sqrt(2) * (*syn_const).sigma * rnd * sqrt( (1 - exp(-(2 * gamma_sum * t_upper) / (*syn_const).tau) ) / (2 * gamma_sum) );
+			#ifdef DEBUG_MODE_SYNAPSE
+				printf("rnd1: %f, random: %f, w_stoch: %f\n", rnd, random_part, w_stoch);
+			#endif /* DEBUG_MODE_SYNAPSE */
+			w = w_stoch;
+		#else /* in this case LTP and LTD are mutually exclusive */
+			#ifdef DEBUG_MODE_SYNAPSE
+				float random_part;
+			#endif /* DEBUG_MODE_SYNAPSE */
+			float in_exp, my_exp;
+			in_exp = -(t_upper * gamma_upper) / (*syn_const).tau;
+			my_exp = exp(in_exp);
+		
+			w_stoch = w * my_exp;
+			rnd = gasdev(&gaussian_synaptic_seed);
+			#ifdef DEBUG_MODE_SYNAPSE
+				printf("\nt_upper: %f, w: %f, in_exp: %f, my_exp: %f, w_stoch: %f, ", t_upper, w, in_exp, my_exp, w_stoch);
+				random_part = (*syn_const).sigma * rnd * sqrt( (1 - exp(-(2 * gamma_upper * t_upper) / (*syn_const).tau) ) / (2 * gamma_upper) );
+			#endif /* DEBUG_MODE_SYNAPSE */
+			w_stoch += (*syn_const).sigma * rnd * sqrt( (1 - exp(-(2 * gamma_upper * t_upper) / (*syn_const).tau) ) / (2 * gamma_upper) );
+			#ifdef DEBUG_MODE_SYNAPSE
+				printf("rnd1: %f, random: %f, w_stoch: %f\n", rnd, random_part, w_stoch);
+			#endif /* DEBUG_MODE_SYNAPSE */
+			w = w_stoch;
+		#endif /* SYN_USE_EXCLUSIVE_LTP */
 	}
 	if (t_lower > 0){
 		#ifdef DEBUG_MODE_SYNAPSE
@@ -1201,7 +1224,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 	//TODO: flat potential hack here
     #ifdef SYN_USE_FLAT_POTENTIAL
         t_deter = 0;
-    #endif
+    #endif /* SYN_USE_FLAT_POTENTIAL */
 	//TODO: comment out following section if double-well desired
 	// Deterministic update for piecewise-quadratic potential well
 	/*if (t_deter > 0){
