@@ -1180,6 +1180,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 			#endif /* DEBUG_MODE_SYNAPSE */
 			w = w_stoch;
 		#else /* in this case LTP and LTD are mutually exclusive */
+			//printf("DEBUG: using mutually exclusive code\n");
 			#ifdef DEBUG_MODE_SYNAPSE
 				float random_part;
 			#endif /* DEBUG_MODE_SYNAPSE */
@@ -1187,7 +1188,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 			in_exp = -(t_upper * gamma_upper) / (*syn_const).tau;
 			my_exp = exp(in_exp);
 		
-			w_stoch = w * my_exp;
+			w_stoch = (1 - my_exp) + w * my_exp;
 			rnd = gasdev(&gaussian_synaptic_seed);
 			#ifdef DEBUG_MODE_SYNAPSE
 				printf("\nt_upper: %f, w: %f, in_exp: %f, my_exp: %f, w_stoch: %f, ", t_upper, w, in_exp, my_exp, w_stoch);
