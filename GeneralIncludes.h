@@ -7,6 +7,9 @@
 //#define DEBUG_MODE_SPIKES // screen display of spike transfers
 //#define DEBUG_MODE_SYNAPSE // screen display of synapse updates
 
+#define SYN_USE_SUPRATHRESHOLD_TIMESTEP
+#define SYN_USE_FLAT_POTENTIAL
+#define SYN_USE_HARD_BOUNDS
 
 #define FILE_NAME_LENGTH (50)
 #define TEXT_BUFFER_LENGTH (100)
