@@ -969,6 +969,20 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 	// Stochastic update
     #ifdef SYN_USE_SUPRATHRESHOLD_TIMESTEP
         // this is where I need to add a time-stepping loop to update the synapse stochastically
+        if (t_upper > 0){
+            int time = 0;
+            int update_steps = ( t_upper / (*syn_const).dt );
+            for (time = 0; time < update_steps; time++){
+                // update synapse here
+            }
+        }
+        if (t_lower > 0){
+            int time = 0;
+            int update_steps = ( t_upper / (*syn_const).dt );
+            for (time = 0; time < update_steps; time++){
+                // update synapse here
+            }
+        }
     #else // use the event-based update
 	double rnd;
 	if (t_upper > 0){
