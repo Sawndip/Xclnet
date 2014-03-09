@@ -546,7 +546,7 @@ int main (int argc, const char * argv[]) {
 			if( ( (*syn_p).pre_lif[i] < (STIM_OFFSET + NO_STIM_LIFS) ) && (STIM_OFFSET <= (*syn_p).pre_lif[i]) ){
 				if( ( (*syn_p).post_lif[i] < (STIM_OFFSET + NO_STIM_LIFS) ) && (STIM_OFFSET <= (*syn_p).post_lif[i]) ){
 					(*syn_p).initially_UP[i] = 1;
-					printf("DEBUG: i: %d\n", i);
+					printf("DEBUG: i: %d, pre_lif: %d, post_lif: %d\n", i, (*syn_p).pre_lif[i], (*syn_p).post_lif[i]);
 				}				
 			}
 		

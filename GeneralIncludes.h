@@ -54,7 +54,7 @@
 #define STIM_ON (2.)
 #define STIM_OFF (2.5)
 #define STIM_INTERVAL (2.)
-#define STIM_NO_REPEATS (5)
+#define STIM_NO_REPEATS (2)
 #define J_STIM (35.) /*(13.)*/ /*J_STIM is now additive on top of J_EXT*/ /*(24.55)*/ /*24.55mV approx 50Hz, 34.8mV approx 100Hz*/
 #define NO_STIM_LIFS (100)
 #define STIM_OFFSET (0)
@@ -78,8 +78,8 @@
 #define LIF_TAU_ME (0.02)
 #define LIF_TAU_MI (0.01)
 #define LIF_SIGMA (5)
-#define LIF_REFRAC_TIME_EXC (2000) /*200*/ /*timesteps*/
-#define LIF_REFRAC_TIME_INH (1000) /*200*/ /*timesteps*/
+#define LIF_REFRAC_TIME_EXC (1000) /*200*/ /*timesteps*/
+#define LIF_REFRAC_TIME_INH (500) /*200*/ /*timesteps*/
 
 // Synapse plasticity model specific
 #define SYN_RHO_INITIAL (0.084525) /*(0.164840)*/ /*(0.406595)*/ /*(0.019) in-vivo*/ /*(0.164840) new in-vitro*/ /*(0.16492)*/ /*(0.203586)*/ /*(1.0)*/
