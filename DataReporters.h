@@ -44,6 +44,7 @@ double *summary_inh_spikes;
 double *lif_injection_spikes;
 //int no_injection_lifs;
 
+#ifdef MONITOR_UP_DOWN_POPS
 //Summary variablse for initially_UP pop
 double *UP_pop_rho;
 double *UP_pop_M;
@@ -59,10 +60,11 @@ double *DOWN_pop_S;
 unsigned int *DOWN_pop_n;
 float *DOWN_pop_max;
 float *DOWN_pop_min;
+#endif /* MONITOR_UP_DOWN_POPS */
 
-
+#ifdef MONITOR_STIM_POPS
 // Summary variables for monitoring synapses which receive only background activity
-/*double *non_summary_rho;
+double *non_summary_rho;
 double *non_summary_M;
 double *non_summary_S;
 unsigned int *non_summary_n;
@@ -88,8 +90,8 @@ double *post_summary_M;
 double *post_summary_S;
 unsigned int *post_summary_n;
 float *post_summary_max;
-float *post_summary_min;*/
-
+float *post_summary_min;
+#endif /* MONITOR_STIM_POPS */
 
 //Debugging variables
 float *lif_gauss_totals;

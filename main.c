@@ -237,7 +237,9 @@ int main (int argc, const char * argv[]) {
 	int i, j, k;
 	int offset;
 	float isi; // new ISI variable (local to main sim loop)
-	long uniform_synaptic_seed = UNIFORM_SYNAPTIC_SEED;
+	#ifdef SYN_USE_RAND_UNIFORM_INITIALISATION
+		long uniform_synaptic_seed = UNIFORM_SYNAPTIC_SEED;
+	#endif
 	//long gaussian_lif_seed = (GAUSSIAN_SYNAPTIC_SEED - 1);
 	
 	clock_t start_t,finish_t;
@@ -433,24 +435,25 @@ int main (int argc, const char * argv[]) {
         //(*lif_p).gauss[i] = gasdev(&gaussian_lif_seed);
     }
 	for( i = 0; i < (*syn_const_p).no_syns; i++){
-		//(*syn_p).rho[i] = SYN_RHO_INITIAL;
 		//TODO: set rho_initial here
-		/*if((i % RECORDER_MULTI_SYNAPSE_SKIP) == RECORDER_SYNAPSE_ID){
-         (*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1;
-         }*/
-		/*if(i == RECORDER_SYNAPSE_ID){
-         (*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1;
-         }*/
-		//else{
-        (*syn_p).rho[i] = (*syn_p).rho_initial[i] = SYN_RHO_INITIAL; //ran2(&uniform_synaptic_seed);//0.377491; //
-		//(*syn_p).rho[i] = (*syn_p).rho_initial[i] = invivo_double_well_distribution(&uniform_synaptic_seed);
+		#ifdef SYN_USE_CONST_INITIALISATION
+			(*syn_p).rho[i] = (*syn_p).rho_initial[i] = SYN_RHO_INITIAL; //ran2(&uniform_synaptic_seed);//0.377491; //
+		#endif
+		#ifdef SYN_USE_RAND_UNIFORM_INITIALISATION
+			(*syn_p).rho[i] = (*syn_p).rho_initial[i] = ran2(&uniform_synaptic_seed);
+		#endif
+		#ifdef SYN_USE_INVIVO_DOUBLE_WELL_INITIALISATION
+			(*syn_p).rho[i] = (*syn_p).rho_initial[i] = invivo_double_well_distribution(&uniform_synaptic_seed);
+		#endif
 		//}
 		
-		// Set a subset of synapses to UP initially
-		if(ran2(&uniform_synaptic_seed) < 0.05){
-			//(*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1; //0.85;
-			(*syn_p).initially_UP[i] = 1;
-		}
+		#ifdef SYN_POTENTIATE_SUBSET_OF_SYNS
+			// Set a subset of synapses to UP initially
+			if(ran2(&uniform_synaptic_seed) < 0.05){
+				//(*syn_p).rho[i] = (*syn_p).rho_initial[i] = 1; //0.85;
+				(*syn_p).initially_UP[i] = 1;
+			}
+		#endif /*  SYN_POTENTIATE_SUBSET_OF_SYNS  */
 		
 		(*syn_p).ca[i] = SYN_CA_INITIAL;
 		(*rnd_syn_p).d_z[i] = 362436069 - i + PARALLEL_SEED;
@@ -735,17 +738,19 @@ int main (int argc, const char * argv[]) {
 		#endif /* DEBUG_MODE_MAIN */
         
         
-        // After 200 secs potentiate 5% of synapses
-        if (j == (float) ( (200 / (*lif_p).dt) + EPSILLON ) ){
-            printf("DEBUG: j: %d, test condition: %d\n", j, (int)(float)( (200 / (*lif_p).dt ) + EPSILLON ) );
-            printf("DEBUG: potentiating subset of synapses\n");
-            for(i = 0; i < (*syn_const_p).no_syns; i++){
-                if((*syn_p).initially_UP[i] == 1){
-                    (*syn_p).rho[i] =  1; //0.85;
-                    //(*syn_p).initially_UP[i] = 1;
-                }
-            }
-        }
+		#ifdef SYN_DELAYED_POTENTIATE_SUBSET_OF_SYNS
+			// After 200 secs potentiate 5% of synapses
+			if (j == (float) ( (200 / (*lif_p).dt) + EPSILLON ) ){
+				printf("DEBUG: j: %d, test condition: %d\n", j, (int)(float)( (200 / (*lif_p).dt ) + EPSILLON ) );
+				printf("DEBUG: potentiating subset of synapses\n");
+				for(i = 0; i < (*syn_const_p).no_syns; i++){
+					if((*syn_p).initially_UP[i] == 1){
+						(*syn_p).rho[i] =  1; //0.85;
+						//(*syn_p).initially_UP[i] = 1;
+					}
+				}
+			}
+		#endif /* SYN_DELAYED_POTENTIATE_SUBSET_OF_SYNS */
         
 		
 		// Setup next LIF Kernel
@@ -777,6 +782,7 @@ int main (int argc, const char * argv[]) {
             int time_bin_index = (int)( ( (*syn_const_p).dt / BIN_SIZE ) * j + EPSILLON);
             
             for (int syn_id = 0; syn_id < (*syn_const_p).no_syns; syn_id++){
+			#ifdef MONITOR_UP_DOWN_POPS	
                 // Monitor pop which begins life in UP state
                 if( (*syn_p).initially_UP[syn_id] == 1 ){
                     //int time_bin_index = (int)( ( (*syn_const_p).dt / BIN_SIZE ) * j + EPSILLON);
@@ -831,8 +837,126 @@ int main (int argc, const char * argv[]) {
                     	}
                 	}
                 } // end DOWN pop monitor update
+			//#endif /* MONITOR_UP_DOWN_POPS */
+			#elseif MONITOR_STIM_POPS
+				//Update multisynapse summary variables
+				if( ( (*syn_p).pre_lif[syn_id] < (NO_STIM_LIFS + STIM_OFFSET) ) && ( (*syn_p).pre_lif[syn_id] > (STIM_OFFSET-1) ) ){ // Pre- stim
+					if( ( (*syn_p).post_lif[syn_id] < (NO_STIM_LIFS + STIM_OFFSET) ) && ( (*syn_p).post_lif[syn_id] > (STIM_OFFSET-1) ) ){ // Post- stim
+						// Synapse receives high stim on both sides
+						//int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
+						stim_summary_rho[time_bin_index] += (*syn_p).rho[syn_id];
+						stim_summary_n[time_bin_index]++;
+				 
+						if(stim_summary_n[time_bin_index] == 1){ // initialise on first entry to time bin
+							stim_summary_M[time_bin_index] = (*syn_p).rho[syn_id];
+							//stim_summary_S[time_bin_index] = 0; //done via calloc()
+							stim_summary_min[time_bin_index] = (*syn_p).rho[syn_id];
+							stim_summary_max[time_bin_index] = (*syn_p).rho[syn_id];
+						}
+						else{
+							//Mk = Mk-1+ (xk - Mk-1)/k
+							//Sk = Sk-1 + (xk - Mk-1)*(xk - Mk).
+							float Mk;
+							Mk = stim_summary_M[time_bin_index] + ( ( (*syn_p).rho[syn_id] - stim_summary_M[time_bin_index] ) / stim_summary_n[time_bin_index] );
+							stim_summary_S[time_bin_index] = stim_summary_S[time_bin_index] + ( ( (*syn_p).rho[syn_id] - stim_summary_M[time_bin_index] ) * ( (*syn_p).rho[syn_id] - Mk ) );
+							stim_summary_M[time_bin_index] = Mk;
+							if ((*syn_p).rho[syn_id] > stim_summary_max[time_bin_index]){
+								stim_summary_max[time_bin_index] = (*syn_p).rho[syn_id];
+							} // these are mutually exclusive events, so using elseif to cut number of computations
+							else if ((*syn_p).rho[syn_id] < stim_summary_min[time_bin_index]){
+								stim_summary_min[time_bin_index] = (*syn_p).rho[syn_id];
+							}
+						}
+					}
+					else{
+						// Synapse receives high stim only on Pre- side
+						//int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
+						pre_summary_rho[time_bin_index] += (*syn_p).rho[syn_id];
+						pre_summary_n[time_bin_index]++;
+				 
+						if(pre_summary_n[time_bin_index] == 1){ // initialise on first entry to time bin
+							pre_summary_M[time_bin_index] = (*syn_p).rho[syn_id];
+							//pre_summary_S[time_bin_index] = 0;
+							pre_summary_min[time_bin_index] = (*syn_p).rho[syn_id];
+							pre_summary_max[time_bin_index] = (*syn_p).rho[syn_id];
+						}
+						else{
+							//Mk = Mk-1+ (xk - Mk-1)/k
+							//Sk = Sk-1 + (xk - Mk-1)*(xk - Mk).
+							float Mk;
+							Mk = pre_summary_M[time_bin_index] + ((*syn_p).rho[syn_id] - pre_summary_M[time_bin_index])/pre_summary_n[time_bin_index];
+							pre_summary_S[time_bin_index] = pre_summary_S[time_bin_index] + ((*syn_p).rho[syn_id] - pre_summary_M[time_bin_index]) * ((*syn_p).rho[syn_id] - Mk);
+							pre_summary_M[time_bin_index] = Mk;
+							if ((*syn_p).rho[syn_id] > pre_summary_max[time_bin_index]){
+								pre_summary_max[time_bin_index] = (*syn_p).rho[syn_id];
+							} // these are mutually exclusive events, so using elseif to cut number of computations
+							else if ((*syn_p).rho[syn_id] < pre_summary_min[time_bin_index]){
+								pre_summary_min[time_bin_index] = (*syn_p).rho[syn_id];
+							}
+						}
+					}
+				 }
+				 else if( ( (*syn_p).post_lif[syn_id] < (NO_STIM_LIFS + STIM_OFFSET) ) && ( (*syn_p).post_lif[syn_id] > (STIM_OFFSET-1) ) ){ // Post- stim
+					 // Synapse receives high stim only on post side
+					 //int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
+					 post_summary_rho[time_bin_index] += (*syn_p).rho[syn_id];
+					 post_summary_n[time_bin_index]++;
+				 
+					 if(post_summary_n[time_bin_index] == 1){ // initialise on first entry to time bin
+						 post_summary_M[time_bin_index] = (*syn_p).rho[syn_id];
+						 //post_summary_S[time_bin_index] = 0;
+						 post_summary_min[time_bin_index] = (*syn_p).rho[syn_id];
+						 post_summary_max[time_bin_index] = (*syn_p).rho[syn_id];
+					 }
+					 else{
+						 //Mk = Mk-1+ (xk - Mk-1)/k
+						 //Sk = Sk-1 + (xk - Mk-1)*(xk - Mk).
+						 float Mk;
+						 Mk = post_summary_M[time_bin_index] + ((*syn_p).rho[syn_id] - post_summary_M[time_bin_index])/post_summary_n[time_bin_index];
+						 post_summary_S[time_bin_index] = post_summary_S[time_bin_index] + ((*syn_p).rho[syn_id] - post_summary_M[time_bin_index]) * ((*syn_p).rho[syn_id] - Mk);
+						 post_summary_M[time_bin_index] = Mk;
+						 if ((*syn_p).rho[syn_id] > post_summary_max[time_bin_index]){
+							 post_summary_max[time_bin_index] = (*syn_p).rho[syn_id];
+						 } // these are mutually exclusive events, so using elseif to cut number of computations
+						 else if ((*syn_p).rho[syn_id] < post_summary_min[time_bin_index]){
+							 post_summary_min[time_bin_index] = (*syn_p).rho[syn_id];
+						 }
+					 }
+				 }
+				 else{
+					 // Synapse receives only background stim levels
+					 //int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
+					 non_summary_rho[time_bin_index] += (*syn_p).rho[syn_id];
+					 non_summary_n[time_bin_index]++;
+				 
+					 if(non_summary_n[time_bin_index] == 1){ // initialise on first entry to time bin
+						 non_summary_M[time_bin_index] = (*syn_p).rho[syn_id];
+						 //non_summary_S[time_bin_index] = 0;
+						 non_summary_min[time_bin_index] = (*syn_p).rho[syn_id];
+						 non_summary_max[time_bin_index] = (*syn_p).rho[syn_id];
+					 }
+					 else{
+						 //Mk = Mk-1+ (xk - Mk-1)/k
+						 //Sk = Sk-1 + (xk - Mk-1)*(xk - Mk).
+						 float Mk;
+						 Mk = non_summary_M[time_bin_index] + ((*syn_p).rho[syn_id] - non_summary_M[time_bin_index])/non_summary_n[time_bin_index];
+						 non_summary_S[time_bin_index] = non_summary_S[time_bin_index] + ((*syn_p).rho[syn_id] - non_summary_M[time_bin_index]) * ((*syn_p).rho[syn_id] - Mk);
+						 non_summary_M[time_bin_index] = Mk;
+						 if ((*syn_p).rho[syn_id] > non_summary_max[time_bin_index]){
+							 non_summary_max[time_bin_index] = (*syn_p).rho[syn_id];
+						 } // these are mutually exclusive events, so using elseif to cut number of computations
+						 else if ((*syn_p).rho[syn_id] < non_summary_min[time_bin_index]){
+							 non_summary_min[time_bin_index] = (*syn_p).rho[syn_id];
+						 }
+					 }
+				 }
+			#endif	/* MONITOR_STIM_POPS */
             } // end loop over synapses
-            printf("DEBUG: rhobar_UP %lf, rhobar_DOWN %lf\n", UP_pop_rho[time_bin_index]/UP_pop_n[time_bin_index], DOWN_pop_rho[time_bin_index]/DOWN_pop_n[time_bin_index]);
+			#ifdef MONITOR_UP_DOWN_POPS
+				printf("DEBUG: rhobar_UP %lf, rhobar_DOWN %lf\n", UP_pop_rho[time_bin_index]/UP_pop_n[time_bin_index], DOWN_pop_rho[time_bin_index]/DOWN_pop_n[time_bin_index]);
+			#elseif MONITOR_STIM_POPS
+				printf("DEBUG: rhobar_STIM %lf, rhobar_NON %lf, rhobar_PRE %lf, rhobar_POST %lf\n", stim_summary_rho[time_bin_index]/stim_summary_n[time_bin_index], non_summary_rho[time_bin_index]/non_summary_n[time_bin_index], pre_summary_rho[time_bin_index]/pre_summary_n[time_bin_index], post_summary_rho[time_bin_index]/post_summary_n[time_bin_index]);
+			#endif
         } // end of time-bin check
     } // end of main program loop (over time)
 	//}
@@ -969,7 +1093,8 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 	// Stochastic update
     #ifdef SYN_USE_SUPRATHRESHOLD_TIMESTEP
         // this is where I need to add a time-stepping loop to update the synapse stochastically
-        if (t_upper > 0){
+		printf("ERR: suprathreshold time stepping code incomplete!\n");
+		if (t_upper > 0){
             int time = 0;
             int update_steps = ( t_upper / (*syn_const).dt );
             for (time = 0; time < update_steps; time++){
