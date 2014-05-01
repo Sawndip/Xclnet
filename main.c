@@ -837,8 +837,8 @@ int main (int argc, const char * argv[]) {
                     	}
                 	}
                 } // end DOWN pop monitor update
-			//#endif /* MONITOR_UP_DOWN_POPS */
-			#elseif MONITOR_STIM_POPS
+			#endif /* MONITOR_UP_DOWN_POPS */
+			#ifdef MONITOR_STIM_POPS
 				//Update multisynapse summary variables
 				if( ( (*syn_p).pre_lif[syn_id] < (NO_STIM_LIFS + STIM_OFFSET) ) && ( (*syn_p).pre_lif[syn_id] > (STIM_OFFSET-1) ) ){ // Pre- stim
 					if( ( (*syn_p).post_lif[syn_id] < (NO_STIM_LIFS + STIM_OFFSET) ) && ( (*syn_p).post_lif[syn_id] > (STIM_OFFSET-1) ) ){ // Post- stim
@@ -954,9 +954,10 @@ int main (int argc, const char * argv[]) {
             } // end loop over synapses
 			#ifdef MONITOR_UP_DOWN_POPS
 				printf("DEBUG: rhobar_UP %lf, rhobar_DOWN %lf\n", UP_pop_rho[time_bin_index]/UP_pop_n[time_bin_index], DOWN_pop_rho[time_bin_index]/DOWN_pop_n[time_bin_index]);
-			#elseif MONITOR_STIM_POPS
+			#endif /* MONITOR_UP_DOWN_POPS */
+			#ifdef MONITOR_STIM_POPS
 				printf("DEBUG: rhobar_STIM %lf, rhobar_NON %lf, rhobar_PRE %lf, rhobar_POST %lf\n", stim_summary_rho[time_bin_index]/stim_summary_n[time_bin_index], non_summary_rho[time_bin_index]/non_summary_n[time_bin_index], pre_summary_rho[time_bin_index]/pre_summary_n[time_bin_index], post_summary_rho[time_bin_index]/post_summary_n[time_bin_index]);
-			#endif
+			#endif /* MONITOR_STIM_POPS */
         } // end of time-bin check
     } // end of main program loop (over time)
 	//}
