@@ -240,6 +240,9 @@ int main (int argc, const char * argv[]) {
 	#ifdef SYN_USE_RAND_UNIFORM_INITIALISATION
 		long uniform_synaptic_seed = UNIFORM_SYNAPTIC_SEED;
 	#endif
+    #ifdef SYN_USE_INVIVO_DOUBLE_WELL_INITIALISATION
+        long uniform_synaptic_seed = UNIFORM_SYNAPTIC_SEED;
+    #endif
 	//long gaussian_lif_seed = (GAUSSIAN_SYNAPTIC_SEED - 1);
 	
 	clock_t start_t,finish_t;
@@ -1116,8 +1119,8 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 	// Stochastic update
     #ifdef SYN_USE_SUPRATHRESHOLD_TIMESTEP
         // this is where I need to add a time-stepping loop to update the synapse stochastically
-		printf("ERR: suprathreshold time stepping code incomplete!\n");
-        float rho = (*syn).rho[synID];
+		//printf("ERR: suprathreshold time stepping code incomplete!\n");
+        float rho = (*syn).rho[syn_id];
         float drho;
         float noise;
         double rnd;
@@ -1127,7 +1130,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
             int update_steps = ( t_upper / (*syn_const).dt );
             for (time = 0; time < update_steps; time++){
                 // update synapse here
-                drho = (-rho * (1-rho) * (0.5-rho)) + (gamma_upper (1-rho)) - (gamma_lower * rho);
+                drho = (-rho * (1-rho) * (0.5-rho)) + (gamma_upper * (1-rho)) - (gamma_lower * rho);
                 drho /= (*syn_const).tau;
                 rnd = gasdev(&gaussian_synaptic_seed);
                 noise = sqrt(2) * (*syn_const).sigma * sqrt( (*syn_const).dt / (*syn_const).tau ) * rnd;
@@ -1139,7 +1142,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
             int update_steps = ( t_lower / (*syn_const).dt );
             for (time = 0; time < update_steps; time++){
                 // update synapse here
-                drho = (-rho * (1-rho) * (0.5-rho)) + (gamma_upper (1-rho)) - (gamma_lower * rho);
+                drho = (-rho * (1-rho) * (0.5-rho)) + (gamma_upper * (1-rho)) - (gamma_lower * rho);
                 drho /= (*syn_const).tau;
                 rnd = gasdev(&gaussian_synaptic_seed);
                 noise = (*syn_const).sigma * sqrt( (*syn_const).dt / (*syn_const).tau ) * rnd;
