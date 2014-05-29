@@ -561,8 +561,10 @@ int main (int argc, const char * argv[]) {
 				#ifdef DEBUG_MODE_SPIKES
 					printf("Pre Spike (LIF %d) \n", (*spike_queue_p).neuron_id[offset][i]);
 				#endif /* DEBUG_MODE_SPIKES */
-				//TODO: reenable updateEventBasedSynapse here
-				updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).outgoing_synapse_index[ (*spike_queue_p).neuron_id[offset][i] ][k], j);
+                #ifdef ENABLE_SYNAPSE_UPDATES
+                    //TODO: reenable updateEventBasedSynapse here
+                    updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).outgoing_synapse_index[ (*spike_queue_p).neuron_id[offset][i] ][k], j);
+                #endif /* ENABLE_SYNAPSE_UPDATES */
 			}
 		}
 		// Event-based 2 (Reset delayed event queue)
@@ -613,27 +615,38 @@ int main (int argc, const char * argv[]) {
 					#ifdef DEBUG_MODE_SPIKES
 						printf("Post Spike (LIF %d) \n", i);
 					#endif /* DEBUG_MODE_SPIKES */
-					//TODO: reenable updateEventBasedSynapse here
-					updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).incoming_synapse_index[i][k], j);
-					//if(i==0){
-					//	printf("backprop to pre-lif synapse(%d)\n", (*lif_p).incoming_synapse_index[i][k]);
-					//}
+                    #ifdef ENABLE_SYNAPSE_UPDATES
+                        //TODO: reenable updateEventBasedSynapse here
+                        updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).incoming_synapse_index[i][k], j);
+                        //if(i==0){
+                        //	printf("backprop to pre-lif synapse(%d)\n", (*lif_p).incoming_synapse_index[i][k]);
+                        //}
+                    #endif /* ENABLE_SYNAPSE_UPDATES */
 				}
 				// Transfer voltage change to post-synaptic neurons
 				for ( k = 0; k < (*lif_p).no_outgoing_ee_synapses[i]; k++){
 					// across plastic synapses
-					// Event-based 4 (Update synapse: Update in advance of current transfer)
-					//TODO: reenable updateEventBasedSynapse here
-					updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).outgoing_synapse_index[i][k], j);
-					//#ifdef DEBUG_MODE_NETWORK
+                    #ifdef ENABLE_SYNAPSE_UPDATES
+                        // Event-based 4 (Update synapse: Update in advance of current transfer)
+                        //TODO: reenable updateEventBasedSynapse here
+                        updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).outgoing_synapse_index[i][k], j);
+                    #endif /* ENABLE_SYNAPSE_UPDATES */
+                    //#ifdef DEBUG_MODE_NETWORK
 						//Debug code
 						if ((*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]] == RECORDER_NEURON_ID){
 							//local_count++;
 							//TODO: change plastic versus fixed transfer voltage here
-							lif_currents_EE[j] += transfer_voltage * (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
-							//lif_currents_EE[j] += transfer_voltage * SYN_RHO_FIXED; //(*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
-							//lif_currents_EE[j] += transfer_voltage * (*syn_p).rho_initial[(*lif_p).outgoing_synapse_index[i][k]];
-							
+                            #ifndef ENABLE_FIXED_TRANSFERS
+                                lif_currents_EE[j] += transfer_voltage * (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
+                            #endif /* ENABLE_FIXED_TRANSFERS */
+                            #ifdef ENABLE_FIXED_TRANSFERS
+                                #ifndef ENABLE_TRANSFER_RHO_INITIAL
+                                    lif_currents_EE[j] += transfer_voltage * SYN_RHO_FIXED; //(*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
+                                #endif /* ENABLE_TRANSFER_RHO_INITIAL */
+                                #ifdef ENABLE_TRANSFER_RHO_INITIAL
+                                    lif_currents_EE[j] += transfer_voltage * (*syn_p).rho_initial[(*lif_p).outgoing_synapse_index[i][k]];
+                                #endif /* ENABLE_TRANSFER_RHO_INITIAL */
+                            #endif /* ENABLE_FIXED_TRANSFERS */
 							//printf("DEBUG: synaptic transfer voltage: %f, rho: %f, transfer voltage: %fc\n", (transfer_voltage * (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]]), (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]], transfer_voltage);
 							//printf("DEBUG: total transfer voltage: %f, time: %f\n", lif_currents_EE[j], (j * LIF_DT));
 							local_count++;
@@ -643,10 +656,18 @@ int main (int argc, const char * argv[]) {
 						printf("Spike transfer (LIF %d) \n", i);
 					#endif /* DEBUG_MODE_SPIKES */
 					//TODO: change plastic versus fixed transfer voltage here
-					(*lif_p).I[(*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]]] += transfer_voltage * (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
-					//(*lif_p).I[(*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]]] += transfer_voltage * SYN_RHO_FIXED; //(*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
-					//(*lif_p).I[(*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]]] += transfer_voltage * (*syn_p).rho_initial[(*lif_p).outgoing_synapse_index[i][k]];
-					/*if(i==0){
+					#ifndef ENABLE_FIXED_TRANSFERS
+                        (*lif_p).I[(*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]]] += transfer_voltage * (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
+                    #endif /* ENABLE_FIXED_TRANSFERS */
+                    #ifdef ENABLE_FIXED_TRANSFERS
+                        #ifndef ENABLE_TRANSFER_RHO_INITIAL
+                            (*lif_p).I[(*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]]] += transfer_voltage * SYN_RHO_FIXED; //(*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]];
+                        #endif /* ENABLE_TRANSFER_RHO_INITIAL */
+                        #ifdef ENABLE_TRANSFER_RHO_INITIAL
+                            (*lif_p).I[(*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]]] += transfer_voltage * (*syn_p).rho_initial[(*lif_p).outgoing_synapse_index[i][k]];
+                        #endif /* ENABLE_TRANSFER_RHO_INITIAL */
+                    #endif /* ENABLE_FIXED_TRANSFERS */
+                    /*if(i==0){
 						printf("current transfer, I: %f, to post-synaptic neuron(%d)\n", (transfer_voltage * (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]]), (*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]]);
 					}*/				
 				}

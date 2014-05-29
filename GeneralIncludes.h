@@ -7,6 +7,10 @@
 //#define DEBUG_MODE_SPIKES // screen display of spike transfers
 //#define DEBUG_MODE_SYNAPSE // screen display of synapse updates
 
+#define ENABLE_SYNAPSE_UPDATES
+#define ENABLE_FIXED_TRANSFERS
+//#define ENABLE_TRANSFER_RHO_INITIAL
+
 //#define SYN_USE_SUPRATHRESHOLD_TIMESTEP
 #define SYN_USE_FLAT_POTENTIAL
 #define SYN_USE_HARD_BOUNDS
@@ -35,7 +39,7 @@
 #define GAUSSIAN_SYNAPTIC_SEED (-12)
 #define UNIFORM_SYNAPTIC_SEED (-11)
 
-#define MAX_TIME_STEPS (120000000) /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
+#define MAX_TIME_STEPS (720000000) /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
 
 // Network schema
 #define NO_EXC (8000) /*(400)*/ /*(10000)*/
@@ -50,8 +54,8 @@
 
 
 // Stimulation of subpopulation /* using secs despite inconsistency with other parameter units */
-#define STIM_ON (200.)
-#define STIM_OFF (203.)
+#define STIM_ON (0.)
+#define STIM_OFF (0.)
 #define J_STIM (24.55) /*24.55mV approx 50Hz, 34.8mV approx 100Hz*/
 #define NO_STIM_LIFS (100)
 #define STIM_OFFSET (0)
