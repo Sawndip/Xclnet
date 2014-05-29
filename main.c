@@ -767,7 +767,8 @@ int main (int argc, const char * argv[]) {
 		 */
 		
 		// Event-based 6 (Update event queue offset variable)
-		offset = (++offset) % (*syn_const_p).delay;
+        offset++; // moved out of evaluation below due to compiler issue
+		offset = (offset) % (*syn_const_p).delay;
 		j++;
 		(*lif_p).time_step = j;
         
