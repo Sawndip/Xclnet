@@ -1117,20 +1117,36 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
     #ifdef SYN_USE_SUPRATHRESHOLD_TIMESTEP
         // this is where I need to add a time-stepping loop to update the synapse stochastically
 		printf("ERR: suprathreshold time stepping code incomplete!\n");
+        float rho = (*syn).rho[synID];
+        float drho;
+        float noise;
+        double rnd;
+    
 		if (t_upper > 0){
             int time = 0;
             int update_steps = ( t_upper / (*syn_const).dt );
             for (time = 0; time < update_steps; time++){
                 // update synapse here
+                drho = (-rho * (1-rho) * (0.5-rho)) + (gamma_upper (1-rho)) - (gamma_lower * rho);
+                drho /= (*syn_const).tau;
+                rnd = gasdev(&gaussian_synaptic_seed);
+                noise = sqrt(2) * (*syn_const).sigma * sqrt( (*syn_const).dt / (*syn_const).tau ) * rnd;
+                rho = rho + (drho * (*syn_const).dt) + noise;
             }
         }
         if (t_lower > 0){
             int time = 0;
-            int update_steps = ( t_upper / (*syn_const).dt );
+            int update_steps = ( t_lower / (*syn_const).dt );
             for (time = 0; time < update_steps; time++){
                 // update synapse here
+                drho = (-rho * (1-rho) * (0.5-rho)) + (gamma_upper (1-rho)) - (gamma_lower * rho);
+                drho /= (*syn_const).tau;
+                rnd = gasdev(&gaussian_synaptic_seed);
+                noise = (*syn_const).sigma * sqrt( (*syn_const).dt / (*syn_const).tau ) * rnd;
+                rho = rho + (drho * (*syn_const).dt) + noise;
             }
         }
+        w = rho;
     #else // use the event-based update
 	double rnd;
 	if (t_upper > 0){
