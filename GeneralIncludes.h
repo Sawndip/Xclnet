@@ -50,8 +50,8 @@
 
 
 // Stimulation of subpopulation /* using secs despite inconsistency with other parameter units */
-#define STIM_ON (0.)
-#define STIM_OFF (0.)
+#define STIM_ON (200.)
+#define STIM_OFF (203.)
 #define J_STIM (24.55) /*24.55mV approx 50Hz, 34.8mV approx 100Hz*/
 #define NO_STIM_LIFS (100)
 #define STIM_OFFSET (0)
