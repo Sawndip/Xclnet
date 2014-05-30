@@ -1142,7 +1142,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
             int update_steps = ( t_lower / (*syn_const).dt );
             for (time = 0; time < update_steps; time++){
                 // update synapse here
-                drho = (-rho * (1-rho) * (0.5-rho)) + (gamma_upper * (1-rho)) - (gamma_lower * rho);
+                drho = (-rho * (1-rho) * (0.5-rho)) - (gamma_lower * rho);
                 drho /= (*syn_const).tau;
                 rnd = gasdev(&gaussian_synaptic_seed);
                 noise = (*syn_const).sigma * sqrt( (*syn_const).dt / (*syn_const).tau ) * rnd;
@@ -1275,7 +1275,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
         else{
             (*syn).rho[syn_id] = 0;
         }
-    #endif
+    #endif /* SYN_USE_HARD_BOUNDS */
 	
 	if(syn_id == RECORDER_SYNAPSE_ID){
 		// Print state of a single synapse
