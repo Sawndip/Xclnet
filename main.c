@@ -182,31 +182,6 @@ unsigned int generateNetwork(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynaps
 	//printf("Time taken: %f, ", totaltime);
 	printf("Total EE synapses: %d, total fixed synapses: %d\n", total_ee_synapses, total_fixed_synapses);
 	
-	/*printf("No of LIFs to be manipulated: %d, removing duplicates...", no_injection_lifs);
-	// Remove duplicates from list of LIFs to be manipulated
-	for(int i = 0; i < no_injection_lifs; i++){
-		for(int j = i+1; j < no_injection_lifs; j++){
-			if(lif_injection_list[i] == lif_injection_list[j]){
-				lif_injection_list[j] = lif_injection_list[no_injection_lifs-1];
-				no_injection_lifs--;
-				//printf("DEBUG: no_injection_lifs %d, reading i %d, removing j %d, value %d, new_value %d\n", no_injection_lifs, i, j, lif_injection_list[i], lif_injection_list[j]);
-			}
-		}
-		//printf("%d %d\n", i, lif_injection_list[i]);
-	}
-	// Resize list of manipulation LIFs
-	lif_injection_list = realloc(lif_injection_list, sizeof(unsigned int) * no_injection_lifs);
-	 */
-	
-	/*printf("Presumed no of current manipulation LIFs (may double count): %d\n", no_injection_lifs);
-	no_injection_lifs = 0;
-	for(int i = 0; i < NO_LIFS; i++){
-		if((*lif_p).subpopulation_flag[i] == 1){
-			//printf("DEBUG: i: %d\n", i);
-			no_injection_lifs++;
-		}
-	}
-	printf("Actual no of current manipulation LIFs: %d\n", no_injection_lifs);*/
 	
 	// Shrink memory reserved to required sizes
 	(*syn_p).pre_lif = realloc((*syn_p).pre_lif, sizeof(signed int) * total_ee_synapses);
@@ -259,11 +234,6 @@ int main (int argc, const char * argv[]) {
 	cl_LIFNeuron lif;
 	cl_LIFNeuron *lif_p = &lif;
 	
-    //These guys get initialise as maps to device memory now (below)
-	//(*lif_p).V = malloc(sizeof(float) * NO_LIFS);
-	//(*lif_p).I = malloc(sizeof(float) * NO_LIFS);
-	//(*lif_p).gauss = calloc(NO_LIFS, sizeof(float));
-	//(*lif_p).time_since_spike = calloc(NO_LIFS, sizeof(unsigned int));
     
 	(*lif_p).time_of_last_spike = calloc(NO_LIFS, sizeof(unsigned int));
 	
@@ -312,34 +282,7 @@ int main (int argc, const char * argv[]) {
 	//(*syn_const_p).no_syns = NO_SYNS;
 	(*cl_syn_p).job_size = (*syn_const_p).no_syns;
 	printf("Network generated, jobsize: %d, generation time: %f\n", (*cl_syn_p).job_size, totaltime);	
-	//DEBUGGING code: print network description using different mapping approaches
-	// Traverse pre-synaptic neurons
-	/*for(int i = 0; i < NO_LIFS; i++){
-		for(int j = 0; j < (*lif_p).no_outgoing_ee_synapses[i]; j++){
-			printf("LIF(%d) -> LIF(%d), via Synapse(%d), no outgoing %d, no EE outgoing: %d\n", i, (*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][j]], (*lif_p).outgoing_synapse_index[i][j], (*lif_p).no_outgoing_synapses[i], (*lif_p).no_outgoing_ee_synapses[i]);
-		}
-		for(int j = (*lif_p).no_outgoing_ee_synapses[i]; j < (*lif_p).no_outgoing_synapses[i]; j++){
-			printf("LIF(%d) -> LIF(%d), via fixed Synapse(%d), no outgoing %d, no EE outgoing: %d\n", i, (*fixed_syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][j]-(*syn_const_p).no_syns], ((*lif_p).outgoing_synapse_index[i][j] - (*syn_const_p).no_syns), (*lif_p).no_outgoing_synapses[i], (*lif_p).no_outgoing_ee_synapses[i]);
-		}
-	} */ /*
-	printf("---------------\n");
-	// Traverse post-synaptic neurons
-	for(int i = 0; i < NO_LIFS; i++){
-		for(int j = 0; j < (*lif_p).no_incoming_synapses[i]; j++){
-			printf("LIF(%d) <- LIF(%d), via Synapse(%d), no incoming %d\n", i, (*syn_p).pre_lif[(*lif_p).incoming_synapse_index[i][j]], (*lif_p).incoming_synapse_index[i][j], (*lif_p).no_incoming_synapses[i]);
-			
-		}
-	} */ /*
-	printf("---------------\n");
-	// Traverse synapses
-	for(int i = 0; i < (*syn_const_p).no_syns; i++){
-		printf("Synapse(%d) links LIF(%d) -> LIF(%d)\n", i, (*syn_p).pre_lif[i], (*syn_p).post_lif[i]);
-	}
-	for(int i = 0; i < (*fixed_syn_p).total_fixed_synapses; i++){
-		printf("Fixed Synapse(%d) links to LIF(%d)\n", i, (*fixed_syn_p).post_lif[i]);
-	}*/
-	//End DEBUGGING code
-	//End network generation
+
 	
 	(*syn_p).rho = malloc(sizeof(float) * (*syn_const_p).no_syns);
 	(*syn_p).rho_initial = malloc(sizeof(float) * (*syn_const_p).no_syns);
@@ -379,10 +322,7 @@ int main (int argc, const char * argv[]) {
 	//for LIF
 	cl_MarsagliaStruct rnd_lif;
 	cl_MarsagliaStruct *rnd_lif_p = &rnd_lif;
-	/*(*rnd_lif_p).d_z = malloc((*lif_p).no_lifs * sizeof(unsigned int));
-	(*rnd_lif_p).d_w = malloc((*lif_p).no_lifs * sizeof(unsigned int));
-	(*rnd_lif_p).d_jsr = malloc((*lif_p).no_lifs * sizeof(unsigned int));
-	(*rnd_lif_p).d_jcong = malloc((*lif_p).no_lifs * sizeof(unsigned int));*/
+
 	//for Synapse
 	cl_MarsagliaStruct rnd_syn;
 	cl_MarsagliaStruct *rnd_syn_p = &rnd_syn;
@@ -430,12 +370,7 @@ int main (int argc, const char * argv[]) {
         (*lif_p).V[i] = (float)LIF_V_INITIAL;
         (*lif_p).I[i] = external_voltage;
         (*lif_p).time_since_spike[i] = (*lif_p).refrac_time;
-        /*(*rnd_lif_p).d_z[i] = 362436069 + i + 1 + PARALLEL_SEED;
-         (*rnd_lif_p).d_w[i] = 521288629 + i + 1 + PARALLEL_SEED;
-         (*rnd_lif_p).d_jsr[i] = 123456789 + i + 1 + PARALLEL_SEED;
-         (*rnd_lif_p).d_jcong[i] = 380116160 + i + 1 + PARALLEL_SEED;*/
-	
-        //(*lif_p).gauss[i] = gasdev(&gaussian_lif_seed);
+
     }
 	for( i = 0; i < (*syn_const_p).no_syns; i++){
 		//TODO: set rho_initial here
@@ -470,25 +405,16 @@ int main (int argc, const char * argv[]) {
 	if( enqueueLifInputBuf(cl_lif_p, lif_p, rnd_lif_p) == EXIT_FAILURE){
 		return EXIT_FAILURE;
 	}
-	/*if( enqueueSynInputBuf(cl_syn_p, syn_p, syn_const_p, rnd_syn_p) == EXIT_FAILURE){
-		return EXIT_FAILURE;
-	}*/
     
     
 	
 	if( setLifKernelArgs(cl_lif_p, lif_p) == EXIT_FAILURE){
 		return EXIT_FAILURE;
 	}
-	/*if( setSynKernelArgs(cl_syn_p, syn_p, syn_const_p) == EXIT_FAILURE){
-		return EXIT_FAILURE;
-	}*/
 	
 	if( getMaxWorkSize(cl_lif_p) == EXIT_FAILURE){
 		return EXIT_FAILURE;
 	}
-	/*if( getMaxWorkSize(cl_syn_p) == EXIT_FAILURE){
-		return EXIT_FAILURE;
-	}*/	
 	
 	
 	// Do the OpenCL processing
@@ -512,33 +438,13 @@ int main (int argc, const char * argv[]) {
 		if( enqueueLifKernel(cl_lif_p) == EXIT_FAILURE){
 			return EXIT_FAILURE;
 		}
-		//Re-enabled waitForKernel() every 10^8 timesteps in the hope that this will free Nvidia memory store,
-		//  it didn't!
-		//if((j % 100000000) == 0){
-		/*if((j % 1000000) == 0){
-			printf("DEBUG: calling clFinish() on the command queue, timestep: %d\n", j);
-            fflush(stdout);
-			if( waitForKernel(cl_lif_p) == EXIT_FAILURE){
-				return EXIT_FAILURE;
-			}
-		}*/
+
 		// Read the OpenCL output
 		if( enqueueLifOutputBuf(cl_lif_p, lif_p, rnd_lif_p) == EXIT_FAILURE){
 			return EXIT_FAILURE;
 		}
 		
-		/*
-		// -----Process Synapse Kernel-----
-		if( enqueueSynKernel(cl_syn_p) == EXIT_FAILURE){
-			return EXIT_FAILURE;
-		}	
-		waitForKernel(cl_syn_p);
-		// Read the OpenCL output
-		if( enqueueSynOutputBuf(cl_syn_p, syn_p, syn_const_p, rnd_syn_p) == EXIT_FAILURE){
-			return EXIT_FAILURE;
-		}
-		 */
-		 
+	 
 	
 		// Output results
 		#ifdef DEBUG_MODE_MAIN
@@ -605,11 +511,7 @@ int main (int argc, const char * argv[]) {
 				isi = ( j - (*lif_p).time_of_last_spike[i] ) * (*lif_p).dt;
 				(*lif_p).time_of_last_spike[i] = j;
 				
-				//CONSIDER: using local variables to point to I[], post_lif[], Jx[], etc. it cuts down on dereferencing!
-				//TODO: strongly consider implementing parallel spike transfer system
-				/*if(i==0){
-					printf("%d spiked\n", i);
-				}*/
+
 				// Event-based 3 (Update synapse: Backpropagation to synapse)
 				// Post-synaptic spike should backpropagate to its synapses with no delay
 				for ( k = 0; k < (*lif_p).no_incoming_synapses[i]; k++){
@@ -650,8 +552,7 @@ int main (int argc, const char * argv[]) {
                                     lif_currents_EE[j] += transfer_voltage * (*syn_p).rho_initial[(*lif_p).outgoing_synapse_index[i][k]];
                                 #endif /* ENABLE_TRANSFER_RHO_INITIAL */
                             #endif /* ENABLE_FIXED_TRANSFERS */
-							//printf("DEBUG: synaptic transfer voltage: %f, rho: %f, transfer voltage: %fc\n", (transfer_voltage * (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]]), (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]], transfer_voltage);
-							//printf("DEBUG: total transfer voltage: %f, time: %f\n", lif_currents_EE[j], (j * LIF_DT));
+
 							local_count++;
 						}
 					//#endif /* DEBUG_MODE_NETWORK */
@@ -670,9 +571,7 @@ int main (int argc, const char * argv[]) {
                             (*lif_p).I[(*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]]] += transfer_voltage * (*syn_p).rho_initial[(*lif_p).outgoing_synapse_index[i][k]];
                         #endif /* ENABLE_TRANSFER_RHO_INITIAL */
                     #endif /* ENABLE_FIXED_TRANSFERS */
-                    /*if(i==0){
-						printf("current transfer, I: %f, to post-synaptic neuron(%d)\n", (transfer_voltage * (*syn_p).rho[(*lif_p).outgoing_synapse_index[i][k]]), (*syn_p).post_lif[(*lif_p).outgoing_synapse_index[i][k]]);
-					}*/				
+			
 				}
 				for ( k = (*lif_p).no_outgoing_ee_synapses[i]; k < (*lif_p).no_outgoing_synapses[i]; k++){
 					// across fixed synapses
@@ -709,16 +608,7 @@ int main (int argc, const char * argv[]) {
 				//Print to raster file
 				print_raster_spike(j, i, isi);
 				
-				// Add to average spiking activity bins
-				/*if( (i < (NO_STIM_LIFS + STIM_OFFSET)) && (i > (STIM_OFFSET-1) ) ){ //Stim pop
-					lif_injection_spikes[(int) ( ( (*lif_p).dt / BIN_SIZE) * j + EPSILLON)]++;
-				}
-				else if(i < NO_EXC){ //Non-stim pop
-					summary_exc_spikes[(int)( ( (*lif_p).dt / BIN_SIZE ) * j + EPSILLON)]++;
-				}
-				else{ //INH pop
-					summary_inh_spikes[(int)( ( (*lif_p).dt / BIN_SIZE ) * j + EPSILLON)]++;
-				}*/
+
 				//CONSIDER: using Kahan formula for addition here to improve accuracy
 				// for now double is sufficient, it works to greater than 1 billion spikes per bin
                 if( i > (NO_EXC - 1)){ //INH pop
@@ -731,29 +621,11 @@ int main (int argc, const char * argv[]) {
 					lif_injection_spikes[(int) ( ( (*lif_p).dt / BIN_SIZE) * j + EPSILLON)]++;
 				}
 			} // end of handling spike
-			// Pre-synaptic spike propagates across synapse after delay
-			// Alternative to event queue system, assumes only 1 spike can occur in delay period
-			// Only one of these two systems can be used at a time, currently using event queue system
-			/*else if((*lif_p).time_since_spike[i] == (*syn_const_p).delay){
-				for ( k = 0; k < (*lif_p).no_outgoing_synapses[i]; k++){
-					(*syn_p).preT[(*lif_p).outgoing_synapse_index[i][k]] = 1;
-					if(i==0){
-						printf("Delayed spike transferred to post-lif synapse(%d)\n", (*lif_p).outgoing_synapse_index[i][k]);
-					}
-				}
-			}
-			*/
 		} // end of loop over neurons
-		//printf("count: %d\n", local_count);
-		
-		//printf("local_count: %d, time: %f\n", local_count, (j*LIF_DT));
-		
+
 		// Print total I to intracellular recorder file
 		fprintf(intracellular_output, "%f %f %f %f %f\n", (*lif_p).I[RECORDER_NEURON_ID], lif_currents_EE[j], lif_currents_IE[j], lif_currents_EI[j], lif_currents_II[j]);
-		
-		// Print state of a single synapse
-		// Moved to updateEventBasedSynapse()
-		//print_synapse_activity(j, syn_p); 
+
 		
 		
 		#ifdef DEBUG_MODE_MAIN
@@ -778,17 +650,9 @@ int main (int argc, const char * argv[]) {
         
 		
 		// Setup next LIF Kernel
-		// this is the part I was able to comment out and sim still worked! (most of the time!)
-        // TODO: test which systems I can comment out the following on and still have a working simulator
 		if( enqueueLifInputBuf(cl_lif_p, lif_p, rnd_lif_p) == EXIT_FAILURE){
 			return EXIT_FAILURE;
 		}
-		/*
-		// Setup next Synapse Kernel
-		if( enqueueSynInputBuf(cl_syn_p, syn_p, syn_const_p, rnd_syn_p) == EXIT_FAILURE){
-			return EXIT_FAILURE;
-		}
-		 */
 		
 		// Event-based 6 (Update event queue offset variable)
         offset++; // moved out of evaluation below due to compiler issue
@@ -799,10 +663,6 @@ int main (int argc, const char * argv[]) {
         // At the end of every time bin record summary statistics for synapses (this was previously done in an on spiking manner)
         if( ( j % (int)( (float)((BIN_SIZE / (*lif_p).dt) + EPSILLON)) ) == 0 ){ // yes, the ugly double cast is necessary for accuracy
             printf("DEBUG: end of bin, j: %d, modulo argument: %d\n", j, (int)(float)((BIN_SIZE / (*lif_p).dt) + EPSILLON));
-            //summary_inh_spikes[(int)( ( (*lif_p).dt / BIN_SIZE ) * j + EPSILLON)]++;
-            // loop over all synapses
-            // calculate mean rho and stdev of rho
-            // save in pop variables or output to file
             
             int time_bin_index = (int)( ( (*syn_const_p).dt / BIN_SIZE ) * j + EPSILLON);
             
@@ -995,8 +855,6 @@ int main (int argc, const char * argv[]) {
 	
 	printf("Simulation finished, printing summary of network activity...\n");
 	// Print summary of excitatory and inhibitory activity
-	//CONSIDER: cycling through all synapses (not just recorder synapses) to do a final update of their states
-	//TODO: disable updating of stimulated synapses here
 	for (i = 0; i < NO_STIM_LIFS; i++){
 		for(k = 0; k < (*lif_p).no_outgoing_ee_synapses[i + STIM_OFFSET]; k++){ // Update stim synapses originating in stim pop
 			//updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).outgoing_synapse_index[i + STIM_OFFSET][k], j);
@@ -1007,10 +865,7 @@ int main (int argc, const char * argv[]) {
 			}
 		}
 	}
-	//TODO: reenable final update of single recorder synapse here
-	/*if(RECORDER_SYNAPSE_ID < (*syn_const_p).no_syns){
-		updateEventBasedSynapse(syn_p, syn_const_p, RECORDER_SYNAPSE_ID, j);
-	}*/
+
 	print_network_summary_activity();
 	printf("done.\nAnd final state of synapses...");
 	// Print final state of synapse strengths
@@ -1028,7 +883,6 @@ int main (int argc, const char * argv[]) {
 	reporters_close();
 	
     shutdownLifKernel(cl_lif_p);
-	//shutdownSynKernel(cl_syn_p);
 	
 	freeMemory(lif_p, syn_p, fixed_syn_p, spike_queue_p);
 	
@@ -1046,10 +900,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 	float gamma_upper = fmax((*syn_const).gamma_d, (*syn_const).gamma_p); //what??? We're always assuming that the gamma related to the upper threshold is greater than gamma for the lower threshold
 	float gamma_lower = fmin((*syn_const).gamma_d, (*syn_const).gamma_p);
 	float gamma_sum = gamma_upper + gamma_lower;
-	/*float theta_upper = (*syn_const).theta_p;
-	float theta_lower = (*syn_const).theta_d;
-	float gamma_upper = (*syn_const).theta_p;
-	float gamma_lower = (*syn_const).theta_d;*/
+
 	float w_stoch, w_deter, w;
 	float c_initial, c_end;
 	
@@ -1200,17 +1051,7 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
     #ifdef SYN_USE_FLAT_POTENTIAL
         t_deter = 0;
     #endif /* SYN_USE_FLAT_POTENTIAL */
-	//TODO: comment out following section if double-well desired
-	// Deterministic update for piecewise-quadratic potential well
-	/*if (t_deter > 0){
-	 if ( w < 0.5){
-	 w_deter = w * exp(-t_deter / (*syn_const).tau);
-	 }
-	 else{
-	 w_deter = 1 + (w - 1) * exp(-t_deter / (*syn_const).tau);
-	 }
-	 w = w_deter;
-	 }*/
+
 	// Deterministic update for double-well potential
 	if (t_deter > 0){
 		float X_0 = pow(w - 0.5, 2) / ( w * (w - 1));
@@ -1281,186 +1122,11 @@ void updateEventBasedSynapse(cl_Synapse *syn, SynapseConsts *syn_const, int syn_
 		// Print state of a single synapse
 		print_synapse_activity(current_time, syn);
 	}
-	
-    // Moved monitor to periodic updating for all synapses in main program loop
-	// Monitor pop which begins life in UP state
-	/*if( (*syn).initially_UP[syn_id] == 1 ){
-		int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
-		UP_pop_rho[time_bin_index] += (*syn).rho[syn_id];
-		UP_pop_n[time_bin_index]++;
-		
-		if(UP_pop_n[time_bin_index] == 1){ // initialise on first entry to time bin
-			UP_pop_M[time_bin_index] = (*syn).rho[syn_id];
-			//stim_summary_S[time_bin_index] = 0; //done via calloc()
-			UP_pop_min[time_bin_index] = (*syn).rho[syn_id];
-			UP_pop_max[time_bin_index] = (*syn).rho[syn_id];
-		}
-		else{
-			//Mk = Mk-1+ (xk - Mk-1)/k
-			//Sk = Sk-1 + (xk - Mk-1)*(xk - Mk).
-			float Mk;
-			Mk = UP_pop_M[time_bin_index] + ( ( (*syn).rho[syn_id] - UP_pop_M[time_bin_index] ) / UP_pop_n[time_bin_index] );
-			UP_pop_S[time_bin_index] = UP_pop_S[time_bin_index] + ( ( (*syn).rho[syn_id] - UP_pop_M[time_bin_index] ) * ( (*syn).rho[syn_id] - Mk ) );
-			UP_pop_M[time_bin_index] = Mk;
-			if ((*syn).rho[syn_id] > UP_pop_max[time_bin_index]){
-				UP_pop_max[time_bin_index] = (*syn).rho[syn_id];
-			} // these are mutually exclusive events, so using elseif to cut number of computations
-			else if ((*syn).rho[syn_id] < UP_pop_min[time_bin_index]){
-				UP_pop_min[time_bin_index] = (*syn).rho[syn_id];
-			}
-		}	
-	}
-	// Monitor pop which begins life in DOWN state
-	else{
-		int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
-		DOWN_pop_rho[time_bin_index] += (*syn).rho[syn_id];
-		DOWN_pop_n[time_bin_index]++;
-		
-		if(DOWN_pop_n[time_bin_index] == 1){ // initialise on first entry to time bin
-			DOWN_pop_M[time_bin_index] = (*syn).rho[syn_id];
-			//stim_summary_S[time_bin_index] = 0; //done via calloc()
-			DOWN_pop_min[time_bin_index] = (*syn).rho[syn_id];
-			DOWN_pop_max[time_bin_index] = (*syn).rho[syn_id];
-		}
-		else{
-			//Mk = Mk-1+ (xk - Mk-1)/k
-			//Sk = Sk-1 + (xk - Mk-1)*(xk - Mk).
-			float Mk;
-			Mk = DOWN_pop_M[time_bin_index] + ( ( (*syn).rho[syn_id] - DOWN_pop_M[time_bin_index] ) / DOWN_pop_n[time_bin_index] );
-			DOWN_pop_S[time_bin_index] = DOWN_pop_S[time_bin_index] + ( ( (*syn).rho[syn_id] - DOWN_pop_M[time_bin_index] ) * ( (*syn).rho[syn_id] - Mk ) );
-			DOWN_pop_M[time_bin_index] = Mk;
-			if ((*syn).rho[syn_id] > DOWN_pop_max[time_bin_index]){
-				DOWN_pop_max[time_bin_index] = (*syn).rho[syn_id];
-			} // these are mutually exclusive events, so using elseif to cut number of computations
-			else if ((*syn).rho[syn_id] < DOWN_pop_min[time_bin_index]){
-				DOWN_pop_min[time_bin_index] = (*syn).rho[syn_id];
-			}
-		}	
-	}*/
-	
-	
-	//TODO: stdev is probably incorrect as each value is actually getting counted one-two times (on spike transfer and after delay)
-	//Update multisynapse summary variables
-	/*if( ( (*syn).pre_lif[syn_id] < (NO_STIM_LIFS + STIM_OFFSET) ) && ( (*syn).pre_lif[syn_id] > (STIM_OFFSET-1) ) ){ // Pre- stim
-		if( ( (*syn).post_lif[syn_id] < (NO_STIM_LIFS + STIM_OFFSET) ) && ( (*syn).post_lif[syn_id] > (STIM_OFFSET-1) ) ){ // Post- stim
-			// Synapse receives high stim on both sides
-			int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
-			stim_summary_rho[time_bin_index] += (*syn).rho[syn_id];
-			stim_summary_n[time_bin_index]++;
-			
-			if(stim_summary_n[time_bin_index] == 1){ // initialise on first entry to time bin
-				stim_summary_M[time_bin_index] = (*syn).rho[syn_id];
-				//stim_summary_S[time_bin_index] = 0; //done via calloc()
-                stim_summary_min[time_bin_index] = (*syn).rho[syn_id];
-                stim_summary_max[time_bin_index] = (*syn).rho[syn_id];
-			}
-			else{
-				//Mk = Mk-1+ (xk - Mk-1)/k
-				//Sk = Sk-1 + (xk - Mk-1)*(xk - Mk).
-				float Mk;
-				Mk = stim_summary_M[time_bin_index] + ( ( (*syn).rho[syn_id] - stim_summary_M[time_bin_index] ) / stim_summary_n[time_bin_index] );
-				stim_summary_S[time_bin_index] = stim_summary_S[time_bin_index] + ( ( (*syn).rho[syn_id] - stim_summary_M[time_bin_index] ) * ( (*syn).rho[syn_id] - Mk ) );
-				stim_summary_M[time_bin_index] = Mk;
-                if ((*syn).rho[syn_id] > stim_summary_max[time_bin_index]){
-                    stim_summary_max[time_bin_index] = (*syn).rho[syn_id];
-                } // these are mutually exclusive events, so using elseif to cut number of computations
-                else if ((*syn).rho[syn_id] < stim_summary_min[time_bin_index]){
-                    stim_summary_min[time_bin_index] = (*syn).rho[syn_id];
-                }
-			}
-		}
-		else{
-			// Synapse receives high stim only on Pre- side
-			int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
-			pre_summary_rho[time_bin_index] += (*syn).rho[syn_id];
-			pre_summary_n[time_bin_index]++;
-			
-			if(pre_summary_n[time_bin_index] == 1){ // initialise on first entry to time bin
-				pre_summary_M[time_bin_index] = (*syn).rho[syn_id];
-				//pre_summary_S[time_bin_index] = 0;
-                pre_summary_min[time_bin_index] = (*syn).rho[syn_id];
-                pre_summary_max[time_bin_index] = (*syn).rho[syn_id];
-			}
-			else{
-				//Mk = Mk-1+ (xk - Mk-1)/k
-				//Sk = Sk-1 + (xk - Mk-1)*(xk - Mk).
-				float Mk;
-				Mk = pre_summary_M[time_bin_index] + ((*syn).rho[syn_id] - pre_summary_M[time_bin_index])/pre_summary_n[time_bin_index];
-				pre_summary_S[time_bin_index] = pre_summary_S[time_bin_index] + ((*syn).rho[syn_id] - pre_summary_M[time_bin_index]) * ((*syn).rho[syn_id] - Mk);
-				pre_summary_M[time_bin_index] = Mk;
-                if ((*syn).rho[syn_id] > pre_summary_max[time_bin_index]){
-                    pre_summary_max[time_bin_index] = (*syn).rho[syn_id];
-                } // these are mutually exclusive events, so using elseif to cut number of computations
-                else if ((*syn).rho[syn_id] < pre_summary_min[time_bin_index]){
-                    pre_summary_min[time_bin_index] = (*syn).rho[syn_id];
-                }
-			}
-		}
-	}
-	else if( ( (*syn).post_lif[syn_id] < (NO_STIM_LIFS + STIM_OFFSET) ) && ( (*syn).post_lif[syn_id] > (STIM_OFFSET-1) ) ){ // Post- stim
-		// Synapse receives high stim only on post side
-		int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
-		post_summary_rho[time_bin_index] += (*syn).rho[syn_id];
-		post_summary_n[time_bin_index]++;
-		
-		if(post_summary_n[time_bin_index] == 1){ // initialise on first entry to time bin
-			post_summary_M[time_bin_index] = (*syn).rho[syn_id];
-			//post_summary_S[time_bin_index] = 0;
-            post_summary_min[time_bin_index] = (*syn).rho[syn_id];
-            post_summary_max[time_bin_index] = (*syn).rho[syn_id];
-		}
-		else{
-			//Mk = Mk-1+ (xk - Mk-1)/k
-			//Sk = Sk-1 + (xk - Mk-1)*(xk - Mk).
-			float Mk;
-			Mk = post_summary_M[time_bin_index] + ((*syn).rho[syn_id] - post_summary_M[time_bin_index])/post_summary_n[time_bin_index];
-			post_summary_S[time_bin_index] = post_summary_S[time_bin_index] + ((*syn).rho[syn_id] - post_summary_M[time_bin_index]) * ((*syn).rho[syn_id] - Mk);
-			post_summary_M[time_bin_index] = Mk;
-            if ((*syn).rho[syn_id] > post_summary_max[time_bin_index]){
-                post_summary_max[time_bin_index] = (*syn).rho[syn_id];
-            } // these are mutually exclusive events, so using elseif to cut number of computations
-            else if ((*syn).rho[syn_id] < post_summary_min[time_bin_index]){
-                post_summary_min[time_bin_index] = (*syn).rho[syn_id];
-            }
-		}
-	}
-	else{
-		// Synapse receives only background stim levels
-		int time_bin_index = (int)( ( (*syn_const).dt / BIN_SIZE ) * current_time + EPSILLON);
-		non_summary_rho[time_bin_index] += (*syn).rho[syn_id];
-		non_summary_n[time_bin_index]++;
-		
-		if(non_summary_n[time_bin_index] == 1){ // initialise on first entry to time bin
-			non_summary_M[time_bin_index] = (*syn).rho[syn_id];
-			//non_summary_S[time_bin_index] = 0;
-            non_summary_min[time_bin_index] = (*syn).rho[syn_id];
-            non_summary_max[time_bin_index] = (*syn).rho[syn_id];
-		}
-		else{
-			//Mk = Mk-1+ (xk - Mk-1)/k
-			//Sk = Sk-1 + (xk - Mk-1)*(xk - Mk).
-			float Mk;
-			Mk = non_summary_M[time_bin_index] + ((*syn).rho[syn_id] - non_summary_M[time_bin_index])/non_summary_n[time_bin_index];
-			non_summary_S[time_bin_index] = non_summary_S[time_bin_index] + ((*syn).rho[syn_id] - non_summary_M[time_bin_index]) * ((*syn).rho[syn_id] - Mk);
-			non_summary_M[time_bin_index] = Mk;
-            if ((*syn).rho[syn_id] > non_summary_max[time_bin_index]){
-                non_summary_max[time_bin_index] = (*syn).rho[syn_id];
-            } // these are mutually exclusive events, so using elseif to cut number of computations
-            else if ((*syn).rho[syn_id] < non_summary_min[time_bin_index]){
-                non_summary_min[time_bin_index] = (*syn).rho[syn_id];
-            }
-		}
-	}
-	 */
 }
 
 
 void freeMemory(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynapse *fixed_syn_p, SpikeQueue *spike_queue_p){
 	// LIF variables
-	/*free((*lif_p).V);
-	free((*lif_p).I);
-	free((*lif_p).gauss);
-	free((*lif_p).time_since_spike);*/
 	free((*lif_p).time_of_last_spike);
 	free((*lif_p).no_outgoing_synapses);
 	free((*lif_p).no_outgoing_ee_synapses);

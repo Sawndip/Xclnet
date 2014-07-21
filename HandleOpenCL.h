@@ -73,26 +73,24 @@ int createCommandQueue(CL *cl);
 int createProgram(CL *cl, char ** KernelSource);
 int buildProgram(CL *cl);
 int createKernel(CL *cl, char * k_name);
-//int createIObufs(CL *cl, unsigned int count);
-int createLifIObufs(CL *cl);
-int createSynIObufs(CL *cl);
-int mapLifIObufs(CL *cl, cl_LIFNeuron *lif);
-//int enqueueInputBuf(CL *cl, unsigned int count);
-int enqueueLifInputBuf(CL *cl, cl_LIFNeuron *lif, cl_MarsagliaStruct *rnd);
-int enqueueSynInputBuf(CL *cl, cl_Synapse *syn, SynapseConsts *syn_const, cl_MarsagliaStruct *rnd);
-//int setKernelArgs(CL *cl, unsigned int count);
-int setLifKernelArgs(CL *cl, cl_LIFNeuron *lif);
-int setSynKernelArgs(CL *cl, cl_Synapse *syn, SynapseConsts *syn_const);
-int getMaxWorkSize(CL *cl);
-//int enqueueKernel(CL *cl, unsigned int count);
-int enqueueLifKernel(CL *cl);
-int enqueueSynKernel(CL *cl);
-int waitForKernel(CL *cl);
-//int enqueueOutputBuf(CL *cl, unsigned int count);
-int enqueueLifOutputBuf(CL *cl, cl_LIFNeuron *lif, cl_MarsagliaStruct *rnd);
-int enqueueSynOutputBuf(CL *cl, cl_Synapse *syn, SynapseConsts *syn_const, cl_MarsagliaStruct *rnd);
 
-//void shutdownKernel(CL *cl);
+int createLifIObufs(CL *cl);
+
+int mapLifIObufs(CL *cl, cl_LIFNeuron *lif);
+
+int enqueueLifInputBuf(CL *cl, cl_LIFNeuron *lif, cl_MarsagliaStruct *rnd);
+
+
+int setLifKernelArgs(CL *cl, cl_LIFNeuron *lif);
+
+int getMaxWorkSize(CL *cl);
+
+int enqueueLifKernel(CL *cl);
+
+int waitForKernel(CL *cl);
+
+int enqueueLifOutputBuf(CL *cl, cl_LIFNeuron *lif, cl_MarsagliaStruct *rnd);
+
 void shutdownLifKernel(CL *cl);
 void shutdownSynKernel(CL *cl);
 

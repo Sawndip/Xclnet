@@ -26,7 +26,7 @@ char* synaptic_activity_name;// = "single_synapse.dat";
 // Final synaptic strengths of all dynamic synapses file
 char* synaptic_strength_name;// = "final_synaptic_strength.dat";
 
-//TODO: rename file pointer variable names for DataReporters
+
 FILE *raster_output;
 FILE *intracellular_output;
 FILE *average_activity_ouput; //network_activity_output

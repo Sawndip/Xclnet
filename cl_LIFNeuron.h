@@ -9,7 +9,6 @@ typedef struct LIFNeuron{
 	float * gauss;
     unsigned int * time_since_spike;
 	
-	//new, for ISI recorder
 	unsigned int * time_of_last_spike;
 	
 	unsigned int * no_outgoing_synapses;
@@ -26,7 +25,7 @@ typedef struct LIFNeuron{
 	//float r_m;
 	//float c_m;
 	float sigma;
-	float refrac_time;  //TODO: why is this a float? I think it was as I wasn't sure whether to use timesteps or seconds here.
+	float refrac_time;
 	float dt;
 	unsigned int no_lifs;
 	
