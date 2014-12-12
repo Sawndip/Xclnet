@@ -74,7 +74,7 @@
 #define LIF_V_REST (-70.0)
 #define LIF_V_RESET (-60.0)
 #define LIF_V_THRESHOLD (-50.0)
-#define LIF_CM (0.001)
+#define LIF_CM (100000) /* set a very large Cm value to have very little leak (temporary) (0.001) */
 #define LIF_RM (20.0)
 #define LIF_SIGMA (5)
 #define LIF_REFRAC_TIME (0) /*200*/ /*timesteps*/
