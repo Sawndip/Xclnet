@@ -15,10 +15,10 @@
 #define SYN_USE_FLAT_POTENTIAL
 #define SYN_USE_HARD_BOUNDS
 
-//#define SYN_USE_CONST_INITIALISATION
+#define SYN_USE_CONST_INITIALISATION
 //#define SYN_USE_RAND_UNIFORM_INITIALISATION
-#define SYN_USE_INVIVO_DOUBLE_WELL_INITIALISATION
-#define SYN_POTENTIATE_SUBSET_OF_SYNS
+//#define SYN_USE_INVIVO_DOUBLE_WELL_INITIALISATION
+//#define SYN_POTENTIATE_SUBSET_OF_SYNS
 //#define SYN_DELAYED_POTENTIATE_SUBSET_OF_SYNS
 
 //#define MONITOR_UP_DOWN_POPS
@@ -39,7 +39,7 @@
 #define GAUSSIAN_SYNAPTIC_SEED (-12)
 #define UNIFORM_SYNAPTIC_SEED (-11)
 
-#define MAX_TIME_STEPS (500000000) /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
+#define MAX_TIME_STEPS (50000000) /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
 
 // Network schema
 #define NO_EXC (8000) /*(400)*/ /*(10000)*/
@@ -55,8 +55,8 @@
 
 // Stimulation of subpopulation /* using secs despite inconsistency with other parameter units */
 #define STIM_ON (0.)
-#define STIM_OFF (0.)
-#define J_STIM (24.55) /*24.55mV approx 50Hz, 34.8mV approx 100Hz*/
+#define STIM_OFF (300.) /* want stimulation for full duration of simulation */
+#define J_STIM (1000) /* a delta stim should cause a spike */ /*(24.55)*/ /*24.55mV approx 50Hz, 34.8mV approx 100Hz*/
 #define NO_STIM_LIFS (100)
 #define STIM_OFFSET (0)
 
@@ -66,7 +66,8 @@
 #define J_II (-0.4)
 #define J_EI (-0.4)
 
-#define J_EXT (11.45) /*(15.315)*/ /*(15.315)*/ /*(11.046)*/ /*(11.45) new in-vivo*/ /*(11.046) new in-vitro*/ /*(7.07)*/ /*(6.966) in-vivo*/ /*(7.07) 1hz in-vitro*/
+//#define J_EXT (11.45) /*(15.315)*/ /*(15.315)*/ /*(11.046)*/ /*(11.45) new in-vivo*/ /*(11.046) new in-vitro*/ /*(7.07)*/ /*(6.966) in-vivo*/ /*(7.07) 1hz in-vitro*/
+#define J_EXT (0.0)
 
 
 // LIF specific
@@ -80,7 +81,7 @@
 #define LIF_REFRAC_TIME (0) /*200*/ /*timesteps*/
 
 // Synapse model specific
-#define SYN_RHO_INITIAL (0.019) /*(0.406595)*/ /*(0.164840)*/ /*(0.406595)*/ /*(0.019) in-vivo*/ /*(0.164840) new in-vitro*/ /*(0.16492)*/ /*(0.203586)*/ /*(1.0)*/
+#define SYN_RHO_INITIAL (0.3) /*arbitrary initialisation for now */ /*(0.019)*/ /*(0.406595)*/ /*(0.164840)*/ /*(0.406595)*/ /*(0.019) in-vivo*/ /*(0.164840) new in-vitro*/ /*(0.16492)*/ /*(0.203586)*/ /*(1.0)*/
 #define SYN_CA_INITIAL (0.0)
 #define SYN_CALCIUM_DELAY (461) /*46*/ /*4.6098ms*/ /*timesteps (needs to be modified when DT is modified above*/
 #define SYN_GAMMA_P (725.085)
