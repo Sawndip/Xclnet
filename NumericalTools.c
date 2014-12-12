@@ -176,6 +176,20 @@ float ran2_resettable(long *idum, int reset, long original_seed_value)
 }
 
 
+// Modified version for expdev() which is coupled to ran2_resettable()
+float expdev_resettable(long *idum, int reset, long original_seed_value)
+{
+    float ran2_resettable(long *idum, int reset, long original_seed_value);
+    float dum;
+    
+    do
+    dum=ran2_resettable(idum, reset, original_seed_value);
+    while (dum == 0.0);
+    return -log(dum);
+}
+
+
+
 //// Below here adapted from Numerical Recipes in C
 
 // ran0 returns a Uniform(0,1) value

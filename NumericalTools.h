@@ -26,6 +26,5 @@ double invivo_double_well_distribution(long *uni_seed);
 
 // Added for repeated pattern generation (resettable RND generators)
 float ran2_resettable(long *idum, int reset, long original_seed_value);
-float expdev_resettable(long *idum);
+float expdev_resettable(long *idum, int reset, long original_seed_value);
 
-void expdev_reset();
