@@ -244,6 +244,10 @@ int main (int argc, const char * argv[]) {
         long uniform_synaptic_seed = UNIFORM_SYNAPTIC_SEED;
     #endif
 	//long gaussian_lif_seed = (GAUSSIAN_SYNAPTIC_SEED - 1);
+    // Variables added for patterned stimulation
+    int pattern_time;
+    int *time_to_next_stim_spike;
+    long seed_resettable_pattern = RAN2_RESETTABLE_SEED;
 	
 	clock_t start_t,finish_t;
 	double totaltime;
@@ -490,7 +494,11 @@ int main (int argc, const char * argv[]) {
 		return EXIT_FAILURE;
 	}*/	
 	
-	
+    
+    // Variables added for patterned stimulation
+    pattern_time = 0;
+    time_to_next_stim_spike = calloc(NO_STIM_LIFS, sizeof(int));
+    
 	// Do the OpenCL processing
 	j = 0;
 	offset = 0;
@@ -587,8 +595,47 @@ int main (int argc, const char * argv[]) {
 		}
 		// For a brief period apply stimulation to a subset of neurons
 		if((STIM_ON < (j * LIF_DT)) && ((j * LIF_DT) < STIM_OFF)){
+            float wait_as_float;
+            int timesteps_to_next_spike;
 			for( i = 0; i < NO_STIM_LIFS; i++){
-				(*lif_p).I[i + STIM_OFFSET] = J_STIM;
+                pattern_time++;
+                if(pattern_time > STIM_PATTERN_DURATION){
+                    // Pattern duration exceeded, restart the pattern
+                    if(i == 0){
+                        // RESET RND generator
+                        do{
+                            wait_as_float = expdev_resettable(&seed_resettable_pattern, 1, RAN2_RESETTABLE_SEED);
+                            timesteps_to_next_spike = (int)(wait_as_float / (STIM_PATTERN_AV_RATE * (*lif_p).dt) + EPSILLON);
+                            time_to_next_stim_spike[i] = timesteps_to_next_spike;
+                        } while (timesteps_to_next_spike <= 0);
+                    }
+                    else{
+                        // Redraw wait times for all stim neurons
+                        do{
+                            wait_as_float = expdev_resettable(&seed_resettable_pattern, 1, RAN2_RESETTABLE_SEED);
+                            timesteps_to_next_spike = (int)(wait_as_float / (STIM_PATTERN_AV_RATE * (*lif_p).dt) + EPSILLON);
+                            time_to_next_stim_spike[i] = timesteps_to_next_spike;
+                        } while (timesteps_to_next_spike <= 0);
+                    }
+                }
+                
+                
+                if(time_to_next_stim_spike[i] == 0){
+                    // It's time for a spike, do it then draw waiting time until next one
+                    (*lif_p).I[i + STIM_OFFSET] = J_STIM;
+                    do{
+                        wait_as_float = expdev_resettable(&seed_resettable_pattern, 0, RAN2_RESETTABLE_SEED);
+                        timesteps_to_next_spike = (int)(wait_as_float / (STIM_PATTERN_AV_RATE * (*lif_p).dt) + EPSILLON);
+                        time_to_next_stim_spike[i] = timesteps_to_next_spike;
+                    } while (timesteps_to_next_spike <= 0);
+                }
+                else{
+                    // No spike this time
+                    time_to_next_stim_spike[i]--;
+                }
+                
+                // The old constant stim code
+                //(*lif_p).I[i + STIM_OFFSET] = J_STIM;
 				//printf("DEBUG: (j*LIF_DT) %f, i %d\n", (j*LIF_DT), i);
 			}
 		}

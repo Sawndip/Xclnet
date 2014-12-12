@@ -62,6 +62,9 @@
 #define NO_STIM_LIFS (100)
 #define STIM_OFFSET (0)
 
+#define STIM_PATTERN_DURATION (100000) /* in timesteps (otherwise should use it to initialise a variable)*/
+#define STIM_PATTERN_AV_RATE (10.) /* for exponential drawing of interspike interval */
+
 // Transfer voltages
 #define J_EE (0.2) /*(0.1)*/
 #define J_IE (0.1)
