@@ -39,6 +39,8 @@
 #define GAUSSIAN_SYNAPTIC_SEED (-12)
 #define UNIFORM_SYNAPTIC_SEED (-11)
 
+#define RAN2_RESETTABLE_SEED (-1)
+
 #define MAX_TIME_STEPS (50000000) /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
 
 // Network schema

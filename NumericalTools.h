@@ -22,3 +22,10 @@ float bnldev(float pp, int n, long *idum);
 // Added for in-vivo sims
 double U(double x);
 double invivo_double_well_distribution(long *uni_seed);
+
+
+// Added for repeated pattern generation (resettable RND generators)
+float ran2_resettable(long *idum, int reset, long original_seed_value);
+float expdev_resettable(long *idum);
+
+void expdev_reset();

@@ -129,6 +129,54 @@ double invivo_double_well_distribution(long *uni_seed){
 }
 
 
+// ran2_resettable returns a Uniform(0,1) distributed value
+// L'Ecuyer combination method, with particularly long period
+// Combination: two linear congruential generators and Bays-Durham shuffle
+// Usage: set (reset != 0) in order to reset internal variables of generator
+//      this will make generator behave as if this is the first call
+//  set original_seed_value with the originally defined seed value (not location)
+float ran2_resettable(long *idum, int reset, long original_seed_value)
+{
+    int j;
+    long k;
+    static long idum2=123456789;
+    static long iy=0;
+    static long iv[NTAB];
+    if(reset){
+        idum2 = 123456789;
+        iy = 0;
+        *idum = original_seed_value;
+    }
+    float temp;
+    
+    if (*idum <= 0) {
+        if (-(*idum) < 1) *idum=1;
+        else *idum = -(*idum);
+        idum2=(*idum);
+        for (j=NTAB+7;j>=0;j--) { // prepare shuffle table
+            k=(*idum)/IQ1;
+            *idum=IA1*(*idum-k*IQ1)-k*IR1;
+            if (*idum < 0) *idum += IM1;
+            if (j < NTAB) iv[j] = *idum;
+        }
+        iy=iv[0];
+    }
+    k=(*idum)/IQ1;
+    *idum=IA1*(*idum-k*IQ1)-k*IR1; // compute idum=(IA1*idum)%IM1 without overflow
+    if (*idum < 0) *idum += IM1;
+    k=idum2/IQ2;
+    idum2=IA2*(idum2-k*IQ2)-k*IR2; // compute idum2=(IA2*idum2)%IM2 without overflow
+    if (idum2 < 0) idum2 += IM2;
+    j=iy/NDIV; // in range 0..NTAB-1
+    iy=iv[j]-idum2; // shuffle idum and combine with idum2 for output
+    iv[j] = *idum;
+    if (iy < 1) iy += IMM1;
+    if ((temp=AM*iy) > RNMX) return RNMX; // do not return end-point value
+    else return temp;
+}
+
+
+//// Below here adapted from Numerical Recipes in C
 
 // ran0 returns a Uniform(0,1) value
 // Minimal Park and Miller method: multiplicative congruential algorithm (I_{j+1} = a I_j \mod m )
