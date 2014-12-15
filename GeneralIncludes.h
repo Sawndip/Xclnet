@@ -58,7 +58,7 @@
 // Stimulation of subpopulation /* using secs despite inconsistency with other parameter units */
 #define STIM_ON (0.)
 #define STIM_OFF (300.) /* want stimulation for full duration of simulation */
-#define J_STIM (1000) /* a delta stim should cause a spike */ /*(24.55)*/ /*24.55mV approx 50Hz, 34.8mV approx 100Hz*/
+#define J_STIM (50) /* a delta stim should cause a spike */ /*(24.55)*/ /*24.55mV approx 50Hz, 34.8mV approx 100Hz*/
 #define NO_STIM_LIFS (100)
 #define STIM_OFFSET (0)
 
