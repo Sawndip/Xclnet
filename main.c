@@ -500,7 +500,7 @@ int main (int argc, const char * argv[]) {
 	
     
     // Variables added for patterned stimulation
-    pattern_time = 0;
+    pattern_time = STIM_PATTERN_DURATION + 1; // force initialisation of interstim spike times upon first run
     time_to_next_stim_spike = calloc(NO_STIM_LIFS, sizeof(int));
     
 	// Do the OpenCL processing
@@ -616,7 +616,7 @@ int main (int argc, const char * argv[]) {
                     else{
                         // Redraw wait times for all stim neurons
                         do{
-                            wait_as_float = expdev_resettable(&seed_resettable_pattern, 1, RAN2_RESETTABLE_SEED);
+                            wait_as_float = expdev_resettable(&seed_resettable_pattern, 0, RAN2_RESETTABLE_SEED);
                             timesteps_to_next_spike = (int)(wait_as_float / (STIM_PATTERN_AV_RATE * (*lif_p).dt) + EPSILLON);
                             time_to_next_stim_spike[i] = timesteps_to_next_spike;
                         } while (timesteps_to_next_spike <= 0);
