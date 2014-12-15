@@ -287,8 +287,12 @@ int main (int argc, const char * argv[]) {
 	
 	// Setup external and synaptic voltages/currents
 	double external_voltage = J_EXT;
-	// Syanptic currents must be modified by (tau_m/dt) as they are delta current spikes
-	double delta_spike_modifier = (*lif_p).tau_m / (*lif_p).dt;
+    // Syanptic currents must be modified by (tau_m/dt) as they are delta current spikes
+    double delta_spike_modifier = (*lif_p).tau_m / (*lif_p).dt;
+    // When STIM current is a delta spike it must be modified by (tau_m/dt)
+    double stim_voltage = J_STIM;
+    stim_voltage *= delta_spike_modifier;
+	// This implementation uses delta-spike model for spike transfer
 	double transfer_voltage = J_EE;
 	transfer_voltage *= delta_spike_modifier;
 	//printf("DEBUG: delta_spike_modifier %f, transfer_voltage %f\n", delta_spike_modifier, transfer_voltage);
@@ -622,7 +626,7 @@ int main (int argc, const char * argv[]) {
                 
                 if(time_to_next_stim_spike[i] == 0){
                     // It's time for a spike, do it then draw waiting time until next one
-                    (*lif_p).I[i + STIM_OFFSET] = J_STIM;
+                    (*lif_p).I[i + STIM_OFFSET] = stim_voltage;
                     do{
                         wait_as_float = expdev_resettable(&seed_resettable_pattern, 0, RAN2_RESETTABLE_SEED);
                         timesteps_to_next_spike = (int)(wait_as_float / (STIM_PATTERN_AV_RATE * (*lif_p).dt) + EPSILLON);
