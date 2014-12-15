@@ -601,8 +601,8 @@ int main (int argc, const char * argv[]) {
 		if((STIM_ON < (j * LIF_DT)) && ((j * LIF_DT) < STIM_OFF)){
             float wait_as_float;
             int timesteps_to_next_spike;
+            pattern_time++;
 			for( i = 0; i < NO_STIM_LIFS; i++){
-                pattern_time++;
                 if(pattern_time > STIM_PATTERN_DURATION){
                     // Pattern duration exceeded, restart the pattern
                     if(i == 0){
@@ -611,6 +611,7 @@ int main (int argc, const char * argv[]) {
                             wait_as_float = expdev_resettable(&seed_resettable_pattern, 1, RAN2_RESETTABLE_SEED);
                             timesteps_to_next_spike = (int)(wait_as_float / (STIM_PATTERN_AV_RATE * (*lif_p).dt) + EPSILLON);
                             time_to_next_stim_spike[i] = timesteps_to_next_spike;
+                            //printf("DEBUG1: time to next stim spike: %d, i: %d, j: %d\n", time_to_next_stim_spike[i], i, j);
                         } while (timesteps_to_next_spike <= 0);
                     }
                     else{
@@ -619,6 +620,7 @@ int main (int argc, const char * argv[]) {
                             wait_as_float = expdev_resettable(&seed_resettable_pattern, 0, RAN2_RESETTABLE_SEED);
                             timesteps_to_next_spike = (int)(wait_as_float / (STIM_PATTERN_AV_RATE * (*lif_p).dt) + EPSILLON);
                             time_to_next_stim_spike[i] = timesteps_to_next_spike;
+                            //printf("DEBUG2: time to next stim spike: %d, i: %d, j: %d\n", time_to_next_stim_spike[i], i, j);
                         } while (timesteps_to_next_spike <= 0);
                     }
                 }
@@ -631,6 +633,7 @@ int main (int argc, const char * argv[]) {
                         wait_as_float = expdev_resettable(&seed_resettable_pattern, 0, RAN2_RESETTABLE_SEED);
                         timesteps_to_next_spike = (int)(wait_as_float / (STIM_PATTERN_AV_RATE * (*lif_p).dt) + EPSILLON);
                         time_to_next_stim_spike[i] = timesteps_to_next_spike;
+                        //printf("DEBUG3: time to next stim spike: %d, i: %d, j: %d\n", time_to_next_stim_spike[i], i, j);
                     } while (timesteps_to_next_spike <= 0);
                 }
                 else{
@@ -642,6 +645,9 @@ int main (int argc, const char * argv[]) {
                 //(*lif_p).I[i + STIM_OFFSET] = J_STIM;
 				//printf("DEBUG: (j*LIF_DT) %f, i %d\n", (j*LIF_DT), i);
 			}
+            if ( pattern_time > STIM_PATTERN_DURATION){
+                pattern_time = 0;
+            }
 		}
 		
 		// Print to intracellular recorder file

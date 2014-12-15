@@ -146,6 +146,7 @@ float ran2_resettable(long *idum, int reset, long original_seed_value)
         idum2 = 123456789;
         iy = 0;
         *idum = original_seed_value;
+        printf("Resetting ran2_resettable()\n");
     }
     float temp;
     

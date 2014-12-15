@@ -29,8 +29,8 @@
 #define EPSILLON (0.0000001)
 
 // Data reporters
-#define RECORDER_NEURON_ID (3)
-#define RECORDER_SYNAPSE_ID (201) /* for modulo addressed multiple synaptic recordings this needs to be less than 400*/
+#define RECORDER_NEURON_ID (0) /*(3)*/
+#define RECORDER_SYNAPSE_ID (99) /* for modulo addressed multiple synaptic recordings this needs to be less than 400*/
 //#define RECORDER_MULTI_SYNAPSE_SKIP (64000) /*(64000)*/ /*(450)*/
 
 #define USE_GPU (1) /* 1=gpu, 0=cpu */
@@ -41,7 +41,7 @@
 
 #define RAN2_RESETTABLE_SEED (-1)
 
-#define MAX_TIME_STEPS (10000) /*(50000000)*/ /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
+#define MAX_TIME_STEPS (60500000) /*(50000000)*/ /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
 
 // Network schema
 #define NO_EXC (8000) /*(400)*/ /*(10000)*/
@@ -52,14 +52,14 @@
 // Time step sizes and statistical bin widths
 #define LIF_DT (0.00001) /* modify refrac time and calcium delay in tandem, also MAX_TIME_STEPS */
 #define SYN_DT LIF_DT /*TODO: at a later stage I will have the synapse update more slowly than the lif*/
-#define BIN_SIZE (1.) /*(0.1)*/
+#define BIN_SIZE (1.) /*(1.)*/ /*(0.1)*/
 
 
 // Stimulation of subpopulation /* using secs despite inconsistency with other parameter units */
 #define STIM_ON (0.)
-#define STIM_OFF (300.) /* want stimulation for full duration of simulation */
+#define STIM_OFF (600.) /* want stimulation for full duration of simulation */
 #define J_STIM (50) /* a delta stim should cause a spike */ /*(24.55)*/ /*24.55mV approx 50Hz, 34.8mV approx 100Hz*/
-#define NO_STIM_LIFS (100)
+#define NO_STIM_LIFS (200)
 #define STIM_OFFSET (0)
 
 #define STIM_PATTERN_DURATION (100000) /* in timesteps (otherwise should use it to initialise a variable)*/
@@ -82,7 +82,7 @@
 #define LIF_V_THRESHOLD (-50.0)
 #define LIF_CM (0.001)
 #define LIF_RM (20.0)
-#define LIF_SIGMA (5)
+#define LIF_SIGMA (0) /*(5)*/
 #define LIF_REFRAC_TIME (0) /*200*/ /*timesteps*/
 
 // Synapse model specific
