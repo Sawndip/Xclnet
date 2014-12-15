@@ -227,14 +227,13 @@ __kernel void lif(
 			//  a synaptic current/voltage step should be multiplied by (tau_m/dt), for a delta spike, before adding to this variable,
 			//  in order to counter rescaling which happens on next three lines of executable code.
 			// input_current is treated as a voltage step, despite the variable name, hence the division by tau_m
-            // Removing multiplication of input_current by dt, should also remove division in main program
-			//dv += (input_current / tau_m);
+			dv += (input_current / tau_m);
 			// Apply noise
 			//noise = sqrt(dt / tau_m) * sigma * rnd.value;
 			noise = sqrt(dt / tau_m) * sigma * random_value;
 		}
 
-		new_v = v + (dv * dt) + (input_current / tau_m) + noise;
+		new_v = v + (dv * dt) + noise;
 		// Apply lower threshold to membrane voltage (no longer desired)
 		/*if (new_v < v_rest){
 			new_v = v_rest;

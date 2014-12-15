@@ -28,7 +28,7 @@ unsigned int generateNetwork(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynaps
 	unsigned int estimated_ee_synapses_per_neuron = (mean_ee_synapses_per_neuron) + (int)(mean_ee_synapses_per_neuron/2) + 1000; // mean + wide margin + constant (for small nets)
 	unsigned int estimated_total_synapses_per_neuron = (mean_total_synapses_per_neuron) + (int)(mean_total_synapses_per_neuron/2) + 2000; // mean + wide margin + constant (for small nets)
 	
-	float delta_spike_modifier = (*lif_p).tau_m; // / (*lif_p).dt;
+	float delta_spike_modifier = (*lif_p).tau_m / (*lif_p).dt;
 	//printf("DEBUG: delta_spike_modifier %f\n", delta_spike_modifier);
 	
 	(*syn_p).pre_lif = calloc(estimated_total_ee_synapses, sizeof(signed int));
@@ -284,7 +284,7 @@ int main (int argc, const char * argv[]) {
 	// Setup external and synaptic voltages/currents
 	double external_voltage = J_EXT;
 	// Syanptic currents must be modified by (tau_m/dt) as they are delta current spikes
-	double delta_spike_modifier = (*lif_p).tau_m; // / (*lif_p).dt;
+	double delta_spike_modifier = (*lif_p).tau_m / (*lif_p).dt;
 	double transfer_voltage = J_EE;
 	transfer_voltage *= delta_spike_modifier;
 	//printf("DEBUG: delta_spike_modifier %f, transfer_voltage %f\n", delta_spike_modifier, transfer_voltage);
