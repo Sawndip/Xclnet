@@ -220,14 +220,14 @@ __kernel void lif(
 		//CONSIDER: changed to >= to allow removal of logical OR which didn't work: (refrac_time==0)||
 		if ( time_since_spike >= refrac_time ){
 			// Apply leak current
-			dv = (-(v - v_rest) / tau_m);
+			//dv = (-(v - v_rest) / tau_m);
 			// Apply the external current
 			// Note: I use one input current variable (to cut down on streams to GPU)
 			//  an external current/voltage should be added directly to this variable (outside the kernel)
 			//  a synaptic current/voltage step should be multiplied by (tau_m/dt), for a delta spike, before adding to this variable,
 			//  in order to counter rescaling which happens on next three lines of executable code.
 			// input_current is treated as a voltage step, despite the variable name, hence the division by tau_m
-			dv += (input_current / tau_m);
+			dv = (input_current / tau_m);
 			// Apply noise
 			//noise = sqrt(dt / tau_m) * sigma * rnd.value;
 			noise = sqrt(dt / tau_m) * sigma * random_value;
