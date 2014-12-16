@@ -88,7 +88,10 @@ void reporters_setup(){
 	#endif /* MONITOR_UP_DOWN_POPS */
 	
 	#ifdef MONITOR_STIM_POPS
-		fprintf(average_activity_ouput, "\n\n\n\n\n# Summary network activity  some nonsense here in sequence(time bin, InstantaneousExcRate, InstantaneousInhRate, InstantaneousStimRate, RhoAvNonPop, RhoStdevNonPop, RhoAvStimPop, RhoStdevStimPop, RhoAvPrePop, RhoStdevPrePop, RhoAvPostPop, RhoStdevPostPop, NupdatesNonPop, NupdatesStimPop, NupdatesPrePop, NupdatesPostPop, RhoMaxNonPop, RhoMinNonPop, RhoMaxStimPop, RhoMinStimPop, RhoMaxPrePop, RhoMinPrePop, RhoMaxPostPop, RhoMinPostPop )\n# all normalised to their respective population sizes\n");
+		//fprintf(average_activity_ouput, "\n\n\n\n\n# Summary network activity  some nonsense here in sequence(time bin, InstantaneousExcRate, InstantaneousInhRate, InstantaneousStimRate, RhoAvNonPop, RhoStdevNonPop, RhoAvStimPop, RhoStdevStimPop, RhoAvPrePop, RhoStdevPrePop, RhoAvPostPop, RhoStdevPostPop, NupdatesNonPop, NupdatesStimPop, NupdatesPrePop, NupdatesPostPop, RhoMaxNonPop, RhoMinNonPop, RhoMaxStimPop, RhoMinStimPop, RhoMaxPrePop, RhoMinPrePop, RhoMaxPostPop, RhoMinPostPop )\n# all normalised to their respective population sizes\n");
+    
+        fprintf(average_activity_ouput, "\n\n\n\n\n# Summary network activity (time bin, InstantaneousExcRate, InstantaneousInhRate, InstantaneousStimRate, sequence:{RhoAv, RhoStdev, Nupdates, RhoMax, RhoMin} for {Stim, Non, Pre, Post} pops )\n# all normalised to their respective population sizes\n");
+    
 		//TODO: new code for monitoring multiple synapses here
 		non_summary_rho = calloc(no_spiking_bins, sizeof(double));
 		non_summary_M = calloc(no_spiking_bins, sizeof(double));
