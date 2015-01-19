@@ -11,7 +11,7 @@
 //#define ENABLE_FIXED_TRANSFERS
 //#define ENABLE_TRANSFER_RHO_INITIAL
 
-#define SYN_USE_SUPRATHRESHOLD_TIMESTEP
+//#define SYN_USE_SUPRATHRESHOLD_TIMESTEP
 #define SYN_USE_FLAT_POTENTIAL
 #define SYN_USE_HARD_BOUNDS
 
@@ -45,7 +45,7 @@
 
 #define RAN2_RESETTABLE_SEED (-1)
 
-#define MAX_TIME_STEPS (100000) /*(60500000)*/ /*(50000000)*/ /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
+#define MAX_TIME_STEPS (60500000) /*(50000000)*/ /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
 
 // Network schema
 #define NO_EXC (8000) /*(400)*/ /*(10000)*/
@@ -67,7 +67,7 @@
 #define STIM_OFFSET (0)
 
 #define STIM_PATTERN_DURATION (10000) /* in timesteps (otherwise should use it to initialise a variable)*/
-#define STIM_PATTERN_DURATION_SECS (0.1) /* pattern duration in secs, for regular patterned stim */
+//#define STIM_PATTERN_DURATION_SECS (0.1) /* pattern duration in secs, for regular patterned stim */
 #define STIM_PATTERN_AV_RATE (10.) /* for exponential drawing of interspike interval */
 #define STIM_PATTERN_PAUSE_DURATION (10000) /* in timesteps: pause between pattern repeats */
 

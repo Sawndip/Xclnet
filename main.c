@@ -516,6 +516,8 @@ int main (int argc, const char * argv[]) {
         // Variables added for Poisson patterned stimulation
         pattern_time = (STIM_PATTERN_DURATION + STIM_PATTERN_PAUSE_DURATION + 1); // force initialisation of interstim spike times upon first run
         time_to_next_stim_spike = calloc(NO_STIM_LIFS, sizeof(int));
+        int stim_isi = (int) ( (1.0 / (STIM_PATTERN_AV_RATE * (*lif_p).dt) ) + EPSILLON); // timesteps between stimuli, on each neuron
+        int inter_neuron_offset = (int) ((float)stim_isi / (float)NO_STIM_LIFS);
     #endif /* LEARNING_REPEATED_PATTERNED_STIM */
 	
     // Do the OpenCL processing
@@ -677,10 +679,6 @@ int main (int argc, const char * argv[]) {
         #ifdef LEARNING_REPEATED_PATTERNED_STIM
             // Using a repeated regular pattern as stimulus
             if((STIM_ON < (j * LIF_DT)) && ((j * LIF_DT) < STIM_OFF)){
-                //float wait_as_float;
-                //int timesteps_to_next_spike;
-                int stim_isi = (int) ( (1.0 / (STIM_PATTERN_AV_RATE * (*lif_p).dt) ) + EPSILLON); // timesteps between stimuli, on each neuron
-                int inter_neuron_offset = (int) ((float)stim_isi / (float)NO_STIM_LIFS);
                 pattern_time++;
                 if (pattern_time < STIM_PATTERN_DURATION){
                     // Follow the pattern stimulation and generation protocol
@@ -689,7 +687,7 @@ int main (int argc, const char * argv[]) {
                             // It's time for a spike, do it then draw waiting time until next one
                             (*lif_p).I[i + STIM_OFFSET] = stim_voltage;
                             time_to_next_stim_spike[i] = stim_isi;
-                            printf("DEBUG: spike, j = %d, i = %d\n", j, i);
+                            //printf("DEBUG: spike, j = %d, i = %d\n", j, i);
                         }
                         else{
                             // No spike this time
@@ -700,10 +698,10 @@ int main (int argc, const char * argv[]) {
                 }
                 else if (pattern_time < (STIM_PATTERN_DURATION + STIM_PATTERN_PAUSE_DURATION) ){
                     // Follow the pause protocol, ie don't stimulate
-                    printf("DEBUG: pause in pattern, j = %d\n", j);
+                    //printf("DEBUG: pause in pattern, j = %d\n", j);
                 }
                 else{
-                    printf("DEBUG: resetting pattern, j = %d\n", j);
+                    //printf("DEBUG: resetting pattern, j = %d\n", j);
                     // Pattern plus pause duration exceeded, restart the pattern
                     for ( i = 0; i < NO_STIM_LIFS; i++){
                         time_to_next_stim_spike[i] = inter_neuron_offset * i;
