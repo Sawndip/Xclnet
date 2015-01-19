@@ -24,6 +24,10 @@
 //#define MONITOR_UP_DOWN_POPS
 #define MONITOR_STIM_POPS
 
+//#define LEARNING_CONST_EXTERN_STIM
+//#define LEARNING_INDEP_POISSON_STIM
+#define LEARNING_REPEATED_PATTERNED_STIM
+
 #define FILE_NAME_LENGTH (50)
 #define TEXT_BUFFER_LENGTH (100)
 #define EPSILLON (0.0000001)
@@ -63,6 +67,7 @@
 #define STIM_OFFSET (0)
 
 #define STIM_PATTERN_DURATION (100000) /* in timesteps (otherwise should use it to initialise a variable)*/
+#define STIM_PATTERN_DURATION_SECS (0.1) /* pattern duration in secs, for regular patterned stim */
 #define STIM_PATTERN_AV_RATE (10.) /* for exponential drawing of interspike interval */
 
 // Transfer voltages
@@ -78,7 +83,7 @@
 // LIF specific
 #define LIF_V_INITIAL (-60.0)
 #define LIF_V_REST (-70.0)
-#define LIF_V_RESET (-60.0)
+#define LIF_V_RESET (-70.0) /*(-60.0)*/
 #define LIF_V_THRESHOLD (-50.0)
 #define LIF_CM (0.001)
 #define LIF_RM (20.0)
@@ -86,7 +91,7 @@
 #define LIF_REFRAC_TIME (0) /*200*/ /*timesteps*/
 
 // Synapse model specific
-#define SYN_RHO_INITIAL (0.3) /*arbitrary initialisation for now */ /*(0.019)*/ /*(0.406595)*/ /*(0.164840)*/ /*(0.406595)*/ /*(0.019) in-vivo*/ /*(0.164840) new in-vitro*/ /*(0.16492)*/ /*(0.203586)*/ /*(1.0)*/
+#define SYN_RHO_INITIAL (0.5) /*arbitrary initialisation for now */ /*(0.019)*/ /*(0.406595)*/ /*(0.164840)*/ /*(0.406595)*/ /*(0.019) in-vivo*/ /*(0.164840) new in-vitro*/ /*(0.16492)*/ /*(0.203586)*/ /*(1.0)*/
 #define SYN_CA_INITIAL (0.0)
 #define SYN_CALCIUM_DELAY (461) /*46*/ /*4.6098ms*/ /*timesteps (needs to be modified when DT is modified above*/
 #define SYN_GAMMA_P (725.085)
@@ -96,8 +101,8 @@
 #define SYN_SIGMA (3.35) /*(3.35)*/ /*3.35;*/ /*TODO: switch synapse noise back on*/
 #define SYN_TAU (346.3615)
 #define SYN_TAU_CA (0.0226936)
-#define SYN_C_PRE (0.33705) /*(0.33705)*/ /*(0.56175)*/ /*(0.5617539)*/
-#define SYN_C_POST (0.74378) /*(0.74378)*/ /*(1.23964)*/
+#define SYN_C_PRE (0.56175) /*(0.33705)*/ /*(0.56175)*/ /*(0.5617539)*/
+#define SYN_C_POST (1.23964) /*(0.74378)*/ /*(1.23964)*/
 
 #define SYN_RHO_FIXED SYN_RHO_INITIAL /*(0.5)*/
 
