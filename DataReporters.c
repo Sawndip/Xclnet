@@ -35,7 +35,7 @@ void reporters_setup(){
 	if(raster_output == NULL){
 		perror("Error: failed to open raster output file\n");
 	}
-	fprintf(raster_output, "\n\n\n\n\n# Raster output (t, lif_no)\n");
+	fprintf(raster_output, "\n\n\n\n\n# Raster output (t, lif_no, isi)\n");
 	
 	// Intracellular recording from a single neuron
 	strcpy(outfile, "output/");
