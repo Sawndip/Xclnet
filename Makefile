@@ -12,7 +12,7 @@ CDEBUG =
 LIBOCL = -L/Developer/SDKs/MacOSX10.6.sdk/System/Library/Frameworks/OpenCL.framework/Versions/A/Libraries
 INCOCL = -I/System/Library/Frameworks/OpenCL.framework/Versions/A/Headers
 
-AIRLIBOCL = -L/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/System/Library/Frameworks/OpenCL.framework/Versions/A/Libraries
+AIRLIBOCL = -L/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/OpenCL.framework/Versions/A/Libraries
 AIRINCOCL = $(INCOCL)
 
 INCCUDA = -I/usr/local/cuda/include/
@@ -24,8 +24,8 @@ LIBAMD = -L/opt/AMDAPP/lib/x86_64/ -lOpenCL
 SRCS = DataReporters.c HandleOpenCL.c NumericalTools.c main.c
 OBJS = *.o
  
-#EXE = kernel/network_sim
-EXE = build/Debug/net_sim_2
+EXE = kernel/network_sim
+#EXE = build/Debug/net_sim_2
 
 midway:
 				$(LD) $(CFLAGS) -lOpenCL $(SRCS) -o $(EXE)
