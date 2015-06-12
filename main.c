@@ -473,6 +473,14 @@ int main (int argc, const char * argv[]) {
 				(*syn_p).initially_UP[i] = 1;
 			}
 		#endif /*  SYN_POTENTIATE_SUBSET_OF_SYNS  */
+        
+        #ifdef LEARNING_REPEATED_PATTERNED_STIM
+        #ifdef MONITOR_UP_DOWN_POPS
+            if (i % 2 == 0){
+                (*syn_p).initially_UP[i] = 1;
+            }
+        #endif /* MONITOR_UP_DOWN_POPS */
+        #endif /* LEARNING_REPEATED_PATTERNED_STIM */
 		
 		(*syn_p).ca[i] = SYN_CA_INITIAL;
 		(*rnd_syn_p).d_z[i] = 362436069 - i + PARALLEL_SEED;
