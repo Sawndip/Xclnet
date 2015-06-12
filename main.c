@@ -517,7 +517,8 @@ int main (int argc, const char * argv[]) {
         pattern_time = (STIM_PATTERN_DURATION + STIM_PATTERN_PAUSE_DURATION + 1); // force initialisation of interstim spike times upon first run
         time_to_next_stim_spike = calloc(NO_STIM_LIFS, sizeof(int));
         int stim_isi = (int) ( (1.0 / (STIM_PATTERN_AV_RATE * (*lif_p).dt) ) + EPSILLON); // timesteps between stimuli, on each neuron
-        int inter_neuron_offset = (int) ((float)stim_isi / (float)NO_STIM_LIFS);
+        //int inter_neuron_offset = (int) ((float)stim_isi / (float)NO_STIM_LIFS); // used for a sort of sliding repeated stim within pattern window, which rescales so that all neurons get a stimulation
+    int inter_neuron_offset = (int) STIM_FIXED_OFFSET_ISI; // just use a fixed offset between neurons, if the end neurons are outside stim window then they just don't get stimulated
     #endif /* LEARNING_REPEATED_PATTERNED_STIM */
 	
     // Do the OpenCL processing

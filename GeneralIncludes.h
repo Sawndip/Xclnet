@@ -21,8 +21,8 @@
 //#define SYN_POTENTIATE_SUBSET_OF_SYNS
 //#define SYN_DELAYED_POTENTIATE_SUBSET_OF_SYNS
 
-//#define MONITOR_UP_DOWN_POPS
-#define MONITOR_STIM_POPS
+#define MONITOR_UP_DOWN_POPS
+//#define MONITOR_STIM_POPS
 
 //#define LEARNING_CONST_EXTERN_STIM
 //#define LEARNING_INDEP_POISSON_STIM
@@ -34,7 +34,7 @@
 
 // Data reporters
 #define RECORDER_NEURON_ID (0) /*(3)*/
-#define RECORDER_SYNAPSE_ID (99) /* for modulo addressed multiple synaptic recordings this needs to be less than 400*/
+#define RECORDER_SYNAPSE_ID (0) /* for modulo addressed multiple synaptic recordings this needs to be less than 400*/
 //#define RECORDER_MULTI_SYNAPSE_SKIP (64000) /*(64000)*/ /*(450)*/
 
 #define USE_GPU (1) /* 1=gpu, 0=cpu */
@@ -45,13 +45,13 @@
 
 #define RAN2_RESETTABLE_SEED (-1)
 
-#define MAX_TIME_STEPS (60500000) /*(50000000)*/ /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
+#define MAX_TIME_STEPS (6500000) /*(50000000)*/ /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
 
 // Network schema
-#define NO_EXC (8000) /*(400)*/ /*(10000)*/
-#define NO_INH (2000)
+#define NO_EXC (100) /*(8000)*/ /*(400)*/ /*(10000)*/
+#define NO_INH (0) /*(2000)*/
 #define NO_LIFS (NO_EXC + NO_INH) 
-#define CONNECTIVITY_PROBABILITY (0.05) /*(0.05)*/
+#define CONNECTIVITY_PROBABILITY (1.) /*(0.05)*/ /*(0.05)*/
 
 // Time step sizes and statistical bin widths
 #define LIF_DT (0.00001) /* modify refrac time and calcium delay in tandem, also MAX_TIME_STEPS */
@@ -60,19 +60,20 @@
 
 
 // Stimulation of subpopulation /* using secs despite inconsistency with other parameter units */
-#define STIM_ON (0.)
-#define STIM_OFF (600.) /* want stimulation for full duration of simulation */
+#define STIM_ON (1.)
+#define STIM_OFF (60.) /* want stimulation for full duration of simulation */
 #define J_STIM (50) /* a delta stim should cause a spike */ /*(24.55)*/ /*24.55mV approx 50Hz, 34.8mV approx 100Hz*/
-#define NO_STIM_LIFS (200)
+#define NO_STIM_LIFS (100)
 #define STIM_OFFSET (0)
 
-#define STIM_PATTERN_DURATION (10000) /* in timesteps (otherwise should use it to initialise a variable)*/
+#define STIM_PATTERN_DURATION (50000) /* in timesteps (otherwise should use it to initialise a variable)*/
 //#define STIM_PATTERN_DURATION_SECS (0.1) /* pattern duration in secs, for regular patterned stim */
-#define STIM_PATTERN_AV_RATE (10.) /* for exponential drawing of interspike interval */
-#define STIM_PATTERN_PAUSE_DURATION (10000) /* in timesteps: pause between pattern repeats */
+#define STIM_PATTERN_AV_RATE (1.) /* for exponential drawing of interspike interval */
+#define STIM_PATTERN_PAUSE_DURATION (50000) /* in timesteps: pause between pattern repeats */
+#define STIM_FIXED_OFFSET_ISI (500) /* in timesteps: pause between stimuli on adjacent neurons */
 
 // Transfer voltages
-#define J_EE (0.2) /*(0.1)*/
+#define J_EE (22.0) /*(0.2)*/ /*(0.1)*/
 #define J_IE (0.1)
 #define J_II (-0.4)
 #define J_EI (-0.4)
@@ -89,7 +90,7 @@
 #define LIF_CM (0.001)
 #define LIF_RM (20.0)
 #define LIF_SIGMA (0) /*(5)*/
-#define LIF_REFRAC_TIME (0) /*200*/ /*timesteps*/
+#define LIF_REFRAC_TIME (2000) /*200*/ /*timesteps*/
 
 // Synapse model specific
 #define SYN_RHO_INITIAL (0.5) /*arbitrary initialisation for now */ /*(0.019)*/ /*(0.406595)*/ /*(0.164840)*/ /*(0.406595)*/ /*(0.019) in-vivo*/ /*(0.164840) new in-vitro*/ /*(0.16492)*/ /*(0.203586)*/ /*(1.0)*/
