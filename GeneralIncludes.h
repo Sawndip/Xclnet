@@ -51,7 +51,7 @@
 #define NO_EXC (100) /*(8000)*/ /*(400)*/ /*(10000)*/
 #define NO_INH (0) /*(2000)*/
 #define NO_LIFS (NO_EXC + NO_INH) 
-#define CONNECTIVITY_PROBABILITY (1.) /*(0.05)*/ /*(0.05)*/
+#define CONNECTIVITY_PROBABILITY (1.1) /*(0.05)*/ /*(0.05)*/
 
 // Time step sizes and statistical bin widths
 #define LIF_DT (0.00001) /* modify refrac time and calcium delay in tandem, also MAX_TIME_STEPS */
