@@ -476,9 +476,10 @@ int main (int argc, const char * argv[]) {
         
         #ifdef LEARNING_REPEATED_PATTERNED_STIM
         #ifdef MONITOR_UP_DOWN_POPS
-        //CONSIDER: change logic here to more accurately track synapses I expect to potentiate and those which should depress
-        //  could monitor forward connections to nearest neighbours separately in UP pop
-            if (i % 2 == 0){
+        //CONSIDER: different options for who to monitor in two pop monitoring
+            //if (i % 2 == 0){
+            //if ( (*syn_p).post_lif[i] > (*syn_p).pre_lif[i] ){ // this is pointing forwards in the protocol direction (very rough estimator)
+            if ( (*syn_p).post_lif[i] == ((*syn_p).pre_lif[i] + 1) ){ // next neighbour in protocol direction
                 (*syn_p).initially_UP[i] = 1;
             }
         #endif /* MONITOR_UP_DOWN_POPS */

@@ -93,7 +93,7 @@
 #define LIF_REFRAC_TIME (2000) /*200*/ /*timesteps*/
 
 // Synapse model specific
-#define SYN_RHO_INITIAL (0.5) /*arbitrary initialisation for now */ /*(0.019)*/ /*(0.406595)*/ /*(0.164840)*/ /*(0.406595)*/ /*(0.019) in-vivo*/ /*(0.164840) new in-vitro*/ /*(0.16492)*/ /*(0.203586)*/ /*(1.0)*/
+#define SYN_RHO_INITIAL (0.0) /*arbitrary initialisation for now */ /*(0.019)*/ /*(0.406595)*/ /*(0.164840)*/ /*(0.406595)*/ /*(0.019) in-vivo*/ /*(0.164840) new in-vitro*/ /*(0.16492)*/ /*(0.203586)*/ /*(1.0)*/
 #define SYN_CA_INITIAL (0.0)
 #define SYN_CALCIUM_DELAY (461) /*46*/ /*4.6098ms*/ /*timesteps (needs to be modified when DT is modified above*/
 #define SYN_GAMMA_P (725.085)
