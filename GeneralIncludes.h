@@ -34,7 +34,7 @@
 
 // Data reporters
 #define RECORDER_NEURON_ID (0) /*(3)*/
-#define RECORDER_SYNAPSE_ID (0) /* for modulo addressed multiple synaptic recordings this needs to be less than 400*/
+#define RECORDER_SYNAPSE_ID (9504) /* for modulo addressed multiple synaptic recordings this needs to be less than 400*/
 //#define RECORDER_MULTI_SYNAPSE_SKIP (64000) /*(64000)*/ /*(450)*/
 
 #define USE_GPU (1) /* 1=gpu, 0=cpu */
@@ -73,7 +73,7 @@
 #define STIM_FIXED_OFFSET_ISI (500) /* in timesteps: pause between stimuli on adjacent neurons */
 
 // Transfer voltages
-#define J_EE (22.0) /*(0.2)*/ /*(0.1)*/
+#define J_EE (2.2) /*(22.0)*/ /*(0.2)*/ /*(0.1)*/
 #define J_IE (0.1)
 #define J_II (-0.4)
 #define J_EI (-0.4)
