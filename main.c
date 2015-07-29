@@ -643,46 +643,51 @@ int main (int argc, const char * argv[]) {
                 float wait_as_float;
                 int timesteps_to_next_spike;
                 pattern_time++;
-                for( i = 0; i < NO_STIM_LIFS; i++){
-                    if(pattern_time > STIM_PATTERN_DURATION){
-                        // Pattern duration exceeded, restart the pattern
-                        if(i == 0){
-                            // RESET RND generator
-                            do{
-                                wait_as_float = expdev_resettable(&seed_resettable_pattern, 1, RAN2_RESETTABLE_SEED);
-                                timesteps_to_next_spike = (int)(wait_as_float / (STIM_PATTERN_AV_RATE * (*lif_p).dt) + EPSILLON);
-                                time_to_next_stim_spike[i] = timesteps_to_next_spike;
-                                //printf("DEBUG1: time to next stim spike: %d, i: %d, j: %d\n", time_to_next_stim_spike[i], i, j);
-                            } while (timesteps_to_next_spike <= 0);
+                for( k = 0; k < NO_STIM_SUBSETS; k++){
+                    // there are multiple stimulation subsets
+                    for( i = 0; i < NO_STIM_LIFS; i++){
+                        // loop over the neurons within a subset
+                        if(pattern_time > STIM_PATTERN_DURATION){
+                            // Pattern duration exceeded, restart the pattern
+                            if(i == 0){
+                                // RESET RND generator
+                                do{
+                                    wait_as_float = expdev_resettable(&seed_resettable_pattern, 1, RAN2_RESETTABLE_SEED);
+                                    timesteps_to_next_spike = (int)(wait_as_float / (STIM_PATTERN_AV_RATE * (*lif_p).dt) + EPSILLON);
+                                    time_to_next_stim_spike[i] = timesteps_to_next_spike;
+                                    //printf("DEBUG1: time to next stim spike: %d, i: %d, j: %d\n", time_to_next_stim_spike[i], i, j);
+                                } while (timesteps_to_next_spike <= 0);
+                            }
+                            else{
+                                // Redraw wait times for all stim neurons
+                                do{
+                                    wait_as_float = expdev_resettable(&seed_resettable_pattern, 0, RAN2_RESETTABLE_SEED);
+                                    timesteps_to_next_spike = (int)(wait_as_float / (STIM_PATTERN_AV_RATE * (*lif_p).dt) + EPSILLON);
+                                    time_to_next_stim_spike[i] = timesteps_to_next_spike;
+                                    //printf("DEBUG2: time to next stim spike: %d, i: %d, j: %d\n", time_to_next_stim_spike[i], i, j);
+                                } while (timesteps_to_next_spike <= 0);
+                            }
                         }
-                        else{
-                            // Redraw wait times for all stim neurons
+                
+                
+                        if(time_to_next_stim_spike[i] == 0){
+                            // It's time for a spike, do it then draw waiting time until next one
+                            (*lif_p).I[i + STIM_OFFSET] = stim_voltage;
                             do{
                                 wait_as_float = expdev_resettable(&seed_resettable_pattern, 0, RAN2_RESETTABLE_SEED);
                                 timesteps_to_next_spike = (int)(wait_as_float / (STIM_PATTERN_AV_RATE * (*lif_p).dt) + EPSILLON);
                                 time_to_next_stim_spike[i] = timesteps_to_next_spike;
-                                //printf("DEBUG2: time to next stim spike: %d, i: %d, j: %d\n", time_to_next_stim_spike[i], i, j);
+                                //printf("DEBUG3: time to next stim spike: %d, i: %d, j: %d\n", time_to_next_stim_spike[i], i, j);
                             } while (timesteps_to_next_spike <= 0);
+                        }
+                        else{
+                            // No spike this time
+                            time_to_next_stim_spike[i]--;
                         }
                     }
                 
-                
-                    if(time_to_next_stim_spike[i] == 0){
-                        // It's time for a spike, do it then draw waiting time until next one
-                        (*lif_p).I[i + STIM_OFFSET] = stim_voltage;
-                        do{
-                            wait_as_float = expdev_resettable(&seed_resettable_pattern, 0, RAN2_RESETTABLE_SEED);
-                            timesteps_to_next_spike = (int)(wait_as_float / (STIM_PATTERN_AV_RATE * (*lif_p).dt) + EPSILLON);
-                            time_to_next_stim_spike[i] = timesteps_to_next_spike;
-                            //printf("DEBUG3: time to next stim spike: %d, i: %d, j: %d\n", time_to_next_stim_spike[i], i, j);
-                        } while (timesteps_to_next_spike <= 0);
-                    }
-                    else{
-                        // No spike this time
-                        time_to_next_stim_spike[i]--;
-                    }
-                }
-            
+                }// end of stim-subset loop
+        
                 if ( pattern_time > STIM_PATTERN_DURATION){
                     pattern_time = 0;
                 }
