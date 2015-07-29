@@ -252,7 +252,7 @@ int main (int argc, const char * argv[]) {
     #endif /* LEARNING_INDEP_POISSON_STIM */
     #ifdef LEARNING_REPEATED_PATTERNED_STIM
         // Variables added for regular patterned stimulation
-        int pattern_time;
+        int pattern_time[NO_STIM_SUBSETS];
         int *time_to_next_stim_spike;
         //long seed_resettable_pattern = RAN2_RESETTABLE_SEED;
     #endif /* LEARNING_REPEATED_PATTERNED_STIM */
@@ -525,8 +525,10 @@ int main (int argc, const char * argv[]) {
     #endif /* LEARNING_INDEP_POISSON_STIM */
     #ifdef LEARNING_REPEATED_PATTERNED_STIM
         // Variables added for Poisson patterned stimulation
-        pattern_time = (STIM_PATTERN_DURATION + STIM_PATTERN_PAUSE_DURATION + 1); // force initialisation of interstim spike times upon first run
-        time_to_next_stim_spike = calloc(NO_STIM_LIFS, sizeof(int));
+        for( int stim_pop_id = 0; stim_pop_id < NO_STIM_SUBSETS; stim_pop_id++){
+            pattern_time[stim_pop_id] = (STIM_PATTERN_DURATION + STIM_PATTERN_PAUSE_DURATION + 1); // force initialisation of interstim spike times upon first run
+        }
+        time_to_next_stim_spike = calloc( (NO_STIM_LIFS * NO_STIM_SUBSETS), sizeof(int));
         int stim_isi = (int) ( (1.0 / (STIM_PATTERN_AV_RATE * (*lif_p).dt) ) + EPSILLON); // timesteps between stimuli, on each neuron
         //int inter_neuron_offset = (int) ((float)stim_isi / (float)NO_STIM_LIFS); // used for a sort of sliding repeated stim within pattern window, which rescales so that all neurons get a stimulation
     int inter_neuron_offset = (int) STIM_FIXED_OFFSET_ISI; // just use a fixed offset between neurons, if the end neurons are outside stim window then they just don't get stimulated
@@ -696,25 +698,25 @@ int main (int argc, const char * argv[]) {
         #ifdef LEARNING_REPEATED_PATTERNED_STIM
             // Using a repeated regular pattern as stimulus
             if((STIM_ON < (j * LIF_DT)) && ((j * LIF_DT) < STIM_OFF)){
-                pattern_time++;
                 // There are multiple stimulation subsets, loop over them
-                for( k = 0; k < NO_STIM_SUBSETS; k++){
-                    if (pattern_time < STIM_PATTERN_DURATION){
+                for( int stim_pop_id = 0; stim_pop_id < NO_STIM_SUBSETS; stim_pop_id++){
+                    pattern_time[stim_pop_id]++;
+                    if (pattern_time[stim_pop_id] < STIM_PATTERN_DURATION){
                         // Follow the pattern stimulation and generation protocol
                         for( i = 0; i < NO_STIM_LIFS; i++){
-                            if(time_to_next_stim_spike[i] == 0){
+                            if(time_to_next_stim_spike[i + (stim_pop_id * STIM_OFFSET)] == 0){
                                 // It's time for a spike, do it then draw waiting time until next one
-                                (*lif_p).I[i + (STIM_OFFSET * k)] = stim_voltage;
-                                time_to_next_stim_spike[i] = stim_isi;
-                                //printf("DEBUG: spike, j = %d, i = %d\n", j, i);
+                                (*lif_p).I[i + (STIM_OFFSET * stim_pop_id)] = stim_voltage;
+                                time_to_next_stim_spike[i + (stim_pop_id * STIM_OFFSET)] = stim_isi;
+                                //printf("DEBUG: spike, j = %d, i = %d, stim_pop_id = %d\n", j, i, stim_pop_id);
                             }
                             else{
                                 // No spike this time
-                                time_to_next_stim_spike[i]--;
+                                time_to_next_stim_spike[i + (stim_pop_id * STIM_OFFSET)]--;
                             }
                         }
                     }
-                    else if (pattern_time < (STIM_PATTERN_DURATION + STIM_PATTERN_PAUSE_DURATION) ){
+                    else if (pattern_time[stim_pop_id] < (STIM_PATTERN_DURATION + STIM_PATTERN_PAUSE_DURATION) ){
                         // Follow the pause protocol, ie don't stimulate
                         //printf("DEBUG: pause in pattern, j = %d\n", j);
                     }
@@ -722,9 +724,9 @@ int main (int argc, const char * argv[]) {
                         //printf("DEBUG: resetting pattern, j = %d\n", j);
                         // Pattern plus pause duration exceeded, restart the pattern
                         for ( i = 0; i < NO_STIM_LIFS; i++){
-                            time_to_next_stim_spike[i] = inter_neuron_offset * i;
+                            time_to_next_stim_spike[i + (stim_pop_id * STIM_OFFSET)] = inter_neuron_offset * i;
                         }
-                        pattern_time = 0;
+                        pattern_time[stim_pop_id] = 0;
                     }
                 } // end of stim-subset loop
             }
