@@ -45,7 +45,7 @@
 
 #define RAN2_RESETTABLE_SEED (-1)
 
-#define MAX_TIME_STEPS (30500000) /*(50000000)*/ /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
+#define MAX_TIME_STEPS (6500000) /*(30500000)*/ /*(50000000)*/ /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
 
 // Network schema
 #define NO_EXC (100) /*(8000)*/ /*(400)*/ /*(10000)*/
@@ -63,8 +63,8 @@
 #define STIM_ON (1.)
 #define STIM_OFF (300.) /* want stimulation for full duration of simulation */
 #define J_STIM (50) /* a delta stim should cause a spike */ /*(24.55)*/ /*24.55mV approx 50Hz, 34.8mV approx 100Hz*/
-#define NO_STIM_LIFS (100)
-#define STIM_OFFSET (0)
+#define NO_STIM_LIFS (30)
+#define STIM_OFFSET (50)
 #define NO_STIM_SUBSETS (2)
 
 #define STIM_PATTERN_DURATION (50000) /* in timesteps (otherwise should use it to initialise a variable)*/
