@@ -8,6 +8,7 @@
  */
  
 #define PI (4.*atan(1.))
+//#define UINT_MAX (4294967295) // used for converting rand(0,UINT_MAX) to (0,1) interval, limits.h not available in OpenCL
 
 #include "Random123/philox.h"
 
@@ -174,8 +175,14 @@ __kernel void lif(
 		ctr.v[1] = random_seed;
 		rand_val = philox2x32_R(10, ctr, key);
 		// Convert to Uniform distribution (1/(2^32 +2))
-		uni_rand.x = rand_val.v[0] * 2.328306435454494e-10;
-		uni_rand.y = rand_val.v[1] * 2.328306435454494e-10;
+		//uni_rand.x = rand_val.v[0] * 2.328306435454494e-10;
+		//uni_rand.y = rand_val.v[1] * 2.328306435454494e-10;
+        // New conversion to Uniform distribution (avoids 0)
+        const float factor = 2.3283064365386963e-10; //( (float) 1. ) / ( UINT_MAX + (( float) 1. ) );
+        const float halffactor = ((float) 0.5) * factor;
+        uni_rand.x = rand_val.v[0] * factor + halffactor;
+        uni_rand.y = rand_val.v[1] * factor + halffactor;
+        
 		// Box-Muller transform
 		float r = sqrt( (float)(-2.0*log(uni_rand.x)) );
 		float theta = 2.0 * PI * uni_rand.y;
