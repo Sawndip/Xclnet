@@ -33,11 +33,11 @@
 #define EPSILLON (0.0000001)
 
 // Data reporters
-#define RECORDER_NEURON_ID (48) /*(3)*/
+#define RECORDER_NEURON_ID (0) /*(3)*/
 #define RECORDER_SYNAPSE_ID (0) /* for modulo addressed multiple synaptic recordings this needs to be less than 400*/
 //#define RECORDER_MULTI_SYNAPSE_SKIP (64000) /*(64000)*/ /*(450)*/
 
-#define USE_GPU (1) /* 1=gpu, 0=cpu */
+#define USE_GPU (0) /* 1=gpu, 0=cpu */
 #define NETWORK_SEED (-14) /*(-14)*/
 #define PARALLEL_SEED (2) /*keep positive for random123*/
 #define GAUSSIAN_SYNAPTIC_SEED (-12)
@@ -45,13 +45,13 @@
 
 #define RAN2_RESETTABLE_SEED (-1)
 
-#define MAX_TIME_STEPS (5000) /*(30500000)*/ /*(50000000)*/ /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
+#define MAX_TIME_STEPS (500000) /*(24100000)*/ /*(30500000)*/ /*(50000000)*/ /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
 
 // Network schema
 #define NO_EXC (100) /*(8000)*/ /*(400)*/ /*(10000)*/
 #define NO_INH (0) /*(2000)*/
 #define NO_LIFS (NO_EXC + NO_INH) 
-#define CONNECTIVITY_PROBABILITY (1.1) /*(0.05)*/ /*(0.05)*/
+#define CONNECTIVITY_PROBABILITY (1.0) /*(0.05)*/ /*(0.05)*/
 
 // Time step sizes and statistical bin widths
 #define LIF_DT (0.00001) /* modify refrac time and calcium delay in tandem, also MAX_TIME_STEPS */
@@ -61,11 +61,11 @@
 
 // Stimulation of subpopulation /* using secs despite inconsistency with other parameter units */
 #define STIM_ON (1.)
-#define STIM_OFF (500.) /* want stimulation for full duration of simulation */
+#define STIM_OFF (4.) /* want stimulation for full duration of simulation */
 #define J_STIM (50) /* a delta stim should cause a spike */ /*(24.55)*/ /*24.55mV approx 50Hz, 34.8mV approx 100Hz*/
-#define NO_STIM_LIFS (100)
-#define STIM_OFFSET (0)
-#define NO_STIM_SUBSETS (1)
+#define NO_STIM_LIFS (50)
+#define STIM_OFFSET (30)
+#define NO_STIM_SUBSETS (2)
 
 #define STIM_PATTERN_DURATION (50000) /* in timesteps (otherwise should use it to initialise a variable)*/
 //#define STIM_PATTERN_DURATION_SECS (0.1) /* pattern duration in secs, for regular patterned stim */

@@ -704,15 +704,16 @@ int main (int argc, const char * argv[]) {
                     if (pattern_time[stim_pop_id] < STIM_PATTERN_DURATION){
                         // Follow the pattern stimulation and generation protocol
                         for( i = 0; i < NO_STIM_LIFS; i++){
-                            if(time_to_next_stim_spike[i + (stim_pop_id * STIM_OFFSET)] == 0){
+                            // indexing of time_to_next_stim_spike[] is per neuron in a particular stim sub-population
+                            if(time_to_next_stim_spike[i + (stim_pop_id * NO_STIM_LIFS)] == 0){
                                 // It's time for a spike, do it then draw waiting time until next one
                                 (*lif_p).I[i + (STIM_OFFSET * stim_pop_id)] = stim_voltage;
-                                time_to_next_stim_spike[i + (stim_pop_id * STIM_OFFSET)] = stim_isi;
+                                time_to_next_stim_spike[i + (stim_pop_id * NO_STIM_LIFS)] = stim_isi;
                                 //printf("DEBUG: spike, j = %d, i = %d, stim_pop_id = %d\n", j, i, stim_pop_id);
                             }
                             else{
                                 // No spike this time
-                                time_to_next_stim_spike[i + (stim_pop_id * STIM_OFFSET)]--;
+                                time_to_next_stim_spike[i + (stim_pop_id * NO_STIM_LIFS)]--;
                             }
                         }
                     }
@@ -724,7 +725,7 @@ int main (int argc, const char * argv[]) {
                         //printf("DEBUG: resetting pattern, j = %d\n", j);
                         // Pattern plus pause duration exceeded, restart the pattern
                         for ( i = 0; i < NO_STIM_LIFS; i++){
-                            time_to_next_stim_spike[i + (stim_pop_id * STIM_OFFSET)] = inter_neuron_offset * i;
+                            time_to_next_stim_spike[i + (stim_pop_id * NO_STIM_LIFS)] = inter_neuron_offset * i;
                         }
                         pattern_time[stim_pop_id] = 0;
                     }

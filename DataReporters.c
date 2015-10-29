@@ -69,7 +69,7 @@ void reporters_setup(){
 	//fprintf(average_activity_ouput, "\n\n\n\n\n# Summary network activity (time bin, InstantaneousExcRate, InstantaneousInhRate, InstantaneousStimRate, RhoAvNonPop, RhoStdevNonPop, RhoAvStimPop, RhoStdevStimPop, RhoAvPrePop, RhoStdevPrePop, RhoAvPostPop, RhoStdevPostPop, NupdatesNonPop, NupdatesStimPop, NupdatesPrePop, NupdatesPostPop, RhoMaxNonPop, RhoMinNonPop, RhoMaxStimPop, RhoMinStimPop, RhoMaxPrePop, RhoMinPrePop, RhoMaxPostPop, RhoMinPostPop )\n# all normalised to their respective population sizes\n");
 	
 	#ifdef MONITOR_UP_DOWN_POPS
-		fprintf(average_activity_ouput, "\n\n\n\n\n# Summary network activity not all accurate?(time bin, InstantaneousExcRate, InstantaneousInhRate, InstantaneousStimRate, RhoAvUpPop, RhoStdevUpPop, NupdatesUpPop, RhoMaxUpPop, RhoMinUpPop, RhoAvDownPop, RhoStdevDownPop, NupdatesDownPop, RhoMaxDownPop, RhoMinDownPop)\n# all normalised to their respective population sizes\n");
+		fprintf(average_activity_ouput, "\n\n\n\n\n# Summary network activity (time bin, InstantaneousExcRate, InstantaneousInhRate, InstantaneousStimRate, RhoAvUpPop, RhoStdevUpPop, NupdatesUpPop, RhoMaxUpPop, RhoMinUpPop, RhoAvDownPop, RhoStdevDownPop, NupdatesDownPop, RhoMaxDownPop, RhoMinDownPop)\n# all normalised to their respective population sizes\n");
 
         //New code for monitoring initially_UP population
 		UP_pop_rho = calloc(no_spiking_bins, sizeof(double));
