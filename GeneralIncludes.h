@@ -20,6 +20,7 @@
 //#define SYN_USE_INVIVO_DOUBLE_WELL_INITIALISATION
 //#define SYN_POTENTIATE_SUBSET_OF_SYNS
 //#define SYN_DELAYED_POTENTIATE_SUBSET_OF_SYNS
+#define SYN_MAINTAIN_FF_CONNECTIVITY // embeds a feed-forward network in the connectivity
 
 #define MONITOR_UP_DOWN_POPS
 //#define MONITOR_STIM_POPS
@@ -33,7 +34,7 @@
 #define EPSILLON (0.0000001)
 
 // Data reporters
-#define RECORDER_NEURON_ID (0) /*(3)*/
+#define RECORDER_NEURON_ID (1) /*(3)*/
 #define RECORDER_SYNAPSE_ID (0) /* for modulo addressed multiple synaptic recordings this needs to be less than 400*/
 //#define RECORDER_MULTI_SYNAPSE_SKIP (64000) /*(64000)*/ /*(450)*/
 
@@ -45,13 +46,13 @@
 
 #define RAN2_RESETTABLE_SEED (-1)
 
-#define MAX_TIME_STEPS (500000) /*(24100000)*/ /*(30500000)*/ /*(50000000)*/ /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
+#define MAX_TIME_STEPS (2000000) /*(24100000)*/ /*(30500000)*/ /*(50000000)*/ /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
 
 // Network schema
 #define NO_EXC (100) /*(8000)*/ /*(400)*/ /*(10000)*/
 #define NO_INH (0) /*(2000)*/
 #define NO_LIFS (NO_EXC + NO_INH) 
-#define CONNECTIVITY_PROBABILITY (1.0) /*(0.05)*/ /*(0.05)*/
+#define CONNECTIVITY_PROBABILITY (0.05) /*(0.05)*/ /*(0.05)*/
 
 // Time step sizes and statistical bin widths
 #define LIF_DT (0.00001) /* modify refrac time and calcium delay in tandem, also MAX_TIME_STEPS */
@@ -61,10 +62,10 @@
 
 // Stimulation of subpopulation /* using secs despite inconsistency with other parameter units */
 #define STIM_ON (1.)
-#define STIM_OFF (4.) /* want stimulation for full duration of simulation */
+#define STIM_OFF (490.) /* want stimulation for full duration of simulation */
 #define J_STIM (50) /* a delta stim should cause a spike */ /*(24.55)*/ /*24.55mV approx 50Hz, 34.8mV approx 100Hz*/
-#define NO_STIM_LIFS (50)
-#define STIM_OFFSET (30)
+#define NO_STIM_LIFS (40)
+#define STIM_OFFSET (50)
 #define NO_STIM_SUBSETS (2)
 
 #define STIM_PATTERN_DURATION (50000) /* in timesteps (otherwise should use it to initialise a variable)*/
@@ -84,12 +85,12 @@
 
 
 // LIF specific
-#define LIF_V_INITIAL (-60.0)
-#define LIF_V_REST (-70.0)
-#define LIF_V_RESET (-70.0) /*(-60.0)*/
+#define LIF_V_INITIAL (-51.0) /*(-60.0)*/
+#define LIF_V_REST (-51.0) /*(-70.0)*/
+#define LIF_V_RESET (-51.0) /*(-70.0)*/ /*(-60.0)*/
 #define LIF_V_THRESHOLD (-50.0)
 #define LIF_CM (0.001)
-#define LIF_RM (20.0)
+#define LIF_RM (10.0) /*(20.0)*/
 #define LIF_SIGMA (0) /*(5)*/
 #define LIF_REFRAC_TIME (2000) /*200*/ /*timesteps*/
 

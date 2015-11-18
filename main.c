@@ -105,6 +105,45 @@ unsigned int generateNetwork(cl_LIFNeuron *lif_p, cl_Synapse *syn_p, FixedSynaps
 						lif_in_EE[j]++;
 					#endif /* DEBUG_MODE_NETWORK */
 				}
+                #ifdef SYN_MAINTAIN_FF_CONNECTIVITY
+                else if ( (i+1) == j ){
+                    // A new synapse is formed
+                    
+                    //printf("synapse(%d) ", total_synapses);
+                    // Assign indices of pre and post synaptic neurons to the new synapse
+                    (*syn_p).pre_lif[total_ee_synapses] = i;
+                    (*syn_p).post_lif[total_ee_synapses] = j;
+                    //printf("pre_lif: %d, post_lif: %d, ", (*syn_p).pre_lif[total_synapses], (*syn_p).post_lif[total_synapses]);
+                    
+                    // Update pre-synaptic neuron relationship with synapse
+                    (*lif_p).outgoing_synapse_index[i][(*lif_p).no_outgoing_synapses[i]] = (int)total_ee_synapses; //synaptic id
+                    (*lif_p).no_outgoing_synapses[i]++;// could be added to array lookup in previous line
+                    (*lif_p).no_outgoing_ee_synapses[i]++;
+                    //printf("out_id: %d, no_out: %d ", (*lif_p).outgoing_synapse_index[i][(*lif_p).no_outgoing_synapses[i]-1], (*lif_p).no_outgoing_synapses[i]);
+                    
+                    // Update post-synaptic neuron relationship with synapse
+                    (*lif_p).incoming_synapse_index[j][(*lif_p).no_incoming_synapses[j]] = (int)total_ee_synapses; //syn id
+                    (*lif_p).no_incoming_synapses[j]++;
+                    //printf("in_id: %d, no_in: %d \n", (*lif_p).incoming_synapse_index[j][(*lif_p).no_incoming_synapses[j]-1], (*lif_p).no_incoming_synapses[j]);
+                    
+                    // Add a small subset of LIFs to manipulation list
+                    /*if((total_ee_synapses % RECORDER_MULTI_SYNAPSE_SKIP) == RECORDER_SYNAPSE_ID){
+                     (*lif_p).subpopulation_flag[i] = 1;
+                     (*lif_p).subpopulation_flag[j] = 1;
+                     no_injection_lifs += 2;
+                     //(*syn_p).receives_stimulation_flag[total_ee_synapses] = 1;
+                     //printf("i %d, j %d\n", i, j);
+                     }*/
+                    
+                    total_ee_synapses++;
+                    #ifdef DEBUG_MODE_NETWORK
+                        lif_mean_destination[i] += j;
+                        lif_mean_dest_EE[i] += j;
+                        lif_debug_no_EE[i]++;
+                        lif_in_EE[j]++;
+                    #endif /* DEBUG_MODE_NETWORK */
+                }
+                #endif /* SYN_MAINTAIN_FF_CONNECTIVITY */
 			}
 		}
 	}
@@ -481,6 +520,8 @@ int main (int argc, const char * argv[]) {
             //if ( (*syn_p).post_lif[i] > (*syn_p).pre_lif[i] ){ // this is pointing forwards in the protocol direction (very rough estimator)
             if ( (*syn_p).post_lif[i] == ((*syn_p).pre_lif[i] + 1) ){ // next neighbour in protocol direction
                 (*syn_p).initially_UP[i] = 1;
+                //(*syn_p).rho[i] = 0.544;
+                //(*syn_p).rho_initial[i] = 0.544;
             }
         #endif /* MONITOR_UP_DOWN_POPS */
         #endif /* LEARNING_REPEATED_PATTERNED_STIM */
