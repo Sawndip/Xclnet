@@ -294,6 +294,18 @@ int main (int argc, const char * argv[]) {
         int pattern_time[NO_STIM_SUBSETS];
         int *time_to_next_stim_spike;
         //long seed_resettable_pattern = RAN2_RESETTABLE_SEED;
+        typedef struct patterned_stim_params {
+            int pattern_time;
+            int *time_to_next_stim_spike;
+        
+            int pattern_duration;
+            int pattern_pause_duration;
+            
+            int inter_neuron_fixed_stepping_isi;
+            int per_neuron_isi;
+        
+        } patterned_stim_params;
+        patterned_stim_params patterned_stim_parameters[NO_STIM_SUBSETS];
     #endif /* LEARNING_REPEATED_PATTERNED_STIM */
 	
 	clock_t start_t,finish_t;
@@ -568,8 +580,10 @@ int main (int argc, const char * argv[]) {
         // Variables added for Poisson patterned stimulation
         for( int stim_pop_id = 0; stim_pop_id < NO_STIM_SUBSETS; stim_pop_id++){
             pattern_time[stim_pop_id] = (STIM_PATTERN_DURATION + STIM_PATTERN_PAUSE_DURATION + 1); // force initialisation of interstim spike times upon first run
+            patterned_stim_parameters[stim_pop_id].pattern_time = (STIM_PATTERN_DURATION + STIM_PATTERN_PAUSE_DURATION + 1); // force initialisation of interstim spike times upon first run
         }
         time_to_next_stim_spike = calloc( (NO_STIM_LIFS * NO_STIM_SUBSETS), sizeof(int));
+
         int stim_isi = (int) ( (1.0 / (STIM_PATTERN_AV_RATE * (*lif_p).dt) ) + EPSILLON); // timesteps between stimuli, on each neuron
         //int inter_neuron_offset = (int) ((float)stim_isi / (float)NO_STIM_LIFS); // used for a sort of sliding repeated stim within pattern window, which rescales so that all neurons get a stimulation
     int inter_neuron_offset = (int) STIM_FIXED_OFFSET_ISI; // just use a fixed offset between neurons, if the end neurons are outside stim window then they just don't get stimulated

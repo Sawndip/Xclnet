@@ -69,10 +69,16 @@
 #define NO_STIM_SUBSETS (2)
 
 #define STIM_PATTERN_DURATION (50000) /* in timesteps (otherwise should use it to initialise a variable)*/
+#define STIM_PATTERN_DURATION_1 (50000)
+#define STIM_PATTERN_DURATION_2 (40000)
+#define STIM_PATTERN_PAUSE_DURATION (50000) /* in timesteps: pause between pattern repeats */
+#define STIM_PATTERN_PAUSE_DURATION_1 (50000)
+#define STIM_PATTERN_PAUSE_DURATION_2 (50000)
+#define STIM_FIXED_OFFSET_ISI (500) /* in timesteps: pause between stimuli on adjacent neurons */
+
 //#define STIM_PATTERN_DURATION_SECS (0.1) /* pattern duration in secs, for regular patterned stim */
 #define STIM_PATTERN_AV_RATE (1.) /* for exponential drawing of interspike interval */
-#define STIM_PATTERN_PAUSE_DURATION (50000) /* in timesteps: pause between pattern repeats */
-#define STIM_FIXED_OFFSET_ISI (500) /* in timesteps: pause between stimuli on adjacent neurons */
+
 
 // Transfer voltages
 #define J_EE (2.2) /*(22.0)*/ /*(0.2)*/ /*(0.1)*/
