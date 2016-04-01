@@ -74,8 +74,9 @@
 #define STIM_PATTERN_PAUSE_DURATION (50000) /* in timesteps: pause between pattern repeats */
 #define STIM_PATTERN_PAUSE_DURATION_1 (50000)
 #define STIM_PATTERN_PAUSE_DURATION_2 (50000)
-#define STIM_FIXED_OFFSET_ISI (500) /* in timesteps: pause between stimuli on adjacent neurons */
+#define STIM_PATTERN_START_DELAY (41)
 
+#define STIM_FIXED_OFFSET_ISI (500) /* in timesteps: pause between stimuli on adjacent neurons */
 //#define STIM_PATTERN_DURATION_SECS (0.1) /* pattern duration in secs, for regular patterned stim */
 #define STIM_PATTERN_AV_RATE (1.) /* for exponential drawing of interspike interval */
 
