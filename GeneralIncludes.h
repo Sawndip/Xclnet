@@ -86,8 +86,8 @@
 #define STIM_PATTERN_START_DELAY_2 (1000) /* in timesteps! */
 #define STIM_FIXED_OFFSET_ISI_1 (500) /* in timesteps: pause between stimuli on adjacent neurons */
 #define STIM_FIXED_OFFSET_ISI_2 (700) /* in timesteps: pause between stimuli on adjacent neurons */
-#define STIM_PATTERN_AV_RATE_1 (1.) /* for exponential drawing of interspike interval */
-#define STIM_PATTERN_AV_RATE_2 (2.) /* for exponential drawing of interspike interval */
+#define STIM_PATTERN_AV_RATE_1 (10.)
+#define STIM_PATTERN_AV_RATE_2 (20.)
 
 
 // Transfer voltages
