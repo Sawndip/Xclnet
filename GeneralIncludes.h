@@ -62,23 +62,25 @@
 
 // Stimulation of subpopulation /* using secs despite inconsistency with other parameter units */
 #define STIM_ON (1.)
-#define STIM_OFF (490.) /* want stimulation for full duration of simulation */
+#define STIM_OFF (18.) /* want stimulation for full duration of simulation */
 #define J_STIM (50) /* a delta stim should cause a spike */ /*(24.55)*/ /*24.55mV approx 50Hz, 34.8mV approx 100Hz*/
-#define NO_STIM_LIFS (40)
+#define NO_STIM_LIFS (30)
 #define STIM_OFFSET (50)
-#define NO_STIM_SUBSETS (2)
+#define NO_STIM_SUBSETS (1)
 
+// These are the parameters if all subpops are using same parameters
 #define STIM_PATTERN_DURATION (50000) /* in timesteps (otherwise should use it to initialise a variable)*/
-#define STIM_PATTERN_DURATION_1 (50000)
-#define STIM_PATTERN_DURATION_2 (40000)
 #define STIM_PATTERN_PAUSE_DURATION (50000) /* in timesteps: pause between pattern repeats */
-#define STIM_PATTERN_PAUSE_DURATION_1 (50000)
-#define STIM_PATTERN_PAUSE_DURATION_2 (50000)
 #define STIM_PATTERN_START_DELAY (41)
-
 #define STIM_FIXED_OFFSET_ISI (500) /* in timesteps: pause between stimuli on adjacent neurons */
 //#define STIM_PATTERN_DURATION_SECS (0.1) /* pattern duration in secs, for regular patterned stim */
 #define STIM_PATTERN_AV_RATE (1.) /* for exponential drawing of interspike interval */
+
+// These are the parameters if we have different parameters per subpopulation (needs to be changed in C-code also)
+#define STIM_PATTERN_DURATION_1 (50000)
+#define STIM_PATTERN_DURATION_2 (40000)
+#define STIM_PATTERN_PAUSE_DURATION_1 (50000)
+#define STIM_PATTERN_PAUSE_DURATION_2 (50000)
 
 
 // Transfer voltages
