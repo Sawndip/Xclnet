@@ -583,16 +583,38 @@ int main (int argc, const char * argv[]) {
     #endif /* LEARNING_INDEP_POISSON_STIM */
     #ifdef LEARNING_REPEATED_PATTERNED_STIM
         // Variables added for Poisson patterned stimulation
+        if (USE_SEPARATE_SUBPOP_PARAMS){
+            // Manually change subpopulation parameters
+            // FIRST SUBPOPULATION
+            patterned_stim_parameters[0].pattern_duration = STIM_PATTERN_DURATION_1;
+            patterned_stim_parameters[0].pattern_pause_duration = STIM_PATTERN_PAUSE_DURATION_1;
+            
+            patterned_stim_parameters[0].start_time_delay = STIM_PATTERN_START_DELAY_1;
+            
+            patterned_stim_parameters[0].inter_neuron_fixed_stepping_isi = (int) STIM_FIXED_OFFSET_ISI_1; // just use a fixed offset between neurons, if the end neurons are outside stim window then they just don't get stimulated
+            patterned_stim_parameters[0].per_neuron_isi = (int) ( (1.0 / (STIM_PATTERN_AV_RATE_1 * (*lif_p).dt) ) + EPSILLON); // timesteps between stimuli, on each neuron
+            
+            // SECOND SUBPOPULATION
+            patterned_stim_parameters[1].pattern_duration = STIM_PATTERN_DURATION_2;
+            patterned_stim_parameters[1].pattern_pause_duration = STIM_PATTERN_PAUSE_DURATION_2;
+            
+            patterned_stim_parameters[1].start_time_delay = STIM_PATTERN_START_DELAY_2;
+            
+            patterned_stim_parameters[1].inter_neuron_fixed_stepping_isi = (int) STIM_FIXED_OFFSET_ISI_2; // just use a fixed offset between neurons, if the end neurons are outside stim window then they just don't get stimulated
+            patterned_stim_parameters[1].per_neuron_isi = (int) ( (1.0 / (STIM_PATTERN_AV_RATE_2 * (*lif_p).dt) ) + EPSILLON); // timesteps between stimuli, on each neuron
+        }
         for( int stim_pop_id = 0; stim_pop_id < NO_STIM_SUBSETS; stim_pop_id++){
+            if (!USE_SEPARATE_SUBPOP_PARAMS){
             // This is the place to implement different pattern durations for each stimulus subpopulation
-            patterned_stim_parameters[stim_pop_id].pattern_duration = STIM_PATTERN_DURATION;
-            patterned_stim_parameters[stim_pop_id].pattern_pause_duration = STIM_PATTERN_PAUSE_DURATION;
+                patterned_stim_parameters[stim_pop_id].pattern_duration = STIM_PATTERN_DURATION;
+                patterned_stim_parameters[stim_pop_id].pattern_pause_duration = STIM_PATTERN_PAUSE_DURATION;
             
-            patterned_stim_parameters[stim_pop_id].start_time_delay = STIM_PATTERN_START_DELAY;
+                patterned_stim_parameters[stim_pop_id].start_time_delay = STIM_PATTERN_START_DELAY;
             
-            patterned_stim_parameters[stim_pop_id].inter_neuron_fixed_stepping_isi = (int) STIM_FIXED_OFFSET_ISI; // just use a fixed offset between neurons, if the end neurons are outside stim window then they just don't get stimulated
-            patterned_stim_parameters[stim_pop_id].per_neuron_isi = (int) ( (1.0 / (STIM_PATTERN_AV_RATE * (*lif_p).dt) ) + EPSILLON); // timesteps between stimuli, on each neuron
+                patterned_stim_parameters[stim_pop_id].inter_neuron_fixed_stepping_isi = (int) STIM_FIXED_OFFSET_ISI; // just use a fixed offset between neurons, if the end neurons are outside stim window then they just don't get stimulated
+                patterned_stim_parameters[stim_pop_id].per_neuron_isi = (int) ( (1.0 / (STIM_PATTERN_AV_RATE * (*lif_p).dt) ) + EPSILLON); // timesteps between stimuli, on each neuron
             
+            }
             
             // Other stimulus subpop specific initialisation (which is not user modifiable)
             patterned_stim_parameters[stim_pop_id].pattern_full_cycle_duration = patterned_stim_parameters[stim_pop_id].pattern_duration + patterned_stim_parameters[stim_pop_id].pattern_pause_duration;

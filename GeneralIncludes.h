@@ -66,12 +66,13 @@
 #define J_STIM (50) /* a delta stim should cause a spike */ /*(24.55)*/ /*24.55mV approx 50Hz, 34.8mV approx 100Hz*/
 #define NO_STIM_LIFS (30)
 #define STIM_OFFSET (50)
-#define NO_STIM_SUBSETS (1)
+#define NO_STIM_SUBSETS (2)
+#define USE_SEPARATE_SUBPOP_PARAMS (1)
 
 // These are the parameters if all subpops are using same parameters
 #define STIM_PATTERN_DURATION (50000) /* in timesteps (otherwise should use it to initialise a variable)*/
 #define STIM_PATTERN_PAUSE_DURATION (50000) /* in timesteps: pause between pattern repeats */
-#define STIM_PATTERN_START_DELAY (41)
+#define STIM_PATTERN_START_DELAY (1000) /* in timesteps! */
 #define STIM_FIXED_OFFSET_ISI (500) /* in timesteps: pause between stimuli on adjacent neurons */
 //#define STIM_PATTERN_DURATION_SECS (0.1) /* pattern duration in secs, for regular patterned stim */
 #define STIM_PATTERN_AV_RATE (1.) /* for exponential drawing of interspike interval */
@@ -80,7 +81,13 @@
 #define STIM_PATTERN_DURATION_1 (50000)
 #define STIM_PATTERN_DURATION_2 (40000)
 #define STIM_PATTERN_PAUSE_DURATION_1 (50000)
-#define STIM_PATTERN_PAUSE_DURATION_2 (50000)
+#define STIM_PATTERN_PAUSE_DURATION_2 (60000)
+#define STIM_PATTERN_START_DELAY_1 (0) /* in timesteps! */
+#define STIM_PATTERN_START_DELAY_2 (1000) /* in timesteps! */
+#define STIM_FIXED_OFFSET_ISI_1 (500) /* in timesteps: pause between stimuli on adjacent neurons */
+#define STIM_FIXED_OFFSET_ISI_2 (700) /* in timesteps: pause between stimuli on adjacent neurons */
+#define STIM_PATTERN_AV_RATE_1 (1.) /* for exponential drawing of interspike interval */
+#define STIM_PATTERN_AV_RATE_2 (2.) /* for exponential drawing of interspike interval */
 
 
 // Transfer voltages
