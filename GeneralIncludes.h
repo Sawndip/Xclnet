@@ -23,7 +23,7 @@
 #define SYN_MAINTAIN_FF_CONNECTIVITY // embeds a feed-forward network in the connectivity
 
 #define MONITOR_UP_DOWN_POPS
-//#define MONITOR_STIM_POPS
+//#define MONITOR_STIM_POPS /* incompatible with multiple stimulus subpops */
 
 //#define LEARNING_CONST_EXTERN_STIM
 //#define LEARNING_INDEP_POISSON_STIM
@@ -65,12 +65,13 @@
 #define STIM_OFF (18.) /* want stimulation for full duration of simulation */
 #define J_STIM (50) /* a delta stim should cause a spike */ /*(24.55)*/ /*24.55mV approx 50Hz, 34.8mV approx 100Hz*/
 #define NO_STIM_LIFS (30)
-#define STIM_OFFSET (20)
 #define NO_STIM_SUBSETS (3)
 #define USE_SEPARATE_SUBPOP_PARAMS
 
 #ifndef USE_SEPARATE_SUBPOP_PARAMS
     // These are the parameters if all subpops are using same parameters
+    #define STIM_OFFSET (20)
+
     #define STIM_PATTERN_DURATION (50000) /* in timesteps (otherwise should use it to initialise a variable)*/
     #define STIM_PATTERN_PAUSE_DURATION (50000) /* in timesteps: pause between pattern repeats */
     #define STIM_PATTERN_START_DELAY (1000) /* in timesteps! */
@@ -79,6 +80,9 @@
     #define STIM_PATTERN_AV_RATE (1.) /* for exponential drawing of interspike interval */
 #else
     // These are the parameters if we have different parameters per subpopulation (needs to be changed in C-code also)
+    #define STIM_OFFSET_1 (0)
+    #define STIM_OFFSET_2 (20)
+    #define STIM_OFFSET_3 (60)
     #define STIM_PATTERN_DURATION_1 (50000)
     #define STIM_PATTERN_DURATION_2 (40000)
     #define STIM_PATTERN_DURATION_3 (40000)

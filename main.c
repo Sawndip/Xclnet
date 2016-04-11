@@ -307,6 +307,8 @@ int main (int argc, const char * argv[]) {
             
             int inter_neuron_fixed_stepping_isi; // this is the offset between adjacent neurons in the pattern
             int per_neuron_isi; // this is the per neuron frequency (via ISI)
+            
+            int stim_id_offset; // id of initial neuron is stimulus subset
         
         } patterned_stim_params;
         patterned_stim_params patterned_stim_parameters[NO_STIM_SUBSETS];
@@ -593,6 +595,7 @@ int main (int argc, const char * argv[]) {
             
             patterned_stim_parameters[0].inter_neuron_fixed_stepping_isi = (int) STIM_FIXED_OFFSET_ISI_1; // just use a fixed offset between neurons, if the end neurons are outside stim window then they just don't get stimulated
             patterned_stim_parameters[0].per_neuron_isi = (int) ( (1.0 / (STIM_PATTERN_AV_RATE_1 * (*lif_p).dt) ) + EPSILLON); // timesteps between stimuli, on each neuron
+            patterned_stim_parameters[0].stim_id_offset = STIM_OFFSET_1;
     
             if (NO_STIM_SUBSETS > 1){
             // SECOND SUBPOPULATION
@@ -603,6 +606,7 @@ int main (int argc, const char * argv[]) {
             
             patterned_stim_parameters[1].inter_neuron_fixed_stepping_isi = (int) STIM_FIXED_OFFSET_ISI_2; // just use a fixed offset between neurons, if the end neurons are outside stim window then they just don't get stimulated
             patterned_stim_parameters[1].per_neuron_isi = (int) ( (1.0 / (STIM_PATTERN_AV_RATE_2 * (*lif_p).dt) ) + EPSILLON); // timesteps between stimuli, on each neuron
+            patterned_stim_parameters[1].stim_id_offset = STIM_OFFSET_2;
             }
     
             if (NO_STIM_SUBSETS > 2){
@@ -614,6 +618,7 @@ int main (int argc, const char * argv[]) {
     
             patterned_stim_parameters[2].inter_neuron_fixed_stepping_isi = (int) STIM_FIXED_OFFSET_ISI_3; // just use a fixed offset between neurons, if the end neurons are outside stim window then they just don't get stimulated
             patterned_stim_parameters[2].per_neuron_isi = (int) ( (1.0 / (STIM_PATTERN_AV_RATE_3 * (*lif_p).dt) ) + EPSILLON); // timesteps between stimuli, on each neuron
+            patterned_stim_parameters[2].stim_id_offset = STIM_OFFSET_3;
             }
         #endif
         for( int stim_pop_id = 0; stim_pop_id < NO_STIM_SUBSETS; stim_pop_id++){
@@ -626,6 +631,8 @@ int main (int argc, const char * argv[]) {
             
                 patterned_stim_parameters[stim_pop_id].inter_neuron_fixed_stepping_isi = (int) STIM_FIXED_OFFSET_ISI; // just use a fixed offset between neurons, if the end neurons are outside stim window then they just don't get stimulated
                 patterned_stim_parameters[stim_pop_id].per_neuron_isi = (int) ( (1.0 / (STIM_PATTERN_AV_RATE * (*lif_p).dt) ) + EPSILLON); // timesteps between stimuli, on each neuron
+            
+                patterned_stim_parameters[stim_pop_id].stim_id_offset = STIM_OFFSET;
             
             #endif
             
@@ -809,13 +816,15 @@ int main (int argc, const char * argv[]) {
                 // There are multiple stimulation subsets, loop over them
                 for( int stim_pop_id = 0; stim_pop_id < NO_STIM_SUBSETS; stim_pop_id++){
                     patterned_stim_parameters[stim_pop_id].pattern_time++;
+                    int stim_sub_pop_offset_from_zero = patterned_stim_parameters[stim_pop_id].stim_id_offset;
                     if (patterned_stim_parameters[stim_pop_id].pattern_time < patterned_stim_parameters[stim_pop_id].pattern_duration){
                         // Follow the pattern stimulation and generation protocol
                         for( i = 0; i < NO_STIM_LIFS; i++){
                             // indexing of time_to_next_stim_spike[] is per neuron in a particular stim sub-population
                             if(patterned_stim_parameters[stim_pop_id].time_to_next_stim_spike[i] == 0){
                                 // It's time for a spike, do it then draw waiting time until next one
-                                (*lif_p).I[i + (STIM_OFFSET * stim_pop_id)] = stim_voltage;
+                                //(*lif_p).I[i + (STIM_OFFSET * stim_pop_id)] = stim_voltage;
+                                (*lif_p).I[i + stim_sub_pop_offset_from_zero] = stim_voltage;
                                 patterned_stim_parameters[stim_pop_id].time_to_next_stim_spike[i] = patterned_stim_parameters[stim_pop_id].per_neuron_isi;
                                 //printf("DEBUG: spike, j = %d, i = %d, stim_pop_id = %d\n", j, i, stim_pop_id);
                             }
@@ -969,15 +978,38 @@ int main (int argc, const char * argv[]) {
 				}*/
 				//CONSIDER: using Kahan formula for addition here to improve accuracy
 				// for now double is sufficient, it works to greater than 1 billion spikes per bin
-                if( i > (NO_EXC - 1)){ //INH pop
-					summary_inh_spikes[(int)( ( (*lif_p).dt / BIN_SIZE ) * j + EPSILLON)]++;
-                }
-                else if( (i > (NO_STIM_LIFS + STIM_OFFSET - 1)) || (i < (STIM_OFFSET) ) ){ //EXC pop
-                    summary_exc_spikes[(int)( ( (*lif_p).dt / BIN_SIZE ) * j + EPSILLON)]++;
-				}
-				else { //Non-stim pop
-					lif_injection_spikes[(int) ( ( (*lif_p).dt / BIN_SIZE) * j + EPSILLON)]++;
-				}
+                #ifndef USE_SEPARATE_SUBPOP_PARAMS
+                    if( i > (NO_EXC - 1)){ //INH pop
+                        summary_inh_spikes[(int)( ( (*lif_p).dt / BIN_SIZE ) * j + EPSILLON)]++;
+                    }
+                    else if( (i > (NO_STIM_LIFS + STIM_OFFSET - 1)) || (i < (STIM_OFFSET) ) ){ //EXC pop
+                        summary_exc_spikes[(int)( ( (*lif_p).dt / BIN_SIZE ) * j + EPSILLON)]++;
+                    }
+                    else { //Stim pop
+                        lif_injection_spikes[(int) ( ( (*lif_p).dt / BIN_SIZE) * j + EPSILLON)]++;
+                    }
+                #else
+                    if( i > (NO_EXC - 1)){ //INH pop
+                        summary_inh_spikes[(int)( ( (*lif_p).dt / BIN_SIZE ) * j + EPSILLON)]++;
+                    }
+                    else{ //EXC pop
+                        int flag_stim_spike_recorder = 0;
+                        int stim_sub_pop_offset_from_zero;
+                        for( int stim_pop_id = 0; stim_pop_id < NO_STIM_SUBSETS; stim_pop_id++){
+                            stim_sub_pop_offset_from_zero = patterned_stim_parameters[stim_pop_id].stim_id_offset;
+                           
+                            if( (i > stim_sub_pop_offset_from_zero) && (i < (stim_sub_pop_offset_from_zero + NO_STIM_LIFS) ) ){
+                                flag_stim_spike_recorder = 1;
+                            }
+                        }
+                        if(flag_stim_spike_recorder){ // only record the spike once even if in multiple stimulus subpopulations
+                            lif_injection_spikes[(int) ( ( (*lif_p).dt / BIN_SIZE) * j + EPSILLON)]++;
+                        }
+                        else{ // EXC non-stim pop
+                            summary_exc_spikes[(int)( ( (*lif_p).dt / BIN_SIZE ) * j + EPSILLON)]++;
+                        }
+                    }
+                #endif /* USE_SEPARATE_SUBPOP_PARAMS */
 			} // end of handling spike
 			// Pre-synaptic spike propagates across synapse after delay
 			// Alternative to event queue system, assumes only 1 spike can occur in delay period
@@ -1243,18 +1275,36 @@ int main (int argc, const char * argv[]) {
 	
 	printf("Simulation finished, printing summary of network activity...\n");
 	// Print summary of excitatory and inhibitory activity
-	//CONSIDER: cycling through all synapses (not just recorder synapses) to do a final update of their states
-	//TODO: disable updating of stimulated synapses here
-	for (i = 0; i < NO_STIM_LIFS; i++){
-		for(k = 0; k < (*lif_p).no_outgoing_ee_synapses[i + STIM_OFFSET]; k++){ // Update stim synapses originating in stim pop
-			//updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).outgoing_synapse_index[i + STIM_OFFSET][k], j);
-		}
-		for(k = 0; k < (*lif_p).no_incoming_synapses[i + STIM_OFFSET]; k++){
-			if((*lif_p).incoming_synapse_index[i + STIM_OFFSET][k] < (*syn_const_p).no_syns){ // Updated stim synapses ending in stim pop
-				//updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).incoming_synapse_index[i + STIM_OFFSET][k], j);
-			}
-		}
-	}
+    //CONSIDER: cycling through all synapses (not just recorder synapses) to do a final update of their states
+    //TODO: disable updating of stimulated synapses here
+    #ifndef USE_SEPARATE_SUBPOP_PARAMS
+        // Regular, non separate stimulus subpopulations version
+        for (i = 0; i < NO_STIM_LIFS; i++){
+            for(k = 0; k < (*lif_p).no_outgoing_ee_synapses[i + STIM_OFFSET]; k++){ // Update stim synapses originating in stim pop
+                //updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).outgoing_synapse_index[i + STIM_OFFSET][k], j);
+            }
+            for(k = 0; k < (*lif_p).no_incoming_synapses[i + STIM_OFFSET]; k++){
+                if((*lif_p).incoming_synapse_index[i + STIM_OFFSET][k] < (*syn_const_p).no_syns){ // Updated stim synapses ending in stim pop
+                    //updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).incoming_synapse_index[i + STIM_OFFSET][k], j);
+                }
+            }
+        }
+    #else
+        // Separate stimulus subpopulations parameters version
+        for( int stim_pop_id = 0; stim_pop_id < NO_STIM_SUBSETS; stim_pop_id++){
+            int stim_sub_pop_offset_from_zero = patterned_stim_parameters[stim_pop_id].stim_id_offset;
+            for (i = 0; i < NO_STIM_LIFS; i++){
+                for(k = 0; k < (*lif_p).no_outgoing_ee_synapses[i + stim_sub_pop_offset_from_zero]; k++){ // Update stim synapses originating in stim pop
+                    //updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).outgoing_synapse_index[i + STIM_OFFSET][k], j);
+                }
+                for(k = 0; k < (*lif_p).no_incoming_synapses[i + stim_sub_pop_offset_from_zero]; k++){
+                    if((*lif_p).incoming_synapse_index[i + stim_sub_pop_offset_from_zero][k] < (*syn_const_p).no_syns){ // Updated stim synapses ending in stim pop
+                        //updateEventBasedSynapse(syn_p, syn_const_p, (*lif_p).incoming_synapse_index[i + STIM_OFFSET][k], j);
+                    }
+                }
+            }
+        }
+    #endif /* USE_SEPARATE_SUBPOP_PARAMS */
 	//TODO: reenable final update of single recorder synapse here
 	/*if(RECORDER_SYNAPSE_ID < (*syn_const_p).no_syns){
 		updateEventBasedSynapse(syn_p, syn_const_p, RECORDER_SYNAPSE_ID, j);
