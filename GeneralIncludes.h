@@ -38,7 +38,7 @@
 #define RECORDER_SYNAPSE_ID (0) /* for modulo addressed multiple synaptic recordings this needs to be less than 400*/
 //#define RECORDER_MULTI_SYNAPSE_SKIP (64000) /*(64000)*/ /*(450)*/
 
-#define USE_GPU (0) /* 1=gpu, 0=cpu */
+#define USE_GPU (1) /* 1=gpu, 0=cpu */
 #define NETWORK_SEED (-14) /*(-14)*/
 #define PARALLEL_SEED (2) /*keep positive for random123*/
 #define GAUSSIAN_SYNAPTIC_SEED (-12)
@@ -46,7 +46,7 @@
 
 #define RAN2_RESETTABLE_SEED (-1)
 
-#define MAX_TIME_STEPS (2000000) /*(24100000)*/ /*(30500000)*/ /*(50000000)*/ /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
+#define MAX_TIME_STEPS (18000000) /*(24100000)*/ /*(30500000)*/ /*(50000000)*/ /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
 
 // Network schema
 #define NO_EXC (100) /*(8000)*/ /*(400)*/ /*(10000)*/
@@ -62,10 +62,10 @@
 
 // Stimulation of subpopulation /* using secs despite inconsistency with other parameter units */
 #define STIM_ON (1.)
-#define STIM_OFF (18.) /* want stimulation for full duration of simulation */
+#define STIM_OFF (1800.) /* want stimulation for full duration of simulation */
 #define J_STIM (50) /* a delta stim should cause a spike */ /*(24.55)*/ /*24.55mV approx 50Hz, 34.8mV approx 100Hz*/
 #define NO_STIM_LIFS (30)
-#define NO_STIM_SUBSETS (3)
+#define NO_STIM_SUBSETS (2)
 #define USE_SEPARATE_SUBPOP_PARAMS
 
 #ifndef USE_SEPARATE_SUBPOP_PARAMS
@@ -80,24 +80,24 @@
     #define STIM_PATTERN_AV_RATE (1.) /* for exponential drawing of interspike interval */
 #else
     // These are the parameters if we have different parameters per subpopulation (needs to be changed in C-code also)
-    #define STIM_OFFSET_1 (0)
-    #define STIM_OFFSET_2 (20)
+    #define STIM_OFFSET_1 (5)
+    #define STIM_OFFSET_2 (60)
     #define STIM_OFFSET_3 (60)
     #define STIM_PATTERN_DURATION_1 (50000)
-    #define STIM_PATTERN_DURATION_2 (40000)
-    #define STIM_PATTERN_DURATION_3 (40000)
+    #define STIM_PATTERN_DURATION_2 (50000)
+    #define STIM_PATTERN_DURATION_3 (50000)
     #define STIM_PATTERN_PAUSE_DURATION_1 (50000)
-    #define STIM_PATTERN_PAUSE_DURATION_2 (60000)
-    #define STIM_PATTERN_PAUSE_DURATION_3 (60000)
+    #define STIM_PATTERN_PAUSE_DURATION_2 (50000)
+    #define STIM_PATTERN_PAUSE_DURATION_3 (50000)
     #define STIM_PATTERN_START_DELAY_1 (0) /* in timesteps! */
-    #define STIM_PATTERN_START_DELAY_2 (1000) /* in timesteps! */
-    #define STIM_PATTERN_START_DELAY_3 (1000) /* in timesteps! */
+    #define STIM_PATTERN_START_DELAY_2 (25000) /* in timesteps! */
+    #define STIM_PATTERN_START_DELAY_3 (0) /* in timesteps! */
     #define STIM_FIXED_OFFSET_ISI_1 (500) /* in timesteps: pause between stimuli on adjacent neurons */
-    #define STIM_FIXED_OFFSET_ISI_2 (700) /* in timesteps: pause between stimuli on adjacent neurons */
-    #define STIM_FIXED_OFFSET_ISI_3 (700) /* in timesteps: pause between stimuli on adjacent neurons */
-    #define STIM_PATTERN_AV_RATE_1 (3.)
-    #define STIM_PATTERN_AV_RATE_2 (6.)
-    #define STIM_PATTERN_AV_RATE_3 (6.)
+    #define STIM_FIXED_OFFSET_ISI_2 (500) /* in timesteps: pause between stimuli on adjacent neurons */
+    #define STIM_FIXED_OFFSET_ISI_3 (500) /* in timesteps: pause between stimuli on adjacent neurons */
+    #define STIM_PATTERN_AV_RATE_1 (1.)
+    #define STIM_PATTERN_AV_RATE_2 (1.)
+    #define STIM_PATTERN_AV_RATE_3 (1.)
 #endif
 
 // Transfer voltages
