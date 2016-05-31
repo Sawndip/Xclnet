@@ -113,15 +113,40 @@ int getPlatformIDs(CL *cl){
 	
 	printf("getting platform IDs...\n");
 	
-	//TODO: more than one platform?
-	(*cl).err = clGetPlatformIDs(1, &(*cl).platform, NULL);
-	//printf("DEBUG platform id: %d\n", (*cl).platform);
+	// more than one platform implemented (needed for TU Berlin)
+    int max_no_platforms = 100;
+	cl_platform_id platforms[max_no_platforms];
+	cl_uint no_platforms = 0;
+    
+    //printf("DEBUG before platform id: %d\n", (int)(*cl).platform[0]);
+	(*cl).err = clGetPlatformIDs(max_no_platforms, platforms, &no_platforms);
+    
+    int platform_to_use_id = 0; /* default to 0 */
+    if(no_platforms>1){
+        platform_to_use_id = USE_OPENCL_PLATFORM_ID; /* TU Berlin has Intel on Platform 0 and Nvidia on Platform 1 */
+    }
+
+	(*cl).platform = platforms[platform_to_use_id];
+	//printf("DEBUG after platform id: %d\n", (int)(*cl).platform[0]);
 	
 	if ((*cl).err != CL_SUCCESS)
 	{
 		printf("Error: Failed to get platform ID!\n%s\n", print_cl_errstring((*cl).err));
 		return EXIT_FAILURE;
 	}
+
+	// TU-Berlin platform debugging code, cope with multiple devices
+    int max_no_local_devices = 10;
+	cl_device_id local_device_ids[max_no_local_devices];
+    unsigned int local_num_devices;
+	(*cl).err = clGetDeviceIDs((*cl).platform, (USE_GPU ? CL_DEVICE_TYPE_GPU : CL_DEVICE_TYPE_CPU), max_no_local_devices, local_device_ids, &local_num_devices);
+    
+    if (no_platforms>1){
+        // This is really debugging code for TU Berlin and would crash on Uchicago if it ran there so use no_platforms to test where we are
+        char buffer[10240];
+        clGetDeviceInfo(local_device_ids[0], CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
+        printf("  DEVICE_NAME = %s\n", buffer);
+    }
 	//clGetDeviceInfo((*cl).device_id, CL_DEVICE_MAX_CONSTANT_ARGS, sizeof(cl_ulong), &dev_info, NULL);
 	//printf("Max no args: %d\n", (unsigned int)dev_info);
 	//printf("test %d\n", !(EXIT_FAILURE));
@@ -138,11 +163,11 @@ int connectToComputeDevice(CL *cl){
 
 	printf("gpu: %d\n", gpu);
 	
-	//TODO: more than one device?
-	cl_device_id local_device_ids[10];
+    int max_no_devices = 10;
+	cl_device_id local_device_ids[max_no_devices];
 	unsigned int local_num_devices;
 	//(*cl).err = clGetDeviceIDs((*cl).platform, (gpu ? CL_DEVICE_TYPE_GPU : CL_DEVICE_TYPE_CPU), 1, &(*cl).device_id, NULL);
-	(*cl).err = clGetDeviceIDs((*cl).platform, (gpu ? CL_DEVICE_TYPE_GPU : CL_DEVICE_TYPE_CPU), 10, local_device_ids, &local_num_devices);
+	(*cl).err = clGetDeviceIDs((*cl).platform, (gpu ? CL_DEVICE_TYPE_GPU : CL_DEVICE_TYPE_CPU), max_no_devices, local_device_ids, &local_num_devices);
 	//printf("DEBUG device id: %d\n", (*cl).device_id);
 	
 	//Some Uchicago specific (Midway) code for selecting the assigned GPU for processing
@@ -265,7 +290,7 @@ int buildProgram(CL *cl){
 	
 	printf("building program...\n");
 	
-	char* options = "-I /home/dhiggins/include/";
+	char* options = "-I /home/dhiggins/include/ -I /cognition/home/higgins/include/";
 	//char* options = "";
 	printf("build options: %s\n", options);
 	

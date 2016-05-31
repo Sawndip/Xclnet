@@ -39,6 +39,7 @@
 //#define RECORDER_MULTI_SYNAPSE_SKIP (64000) /*(64000)*/ /*(450)*/
 
 #define USE_GPU (1) /* 1=gpu, 0=cpu */
+#define USE_OPENCL_PLATFORM_ID (1) /* index of platform to use, 1 for TU Berlin, 0 at Uchicago, MacOS, most other locations */
 #define NETWORK_SEED (-14) /*(-14)*/
 #define PARALLEL_SEED (2) /*keep positive for random123*/
 #define GAUSSIAN_SYNAPTIC_SEED (-12)
@@ -46,7 +47,7 @@
 
 #define RAN2_RESETTABLE_SEED (-1)
 
-#define MAX_TIME_STEPS (18000000) /*(24100000)*/ /*(30500000)*/ /*(50000000)*/ /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
+#define MAX_TIME_STEPS (180) /*(24100000)*/ /*(30500000)*/ /*(50000000)*/ /*(12000000)*/ /*(12000000)*/ /*(300000)*/ /*no of timesteps, each of size dt*/
 
 // Network schema
 #define NO_EXC (100) /*(8000)*/ /*(400)*/ /*(10000)*/
