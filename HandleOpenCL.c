@@ -135,21 +135,6 @@ int getPlatformIDs(CL *cl){
 		return EXIT_FAILURE;
 	}
 
-	// TU-Berlin platform debugging code, cope with multiple devices
-    int max_no_local_devices = 10;
-	cl_device_id local_device_ids[max_no_local_devices];
-    unsigned int local_num_devices;
-	(*cl).err = clGetDeviceIDs((*cl).platform, (USE_GPU ? CL_DEVICE_TYPE_GPU : CL_DEVICE_TYPE_CPU), max_no_local_devices, local_device_ids, &local_num_devices);
-    
-    if (no_platforms>1){
-        // This is really debugging code for TU Berlin and would crash on Uchicago if it ran there so use no_platforms to test where we are
-        char buffer[10240];
-        clGetDeviceInfo(local_device_ids[0], CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
-        printf("  DEVICE_NAME = %s\n", buffer);
-    }
-	//clGetDeviceInfo((*cl).device_id, CL_DEVICE_MAX_CONSTANT_ARGS, sizeof(cl_ulong), &dev_info, NULL);
-	//printf("Max no args: %d\n", (unsigned int)dev_info);
-	//printf("test %d\n", !(EXIT_FAILURE));
 	return !(EXIT_FAILURE);
 }
 
@@ -163,6 +148,7 @@ int connectToComputeDevice(CL *cl){
 
 	printf("gpu: %d\n", gpu);
 	
+    // Cope with multiple devices on a single machine
     int max_no_devices = 10;
 	cl_device_id local_device_ids[max_no_devices];
 	unsigned int local_num_devices;
@@ -171,6 +157,7 @@ int connectToComputeDevice(CL *cl){
 	//printf("DEBUG device id: %d\n", (*cl).device_id);
 	
 	//Some Uchicago specific (Midway) code for selecting the assigned GPU for processing
+    // connect to first device unless the midway environment variables are set otherwise
 	int device = 0;
 	if (local_num_devices > 1){
 		char *p_midway_cuda_device_id;
@@ -202,12 +189,20 @@ int connectToComputeDevice(CL *cl){
 	
 	printf("%d devices found, connecting to device: %d\n", local_num_devices, device);
 	fflush(stdout);
-	
+    
+    // Query the device to aid debugging
+    char buffer[10240];
+    (*cl).err |= clGetDeviceInfo(local_device_ids[device], CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
+    printf("  DEVICE_NAME = %s\n", buffer);
+    fflush(stdout);
+    
+    // Check that we've successfully found a device ID and gotten some info from it
 	if ((*cl).err != CL_SUCCESS)
 	{
 		printf("Error: Failed to create a device group!\n%s\n", print_cl_errstring((*cl).err));
 		return EXIT_FAILURE;
 	}
+    
 	//clGetDeviceInfo((*cl).device_id, CL_DEVICE_MAX_CONSTANT_ARGS, sizeof(cl_ulong), &dev_info, NULL);
 	//printf("Max no args: %d\n", (unsigned int)dev_info);
 	//printf("test %d\n", !(EXIT_FAILURE));
